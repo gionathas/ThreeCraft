@@ -31,11 +31,6 @@ export type Config = {
   orbitControls?: {
     target?: THREE.Vector3;
   };
-  textureConfig?: {
-    url: string;
-    magFilter: THREE.TextureFilter;
-    minFilter: THREE.TextureFilter;
-  };
 };
 
 export default class AnimatedApp {
@@ -141,16 +136,6 @@ export default class AnimatedApp {
     orbitControls.target.copy(target);
     orbitControls.update();
   }
-
-  // setupTextures() {
-  //   const { textureConfig } = this.config;
-
-  //   if (textureConfig) {
-  //     this.texture = new THREE.TextureLoader().load(textureConfig.url);
-  //     this.texture.magFilter = textureConfig.magFilter;
-  //     this.texture.minFilter = textureConfig.minFilter;
-  //   }
-  // }
 
   setupScene() {
     const { sceneConfig } = this.config;

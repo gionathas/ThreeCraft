@@ -29,7 +29,6 @@ export const VoxelFacesNormal: Record<VoxelFace, [number, number, number]> = {
 };
 
 type VoxelGeometry = {
-  uvRow: number;
   normal: [number, number, number];
   corners: {
     pos: [number, number, number];
@@ -46,7 +45,7 @@ export function detectFace(normal: THREE.Vector3): VoxelFace | null {
   return null;
 }
 
-export function getVoxelTextureCoordinates(
+export function getBlockTextureCoordinates(
   voxel: Voxel,
   face: VoxelFace,
   [u, v]: [number, number]
@@ -97,7 +96,6 @@ export function getVoxelNormal(
 
 export const VoxelFacesGeometry: Record<VoxelFace, VoxelGeometry> = {
   Left: {
-    uvRow: 0,
     normal: VoxelFacesNormal.Left,
     corners: [
       { pos: [0, 1, 0], uv: [0, 1] },
@@ -107,7 +105,6 @@ export const VoxelFacesGeometry: Record<VoxelFace, VoxelGeometry> = {
     ],
   },
   Right: {
-    uvRow: 0,
     normal: VoxelFacesNormal.Right,
     corners: [
       { pos: [1, 1, 1], uv: [0, 1] },
@@ -117,7 +114,6 @@ export const VoxelFacesGeometry: Record<VoxelFace, VoxelGeometry> = {
     ],
   },
   Top: {
-    uvRow: 2,
     normal: VoxelFacesNormal.Top,
     corners: [
       { pos: [0, 1, 1], uv: [1, 1] },
@@ -127,7 +123,6 @@ export const VoxelFacesGeometry: Record<VoxelFace, VoxelGeometry> = {
     ],
   },
   Bottom: {
-    uvRow: 1,
     normal: VoxelFacesNormal.Bottom,
     corners: [
       { pos: [1, 0, 1], uv: [1, 0] },
@@ -137,7 +132,6 @@ export const VoxelFacesGeometry: Record<VoxelFace, VoxelGeometry> = {
     ],
   },
   Front: {
-    uvRow: 0,
     normal: VoxelFacesNormal.Front,
     corners: [
       { pos: [0, 0, 1], uv: [0, 0] },
@@ -147,7 +141,6 @@ export const VoxelFacesGeometry: Record<VoxelFace, VoxelGeometry> = {
     ],
   },
   Back: {
-    uvRow: 0,
     normal: VoxelFacesNormal.Back,
     corners: [
       { pos: [1, 0, 0], uv: [0, 0] },

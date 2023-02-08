@@ -2,7 +2,7 @@ import * as THREE from "three";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 import {
-  getVoxelTextureCoordinates,
+  getBlockTextureCoordinates,
   Voxel,
   VoxelFace,
   VoxelFacesGeometry,
@@ -77,7 +77,7 @@ export default class Chunk {
                   // add normal for this corner
                   normals.push(...dir);
 
-                  const textureCoords = getVoxelTextureCoordinates(
+                  const textureCoords = getBlockTextureCoordinates(
                     currVoxel,
                     voxelFace,
                     [uv[0], uv[1]]

@@ -16,7 +16,7 @@ const app = new AnimatedApp({
     lights: [light1, light2],
   },
   cameraConfig: {
-    position: new THREE.Vector3(40, 20, -20),
+    position: new THREE.Vector3(0, 0, -20),
   },
   // orbitControls: {
   //   target: new THREE.Vector3(chunkWidth / 2, chunkHeight / 2, chunkWidth / 2),
@@ -24,11 +24,6 @@ const app = new AnimatedApp({
   guiConfig: {
     grid: true,
     axes: false,
-  },
-  textureConfig: {
-    url: "src/assets/textures/flourish.png",
-    magFilter: THREE.NearestFilter,
-    minFilter: THREE.NearestFilter,
   },
 });
 

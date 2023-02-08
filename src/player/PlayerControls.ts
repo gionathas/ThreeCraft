@@ -28,7 +28,7 @@ export const devPlayerProperties: PlayerControlsProperties = {
   verticalSpeed: 2,
   dampingCoefficient: 10,
   physicsEnabled: false,
-  showHitbox: false,
+  showHitbox: true,
 };
 
 export const simPlayerProperties: PlayerControlsProperties = {
