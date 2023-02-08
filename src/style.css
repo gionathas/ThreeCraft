@@ -1,97 +1,78 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  --cross-width: 20px;
+  --cross-thickness: 4px;
 }
 
 body {
+  padding: 0;
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: monospace;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.progress-bar {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 80px;
+  color: red;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+#infoUI {
+  position: absolute;
+  color: white;
+  font-size: 20px;
+  left: 10px;
+  bottom: 10px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #3178c6aa);
+/* Central cross */
+#target {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.card {
-  padding: 2em;
+#target .box {
+  position: relative;
+  width: var(--cross-width);
+  height: var(--cross-width);
+  background: transparent;
 }
 
-.read-the-docs {
-  color: #888;
+#target .box .vbar,
+#target .box .hbar {
+  position: absolute;
+  background-color: white;
+  opacity: 80%;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+#target .box .vbar {
+  left: 50%;
+  width: var(--cross-thickness);
+  height: 100%;
+  transform: translate(-50%);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+#target .box .hbar {
+  top: 50%;
+  width: 100%;
+  height: var(--cross-thickness);
+  transform: translate(0, -50%);
+}
+
+/* Game paused UI */
+#game-paused-menu {
+  position: absolute;
+  backdrop-filter: blur(1px);
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-content: center;
+}
+
+#game-paused-menu h2 {
+  color: #fff;
+  font-size: 60px;
 }

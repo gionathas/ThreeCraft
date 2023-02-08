@@ -1,23 +1,40 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import { setupCounter } from './counter'
+import * as THREE from "three";
+import AnimatedApp from "./core/AnimatedApp";
+import GameManager from "./core/GameManager";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
+const light1 = new THREE.DirectionalLight(0xffffff, 1);
+light1.position.set(-1, 2, 4);
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const light2 = new THREE.DirectionalLight(0xffffff, 1);
+light2.position.set(1, -1, -2);
+
+const app = new AnimatedApp({
+  sceneConfig: {
+    background: new THREE.Color("lightblue"),
+  },
+  lightsConfig: {
+    lights: [light1, light2],
+  },
+  cameraConfig: {
+    position: new THREE.Vector3(40, 20, -20),
+  },
+  // orbitControls: {
+  //   target: new THREE.Vector3(chunkWidth / 2, chunkHeight / 2, chunkWidth / 2),
+  // },
+  guiConfig: {
+    grid: true,
+    axes: false,
+  },
+  textureConfig: {
+    url: "src/assets/textures/flourish.png",
+    magFilter: THREE.NearestFilter,
+    minFilter: THREE.NearestFilter,
+  },
+});
+
+const game = new GameManager(app, true);
+game.initGame();
+
+app.render((dt) => {
+  game.update(dt);
+});
