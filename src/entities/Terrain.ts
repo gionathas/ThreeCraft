@@ -22,6 +22,15 @@ const verticalTopRenderDistance =
 const verticalBottomRenderDistance =
   BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_HEIGHT;
 
+type TerrainBoundaries = {
+  lowerX: number;
+  upperX: number;
+  lowerY: number;
+  upperY: number;
+  lowerZ: number;
+  upperZ: number;
+};
+
 export default class Terrain implements VoxelModel {
   private chunkFactory: TerrainChunksFactory;
   private scene: THREE.Scene;
@@ -45,18 +54,18 @@ export default class Terrain implements VoxelModel {
       this.previousCenterPosition.equals(newCenterPosition);
 
     if ((!isSamePosition && isGenerationEnabled) || isFirstUpdate) {
-      this.unloadTerrainFrom(newCenterPosition);
-      this.loadTerrainFrom(newCenterPosition);
+      const terrainBoundaries =
+        this.getTerrainBoundariesFromPosition(newCenterPosition);
+      this.unloadTerrain(terrainBoundaries);
+      this.loadTerrain(terrainBoundaries);
       this.previousCenterPosition.copy(newCenterPosition);
 
       // console.debug(`meshPool: ${this.chunkFactory._poolMeshSize}`);
     }
   }
 
-  private loadTerrainFrom(centerCoords: Coordinate) {
-    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } =
-      this.getTerrainBoundariesFromPosition(centerCoords);
-
+  private loadTerrain(boundaries: TerrainBoundaries) {
+    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
     for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
       for (let z = lowerZ; z < upperZ; z += CHUNK_WIDTH) {
         for (let y = lowerY; y < upperY; y += CHUNK_HEIGHT) {
@@ -68,10 +77,8 @@ export default class Terrain implements VoxelModel {
     }
   }
 
-  private unloadTerrainFrom(centerCoords: Coordinate) {
-    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } =
-      this.getTerrainBoundariesFromPosition(centerCoords);
-
+  private unloadTerrain(boundaries: TerrainBoundaries) {
+    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
     const loadedChunks = this.chunkFactory.loadedChunks;
 
     for (const chunk of loadedChunks) {

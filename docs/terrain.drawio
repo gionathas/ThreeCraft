@@ -1,0 +1,70 @@
+<mxfile host="65bd71144e">
+    <diagram id="aqnBa4sP0OJ_P-O2IkrZ" name="Terrain Generation">
+        <mxGraphModel dx="727" dy="1661" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="&lt;h1&gt;&amp;nbsp;Terrain Generation Pipeline&lt;/h1&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="76.88" y="-40" width="405" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="3" target="4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Get Player Current&amp;nbsp;&lt;br&gt;Position" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="107.5" y="60" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="4" target="8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Calculate the terrain boundaries" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="105" y="190" width="205" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Use the player position as the center of the terrain and calculate:&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;1. North and South boundaries (z)&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;2. Est and Ovest boundaries (x)&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;3. Up and Bottom boundaries (y)&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="185" width="290" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;" parent="1" source="8" target="12" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="&lt;b&gt;Remove/Unload&lt;/b&gt; all the chunks that are out of the boundaries" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="92.5" y="360" width="230" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="&lt;div style=&quot;font-size: 12px;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;1. Remove the chunk from the list of loaded chunks&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 12px;&quot;&gt;2. If the chunks was not completely empty (all AIR):&lt;br style=&quot;font-size: 12px;&quot;&gt;&lt;br style=&quot;font-size: 12px;&quot;&gt;&lt;/div&gt;&lt;blockquote style=&quot;margin: 0 0 0 40px; border: none; padding: 0px;&quot;&gt;&lt;div style=&quot;font-size: 12px;&quot;&gt;1. Remove the mesh from the scene and dispose the mesh, if the pool of mesh is filled up&lt;br&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 12px;&quot;&gt;2. Remove from the mesh from the scene and push the mesh inside the mesh pool in order to reuse the mesh&lt;/div&gt;&lt;/blockquote&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;labelPosition=center;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=10;fontSize=12;spacingTop=2;spacing=2;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="360" width="450" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;" parent="1" source="12" target="15" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="&lt;b&gt;Detect &lt;/b&gt;the chunks that needs to be loaded" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="78.75" y="585" width="257.5" height="115" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="&lt;div style=&quot;text-align: left;&quot;&gt;Loop over all the chunks postion that needs to be shown.&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;This operation requires a 3 nested loop to iterate over the x, y and z chunks origin position.&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="595" width="290" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;" parent="1" source="15" target="18" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="Push all the new chunks inside a queue in order to be processed by the workers" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="78.75" y="800" width="261.25" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="&lt;div style=&quot;text-align: left;&quot;&gt;The use of a queue is needed for avoiding to generate the same chunks in successive frames&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="810" width="240" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;" parent="1" source="18" target="21" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="If the chunk is not already being processed by another worker, take a new worker and start the chunk generation process" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="76.88" y="1000" width="261.25" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="&lt;div style=&quot;text-align: left;&quot;&gt;The worker will generate the chunk and will return back the data needed to create this chunk (in this case the voxels or blocks that made up the chunk )&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="1010" width="240" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="If the generated chunk is not completely empty, we generate the chunk mesh and add it inside the scene" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="75" y="1250" width="265" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="&lt;div style=&quot;text-align: left;&quot;&gt;This process will be executed when the worker has finished generating the chunk.&lt;br&gt;&lt;br&gt;The chunk is also added inside the loaded chunk list and the loaded chunk mesh list&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="1260" width="240" height="110" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

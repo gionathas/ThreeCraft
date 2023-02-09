@@ -11,7 +11,7 @@ export type PlayerMode = "sim" | "dev";
 
 export default class Player {
   private terrain: Terrain;
-  private voxelMarker: VoxelMarker | null;
+  private blockMarker: VoxelMarker | null;
 
   private scene: THREE.Scene;
   private inputController: InputController;
@@ -28,7 +28,7 @@ export default class Player {
     this.scene = scene;
     this.terrain = terrain;
     this.inputController = InputController.getInstance();
-    this.voxelMarker = null;
+    this.blockMarker = null;
     this.playerControls = new PlayerControls(
       camera,
       domElement,
@@ -40,7 +40,7 @@ export default class Player {
 
   update(dt: number) {
     this.playerControls.update(dt);
-    this.updateVoxelMarker();
+    this.updateBlockMarker();
     this.updateVoxelPlacement();
   }
 
@@ -54,18 +54,18 @@ export default class Player {
     const rightButton = this.inputController.isRightButtonJustPressed;
 
     if (leftButton) {
-      this.placeVoxel(Voxel.AIR); // erasing
+      this.placeBlock(Voxel.AIR); // erasing
     } else if (rightButton) {
-      this.placeVoxel(Voxel.COBBLESTONE); //FIXME
+      this.placeBlock(Voxel.GLASS); //FIXME
     }
   }
 
-  private placeVoxel(voxel: Voxel) {
+  private placeBlock(block: Voxel) {
     const { terrain } = this;
 
     if (!EDITING_ENABLED) return;
 
-    const targetVoxel = this.getTargetVoxel();
+    const targetVoxel = this.getTargetBlock();
 
     if (targetVoxel) {
       // the intersection point is on the face. That means
@@ -73,31 +73,31 @@ export default class Player {
       // so go half a normal into the voxel if removing (currentVoxel = 0)
       // our out of the voxel if adding (currentVoxel  > 0)
       const [x, y, z] = targetVoxel.position.map((v, ndx) => {
-        return v + targetVoxel.normal[ndx] * (voxel != Voxel.AIR ? 0.5 : -0.5);
+        return v + targetVoxel.normal[ndx] * (block != Voxel.AIR ? 0.5 : -0.5);
       });
 
-      terrain.setBlock({ x, y, z }, voxel);
+      terrain.setBlock({ x, y, z }, block);
     }
   }
 
-  private updateVoxelMarker() {
-    const targetVoxel = this.getTargetVoxel();
+  private updateBlockMarker() {
+    const targetBlock = this.getTargetBlock();
 
     // any voxel in sight, hide the marker
-    if (!targetVoxel && this.voxelMarker) {
-      this.voxelMarker.visible = false;
+    if (!targetBlock && this.blockMarker) {
+      this.blockMarker.visible = false;
     }
 
-    if (targetVoxel) {
-      const voxelNormal = new THREE.Vector3().fromArray(targetVoxel.normal);
-      const voxelPosition = new THREE.Vector3().fromArray(targetVoxel.position);
+    if (targetBlock) {
+      const blockNormal = new THREE.Vector3().fromArray(targetBlock.normal);
+      const blockPosition = new THREE.Vector3().fromArray(targetBlock.position);
 
-      this.voxelMarker = this.voxelMarker ?? new VoxelMarker();
-      this.voxelMarker.adaptToVoxel(voxelPosition, voxelNormal);
-      this.voxelMarker.visible = true;
+      this.blockMarker = this.blockMarker ?? new VoxelMarker();
+      this.blockMarker.adaptToVoxel(blockPosition, blockNormal);
+      this.blockMarker.visible = true;
 
-      if (!this.scene.children.includes(this.voxelMarker)) {
-        this.scene.add(this.voxelMarker);
+      if (!this.scene.children.includes(this.blockMarker)) {
+        this.scene.add(this.blockMarker);
       }
     }
   }
@@ -105,7 +105,7 @@ export default class Player {
   /**
    * Get the first intersected voxel by the screen coordinates
    */
-  getTargetVoxel() {
+  getTargetBlock() {
     const [cenX, cenY] = this.inputController.currentPointerCenterCoordinates;
     const { terrain } = this;
     const camera = this.playerControls.getCamera();

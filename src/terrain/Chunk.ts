@@ -40,45 +40,56 @@ export default class Chunk {
 
     // voxels generation
     for (let y = 0; y < chunkHeight; ++y) {
-      const voxelY = startY + y;
+      const blockY = startY + y;
       for (let z = 0; z < chunkWidth; ++z) {
-        const voxelZ = startZ + z;
+        const blockZ = startZ + z;
 
         for (let x = 0; x < chunkWidth; ++x) {
-          const voxelX = startX + x;
+          const blockX = startX + x;
 
-          const currVoxel = this.getVoxel({ x: voxelX, y: voxelY, z: voxelZ });
+          const block = this.getVoxel({ x: blockX, y: blockY, z: blockZ });
+          //FIXME
+          const isBlockTransparent =
+            block === Voxel.GLASS || block === Voxel.WATER;
 
-          if (currVoxel) {
-            // iterate over each face of this voxel
+          if (block) {
+            // iterate over each face of this block
             for (const face of Object.keys(VoxelFacesGeometry)) {
               const voxelFace = face as VoxelFace;
               const { normal: dir, corners } = VoxelFacesGeometry[voxelFace];
 
-              // let's check the voxel neighbour of this face of the voxel
-              const neighborVoxel = this.getVoxel({
-                x: voxelX + dir[0],
-                y: voxelY + dir[1],
-                z: voxelZ + dir[2],
+              // let's check the block neighbour of this face of the block
+              const neighborBlock = this.getVoxel({
+                x: blockX + dir[0],
+                y: blockY + dir[1],
+                z: blockZ + dir[2],
               });
 
-              // if the voxel has no neighbor in this face, we need to show this face
-              if (!neighborVoxel) {
+              //FIXME
+              const isNeighbourTransparent =
+                neighborBlock === Voxel.GLASS || neighborBlock === Voxel.WATER;
+
+              // if the current block has no neighbor or has a transparent neighbour
+              // we need to show this block face
+              if (
+                !neighborBlock ||
+                (isNeighbourTransparent && !isBlockTransparent)
+              ) {
                 const ndx = positions.length / 3;
 
                 for (const { pos, uv } of corners) {
                   // add corner position
                   positions.push(
-                    pos[0] + voxelX,
-                    pos[1] + voxelY,
-                    pos[2] + voxelZ
+                    pos[0] + blockX,
+                    pos[1] + blockY,
+                    pos[2] + blockZ
                   );
 
                   // add normal for this corner
                   normals.push(...dir);
 
                   const textureCoords = getBlockTextureCoordinates(
-                    currVoxel,
+                    block,
                     voxelFace,
                     [uv[0], uv[1]]
                   );

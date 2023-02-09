@@ -15,6 +15,7 @@ export enum Voxel {
   GRASS = 14,
   WATER = 13,
   SAND = 3,
+  GLASS = 5,
 }
 
 export type VoxelFace = "Left" | "Right" | "Top" | "Bottom" | "Front" | "Back";
@@ -222,6 +223,20 @@ const VoxelTextures: Record<number, TextureCoordinate> = {
     bottom: {
       row: 1,
       col: 7,
+    },
+  },
+  [Voxel.GLASS]: {
+    side: {
+      row: 2,
+      col: 0,
+    },
+    top: {
+      row: 2,
+      col: 0,
+    },
+    bottom: {
+      row: 2,
+      col: 0,
     },
   },
 };
