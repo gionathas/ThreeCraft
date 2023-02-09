@@ -10,12 +10,12 @@ export const VOXEL_SIZE = 1;
 
 export enum Voxel {
   AIR = 0,
-  COBBLESTONE = 4,
-  DIRT = 15,
-  GRASS = 14,
-  WATER = 13,
-  SAND = 3,
-  GLASS = 5,
+  COBBLESTONE,
+  DIRT,
+  GRASS,
+  WATER,
+  SAND,
+  GLASS,
 }
 
 export type VoxelFace = "Left" | "Right" | "Top" | "Bottom" | "Front" | "Back";
