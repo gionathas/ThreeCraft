@@ -151,12 +151,6 @@ export default class Terrain implements ChunkModel {
     return BlockUtils.isSolidBlock(block?.type);
   }
 
-  /**
-   * Given a voxel position returns the value of the voxel there.
-   *
-   * @returns the voxel value or null if the chunk does not exist
-   *
-   */
   getBlock(blockCoord: Coordinate) {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
     const chunk = this.chunkFactory.getChunk(chunkId);
@@ -168,22 +162,17 @@ export default class Terrain implements ChunkModel {
     return chunk.getBlock(blockCoord);
   }
 
-  /**
-   * Set the specified voxel into his relative chunk.
-   *
-   * If the chunk doesn't exist it will create a new one.
-   */
-  setBlock(blockCoord: Coordinate, voxel: BlockType) {
+  setBlock(blockCoord: Coordinate, block: BlockType) {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
 
     let chunk = this.chunkFactory.getChunk(chunkId);
 
-    // add new chunk if we try to set a voxel in a chunk that does not exist yet
+    // add new chunk if we try to set a block in a chunk that does not exist yet
     if (!chunk) {
       chunk = this.chunkFactory.createChunk(chunkId);
     }
 
-    chunk.setBlock(blockCoord, voxel);
+    chunk.setBlock(blockCoord, block);
     const { updatedChunkMesh, removedChunksIds } =
       this.chunkFactory.updateChunk(chunkId);
 

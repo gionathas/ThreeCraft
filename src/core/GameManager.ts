@@ -124,7 +124,7 @@ export default class GameManager {
         app.renderer.domElement,
         app.scene,
         terrain,
-        "sim" //FIXME
+        "dev" //FIXME
       );
 
       //FIXME wait the terrain finished being created

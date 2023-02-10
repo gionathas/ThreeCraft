@@ -6,8 +6,8 @@ import {
   EDITING_ENABLED,
 } from "../config/constants";
 import InputController from "../io/InputController";
+import BlockMarker from "../player/BlockMarker";
 import PlayerControls from "../player/PlayerControls";
-import BlockMarker from "../player/VoxelMarker";
 import { BlockType, BlockUtils } from "../terrain/Block";
 import ChunkUtils from "../utils/ChunkUtils";
 import Terrain from "./Terrain";
