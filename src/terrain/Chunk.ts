@@ -2,9 +2,17 @@ import * as THREE from "three";
 import { SEA_LEVEL } from "../config/constants";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
-import { BlockFace, BlockFacesGeometry, BlockType, BlockUtils } from "./Block";
+import { BlockInfo, Blocks, BlockType, BlockUtils } from "./Block";
 
 export type ChunkID = string;
+
+export type Block = {
+  type: BlockType;
+} & BlockInfo;
+
+export interface ChunkModel {
+  getBlock: (blockCoord: Coordinate) => Block | null;
+}
 export default class Chunk {
   private _chunkId: ChunkID;
   private chunkWidth: number;
@@ -48,35 +56,35 @@ export default class Chunk {
           const blockX = startX + x;
 
           const block = this.getBlock({ x: blockX, y: blockY, z: blockZ });
-          //FIXME
-          const isBlockTransparent =
-            block === BlockType.GLASS || block === BlockType.WATER;
+          const isSolidBlock = BlockUtils.isSolidBlock(block?.type);
 
-          if (block === BlockType.WATER && blockY !== SEA_LEVEL - 1) {
-            continue;
-          }
+          if (block && isSolidBlock) {
+            const isBlockTransparent = block.isTransparent;
+            const isWater = block.type === BlockType.WATER;
 
-          const positions = isBlockTransparent
-            ? transparentPositions
-            : soldidPositions;
-          const normals = isBlockTransparent
-            ? transparentNormals
-            : solidNormals;
-          const indices = isBlockTransparent
-            ? transparentIndices
-            : solidIndices;
-          const uvs = isBlockTransparent ? transparentUVs : solidUVs;
+            if (isWater && blockY !== SEA_LEVEL - 1) {
+              continue;
+            }
 
-          if (block) {
+            const positions = isBlockTransparent
+              ? transparentPositions
+              : soldidPositions;
+            const normals = isBlockTransparent
+              ? transparentNormals
+              : solidNormals;
+            const indices = isBlockTransparent
+              ? transparentIndices
+              : solidIndices;
+            const uvs = isBlockTransparent ? transparentUVs : solidUVs;
+
             // iterate over each face of this block
-            for (const face of Object.keys(BlockFacesGeometry)) {
-              const voxelFace = face as BlockFace;
-
-              if (block === BlockType.WATER && voxelFace !== "top") {
+            for (const blockFace of BlockUtils.getBlockFaces()) {
+              if (isWater && blockFace !== "top") {
                 continue;
               }
 
-              const { normal: dir, vertices } = BlockFacesGeometry[voxelFace];
+              const { normal: dir, vertices } =
+                BlockUtils.getBlockFaceGeometry(blockFace);
 
               // let's check the block neighbour of this face of the block
               const neighborBlock = this.getBlock({
@@ -85,17 +93,11 @@ export default class Chunk {
                 z: blockZ + dir[2],
               });
 
-              //FIXME
-              const isNeighbourTransparent =
-                neighborBlock === BlockType.GLASS ||
-                neighborBlock === BlockType.WATER;
+              const isNeighbourTransparent = neighborBlock?.isTransparent;
 
               // if the current block has no neighbor or has a transparent neighbour
               // we need to show this block face
-              if (
-                !neighborBlock ||
-                (isNeighbourTransparent && !isBlockTransparent)
-              ) {
+              if (!neighborBlock || isNeighbourTransparent) {
                 const ndx = positions.length / 3;
 
                 for (const { pos, uv } of vertices) {
@@ -110,8 +112,8 @@ export default class Chunk {
                   normals.push(...dir);
 
                   const textureCoords = BlockUtils.getBlockUVCoordinates(
-                    block,
-                    voxelFace,
+                    block.type,
+                    blockFace,
                     [uv[0], uv[1]]
                   );
 
@@ -142,13 +144,18 @@ export default class Chunk {
     };
   }
 
-  getBlock(coord: Coordinate): BlockType | null {
+  getBlock(coord: Coordinate): Block | null {
     if (!this.isBlockInChunk(coord)) {
       return null;
     }
 
     const blockIndex = this.computeBlockIndex(coord);
-    return this.blocks[blockIndex];
+    const blockType = this.blocks[blockIndex] as BlockType;
+
+    return {
+      type: blockType,
+      ...Blocks[blockType],
+    };
   }
 
   setBlock(coord: Coordinate, voxel: BlockType) {

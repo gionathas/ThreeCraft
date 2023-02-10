@@ -34,8 +34,8 @@ export const devPlayerProperties: PlayerControlsProperties = {
 export const simPlayerProperties: PlayerControlsProperties = {
   width: 0.4,
   height: 1.8,
-  horizontalSpeed: 0.5,
-  verticalSpeed: 5,
+  horizontalSpeed: 0.8,
+  verticalSpeed: 6,
   dampingCoefficient: 10,
   physicsEnabled: true,
   showHitbox: false,

@@ -8,7 +8,8 @@ import {
   TERRAIN_GENERATION_ENABLED,
   TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
 } from "../config/constants";
-import { BlockType, ChunkModel } from "../terrain/Block";
+import { BlockType, BlockUtils } from "../terrain/Block";
+import { ChunkModel } from "../terrain/Chunk";
 import TerrainChunksFactory from "../terrain/TerrainChunksFactory";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
@@ -147,7 +148,7 @@ export default class Terrain implements ChunkModel {
   isSolidBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
-    return block != null && block != BlockType.AIR;
+    return BlockUtils.isSolidBlock(block?.type);
   }
 
   /**
@@ -156,7 +157,7 @@ export default class Terrain implements ChunkModel {
    * @returns the voxel value or null if the chunk does not exist
    *
    */
-  getBlock(blockCoord: Coordinate): BlockType | null {
+  getBlock(blockCoord: Coordinate) {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
     const chunk = this.chunkFactory.getChunk(chunkId);
 

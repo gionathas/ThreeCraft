@@ -8,9 +8,8 @@ import {
 import InputController from "../io/InputController";
 import PlayerControls from "../player/PlayerControls";
 import BlockMarker from "../player/VoxelMarker";
-import { BlockType } from "../terrain/Block";
+import { BlockType, BlockUtils } from "../terrain/Block";
 import ChunkUtils from "../utils/ChunkUtils";
-import { intersectVoxel } from "../utils/helpers";
 import Terrain from "./Terrain";
 
 export type PlayerMode = "sim" | "dev";
@@ -132,7 +131,7 @@ export default class Player {
     rayLength.multiplyScalar(EDITING_DISTANCE);
     rayEnd.copy(rayStart).add(rayLength);
 
-    return intersectVoxel(rayStart, rayEnd, terrain);
+    return BlockUtils.intersectBlock(rayStart, rayEnd, terrain);
   }
 
   enableControls() {
