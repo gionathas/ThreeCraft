@@ -33,6 +33,7 @@ export type Config = {
   };
 };
 
+//TODO: etraxt the class SceneManager (singleton class)
 export default class AnimatedApp {
   protected config: Config;
   renderer!: THREE.WebGLRenderer;
