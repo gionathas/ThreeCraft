@@ -7,8 +7,8 @@ import {
 } from "../config/constants";
 import InputController from "../io/InputController";
 import PlayerControls from "../player/PlayerControls";
-import VoxelMarker from "../player/VoxelMarker";
-import { Voxel } from "../terrain/Voxel";
+import BlockMarker from "../player/VoxelMarker";
+import { BlockType } from "../terrain/Block";
 import ChunkUtils from "../utils/ChunkUtils";
 import { intersectVoxel } from "../utils/helpers";
 import Terrain from "./Terrain";
@@ -17,7 +17,7 @@ export type PlayerMode = "sim" | "dev";
 
 export default class Player {
   private terrain: Terrain;
-  private blockMarker: VoxelMarker | null;
+  private blockMarker: BlockMarker | null;
 
   private scene: THREE.Scene;
   private inputController: InputController;
@@ -60,13 +60,13 @@ export default class Player {
     const rightButton = this.inputController.isRightButtonJustPressed;
 
     if (leftButton) {
-      this.placeBlock(Voxel.AIR); // erasing
+      this.placeBlock(BlockType.AIR); // erasing
     } else if (rightButton) {
-      this.placeBlock(Voxel.GLASS); //FIXME
+      this.placeBlock(BlockType.GLASS); //FIXME
     }
   }
 
-  private placeBlock(block: Voxel) {
+  private placeBlock(block: BlockType) {
     const { terrain } = this;
 
     if (!EDITING_ENABLED) return;
@@ -79,7 +79,9 @@ export default class Player {
       // so go half a normal into the voxel if removing (currentVoxel = 0)
       // our out of the voxel if adding (currentVoxel  > 0)
       const [x, y, z] = targetVoxel.position.map((v, ndx) => {
-        return v + targetVoxel.normal[ndx] * (block != Voxel.AIR ? 0.5 : -0.5);
+        return (
+          v + targetVoxel.normal[ndx] * (block != BlockType.AIR ? 0.5 : -0.5)
+        );
       });
 
       terrain.setBlock({ x, y, z }, block);
@@ -98,8 +100,8 @@ export default class Player {
       const blockNormal = new THREE.Vector3().fromArray(targetBlock.normal);
       const blockPosition = new THREE.Vector3().fromArray(targetBlock.position);
 
-      this.blockMarker = this.blockMarker ?? new VoxelMarker();
-      this.blockMarker.adaptToVoxel(blockPosition, blockNormal);
+      this.blockMarker = this.blockMarker ?? new BlockMarker();
+      this.blockMarker.adaptToBlock(blockPosition, blockNormal);
       this.blockMarker.visible = true;
 
       if (!this.scene.children.includes(this.blockMarker)) {

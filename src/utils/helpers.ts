@@ -1,4 +1,4 @@
-import { VoxelModel } from "../terrain/Voxel";
+import { ChunkModel } from "../terrain/Block";
 
 export type Axis = "x" | "y" | "z";
 
@@ -41,7 +41,7 @@ export function determineAngleQuadrant(angle: number): 1 | 2 | 3 | 4 {
 export const intersectVoxel = (
   rayStart: THREE.Vector3,
   rayEnd: THREE.Vector3,
-  voxels: VoxelModel
+  voxels: ChunkModel
 ) => {
   let dx = rayEnd.x - rayStart.x;
   let dy = rayEnd.y - rayStart.y;

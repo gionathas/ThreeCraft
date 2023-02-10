@@ -3,11 +3,11 @@ import { SEA_LEVEL } from "../config/constants";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 import {
+  BlockFace,
+  BlockFacesGeometry,
+  BlockType,
   getBlockTextureCoordinates,
-  Voxel,
-  VoxelFace,
-  VoxelFacesGeometry,
-} from "./Voxel";
+} from "./Block";
 
 export type ChunkID = string;
 export default class Chunk {
@@ -55,9 +55,9 @@ export default class Chunk {
           const block = this.getVoxel({ x: blockX, y: blockY, z: blockZ });
           //FIXME
           const isBlockTransparent =
-            block === Voxel.GLASS || block === Voxel.WATER;
+            block === BlockType.GLASS || block === BlockType.WATER;
 
-          if (block === Voxel.WATER && blockY !== SEA_LEVEL - 1) {
+          if (block === BlockType.WATER && blockY !== SEA_LEVEL - 1) {
             continue;
           }
 
@@ -74,14 +74,14 @@ export default class Chunk {
 
           if (block) {
             // iterate over each face of this block
-            for (const face of Object.keys(VoxelFacesGeometry)) {
-              const voxelFace = face as VoxelFace;
+            for (const face of Object.keys(BlockFacesGeometry)) {
+              const voxelFace = face as BlockFace;
 
-              if (block === Voxel.WATER && voxelFace !== "Top") {
+              if (block === BlockType.WATER && voxelFace !== "top") {
                 continue;
               }
 
-              const { normal: dir, corners } = VoxelFacesGeometry[voxelFace];
+              const { normal: dir, corners } = BlockFacesGeometry[voxelFace];
 
               // let's check the block neighbour of this face of the block
               const neighborBlock = this.getVoxel({
@@ -92,7 +92,8 @@ export default class Chunk {
 
               //FIXME
               const isNeighbourTransparent =
-                neighborBlock === Voxel.GLASS || neighborBlock === Voxel.WATER;
+                neighborBlock === BlockType.GLASS ||
+                neighborBlock === BlockType.WATER;
 
               // if the current block has no neighbor or has a transparent neighbour
               // we need to show this block face
@@ -151,7 +152,7 @@ export default class Chunk {
    *
    * @returns the voxel value or null if the voxel does not belong to this chunk.
    */
-  getVoxel(coord: Coordinate): Voxel | null {
+  getVoxel(coord: Coordinate): BlockType | null {
     if (!this.isVoxelInChunk(coord)) {
       return null;
     }
@@ -160,7 +161,7 @@ export default class Chunk {
     return this.voxels[voxelOffset];
   }
 
-  setVoxel(coord: Coordinate, voxel: Voxel) {
+  setVoxel(coord: Coordinate, voxel: BlockType) {
     // the voxel does not belong to this chunk, skip
     if (!this.isVoxelInChunk(coord)) {
       return;

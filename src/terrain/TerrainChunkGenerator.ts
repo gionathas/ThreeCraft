@@ -8,8 +8,8 @@ import {
   TERRAIN_LEVEL,
 } from "../config/constants";
 import { Coordinate } from "../utils/helpers";
+import { BlockType } from "./Block";
 import Chunk from "./Chunk";
-import { Voxel } from "./Voxel";
 
 export default class TerrainChunkGenerator {
   private noise: NoiseFunction2D;
@@ -39,7 +39,7 @@ export default class TerrainChunkGenerator {
     const surfaceHeight =
       BASE_HEIGHT + this.noise(x / NOISE_SCALE, z / NOISE_SCALE) * HILL_OFFSET;
 
-    let voxelType: Voxel;
+    let voxelType: BlockType;
     if (y < surfaceHeight) {
       voxelType = this.generateVoxelBelowSurface(y, surfaceHeight);
     } else {
@@ -54,22 +54,22 @@ export default class TerrainChunkGenerator {
   private generateVoxelBelowSurface(y: number, surfaceHeight: number) {
     if (y > surfaceHeight - 1) {
       if (y < SEA_LEVEL + 2) {
-        return Voxel.SAND;
+        return BlockType.SAND;
       } else {
-        return Voxel.GRASS;
+        return BlockType.GRASS;
       }
     } else if (y > TERRAIN_LEVEL) {
-      return Voxel.DIRT;
+      return BlockType.DIRT;
     }
 
-    return Voxel.COBBLESTONE;
+    return BlockType.COBBLESTONE;
   }
 
   private generateVoxelAboveSurface(y: number, surfaceHeight: number) {
     if (y < SEA_LEVEL) {
-      return Voxel.WATER;
+      return BlockType.WATER;
     }
 
-    return Voxel.AIR;
+    return BlockType.AIR;
   }
 }

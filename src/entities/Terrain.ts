@@ -8,8 +8,8 @@ import {
   TERRAIN_GENERATION_ENABLED,
   TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
 } from "../config/constants";
+import { BlockType, ChunkModel } from "../terrain/Block";
 import TerrainChunksFactory from "../terrain/TerrainChunksFactory";
-import { Voxel, VoxelModel } from "../terrain/Voxel";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 
@@ -31,7 +31,7 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
-export default class Terrain implements VoxelModel {
+export default class Terrain implements ChunkModel {
   private chunkFactory: TerrainChunksFactory;
   private scene: THREE.Scene;
 
@@ -147,7 +147,7 @@ export default class Terrain implements VoxelModel {
   isSolidBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
-    return block != null && block != Voxel.AIR;
+    return block != null && block != BlockType.AIR;
   }
 
   /**
@@ -156,7 +156,7 @@ export default class Terrain implements VoxelModel {
    * @returns the voxel value or null if the chunk does not exist
    *
    */
-  getBlock(blockCoord: Coordinate): Voxel | null {
+  getBlock(blockCoord: Coordinate): BlockType | null {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
     const chunk = this.chunkFactory.getChunk(chunkId);
 
@@ -172,7 +172,7 @@ export default class Terrain implements VoxelModel {
    *
    * If the chunk doesn't exist it will create a new one.
    */
-  setBlock(blockCoord: Coordinate, voxel: Voxel) {
+  setBlock(blockCoord: Coordinate, voxel: BlockType) {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
 
     let chunk = this.chunkFactory.getChunk(chunkId);

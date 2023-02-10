@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { detectFace, VOXEL_SIZE } from "../terrain/Voxel";
+import { BLOCK_SIZE, detectBlockFace } from "../terrain/Block";
 
-export default class VoxelMarker extends THREE.LineSegments {
+export default class BlockMarker extends THREE.LineSegments {
   private edgesMaterial!: THREE.LineBasicMaterial;
 
   constructor() {
@@ -19,53 +19,53 @@ export default class VoxelMarker extends THREE.LineSegments {
 
   private initGeometries() {
     const { edgesMaterial } = this;
-    const markerPlaneGeom = new THREE.PlaneGeometry(VOXEL_SIZE, VOXEL_SIZE);
+    const markerPlaneGeom = new THREE.PlaneGeometry(BLOCK_SIZE, BLOCK_SIZE);
     const markerEdgesGeom = new THREE.EdgesGeometry(markerPlaneGeom);
     this.geometry = markerEdgesGeom;
     this.material = edgesMaterial;
   }
 
-  adaptToVoxel(voxelPosition: THREE.Vector3, voxelNormal: THREE.Vector3) {
-    const [x, y, z] = voxelPosition.toArray();
-    const offsetFromVoxel = 0.01;
+  adaptToBlock(blockPosition: THREE.Vector3, blockNormal: THREE.Vector3) {
+    const [x, y, z] = blockPosition.toArray();
+    const offsetFromBlock = 0.01;
 
-    const toVoxelCenterCoord = (val: number) =>
-      Math.floor(val / VOXEL_SIZE) * VOXEL_SIZE + VOXEL_SIZE / 2;
+    const toBlockCenterCoord = (val: number) =>
+      Math.floor(val / BLOCK_SIZE) * BLOCK_SIZE + BLOCK_SIZE / 2;
 
-    const planeX = toVoxelCenterCoord(x);
-    const planeY = toVoxelCenterCoord(y);
-    const planeZ = toVoxelCenterCoord(z);
+    const planeX = toBlockCenterCoord(x);
+    const planeY = toBlockCenterCoord(y);
+    const planeZ = toBlockCenterCoord(z);
 
-    const face = detectFace(voxelNormal);
+    const face = detectBlockFace(blockNormal);
 
     switch (face) {
-      case "Top": {
-        this.position.set(planeX, y + offsetFromVoxel, planeZ);
+      case "top": {
+        this.position.set(planeX, y + offsetFromBlock, planeZ);
         this.rotation.set(Math.PI / 2, 0, 0);
         break;
       }
-      case "Bottom": {
-        this.position.set(planeX, y - offsetFromVoxel, planeZ);
+      case "bottom": {
+        this.position.set(planeX, y - offsetFromBlock, planeZ);
         this.rotation.set(Math.PI / 2, 0, 0);
         break;
       }
-      case "Front": {
-        this.position.set(planeX, planeY, z + offsetFromVoxel);
+      case "front": {
+        this.position.set(planeX, planeY, z + offsetFromBlock);
         this.rotation.set(0, 0, 0);
         break;
       }
-      case "Back": {
-        this.position.set(planeX, planeY, z - offsetFromVoxel);
+      case "back": {
+        this.position.set(planeX, planeY, z - offsetFromBlock);
         this.rotation.set(0, 0, 0);
         break;
       }
-      case "Left": {
-        this.position.set(x - offsetFromVoxel, planeY, planeZ);
+      case "left": {
+        this.position.set(x - offsetFromBlock, planeY, planeZ);
         this.rotation.set(0, Math.PI / 2, 0);
         break;
       }
-      case "Right": {
-        this.position.set(x + offsetFromVoxel, planeY, planeZ);
+      case "right": {
+        this.position.set(x + offsetFromBlock, planeY, planeZ);
         this.rotation.set(0, Math.PI / 2, 0);
         break;
       }
