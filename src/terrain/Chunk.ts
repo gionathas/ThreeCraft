@@ -2,12 +2,7 @@ import * as THREE from "three";
 import { SEA_LEVEL } from "../config/constants";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
-import {
-  BlockFace,
-  BlockFacesGeometry,
-  BlockType,
-  getBlockTextureCoordinates,
-} from "./Block";
+import { BlockFace, BlockFacesGeometry, BlockType, BlockUtils } from "./Block";
 
 export type ChunkID = string;
 export default class Chunk {
@@ -81,7 +76,7 @@ export default class Chunk {
                 continue;
               }
 
-              const { normal: dir, corners } = BlockFacesGeometry[voxelFace];
+              const { normal: dir, vertices } = BlockFacesGeometry[voxelFace];
 
               // let's check the block neighbour of this face of the block
               const neighborBlock = this.getVoxel({
@@ -103,7 +98,7 @@ export default class Chunk {
               ) {
                 const ndx = positions.length / 3;
 
-                for (const { pos, uv } of corners) {
+                for (const { pos, uv } of vertices) {
                   // add corner position
                   positions.push(
                     pos[0] + blockX,
@@ -114,13 +109,13 @@ export default class Chunk {
                   // add normal for this corner
                   normals.push(...dir);
 
-                  const textureCoords = getBlockTextureCoordinates(
+                  const textureCoords = BlockUtils.getBlockUVCoordinates(
                     block,
                     voxelFace,
                     [uv[0], uv[1]]
                   );
 
-                  uvs.push(textureCoords.x, textureCoords.y);
+                  uvs.push(textureCoords.u, textureCoords.v);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);

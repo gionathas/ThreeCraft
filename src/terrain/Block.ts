@@ -18,12 +18,21 @@ export enum BlockType {
   GLASS,
 }
 
-export type BlockFace = "left" | "right" | "top" | "bottom" | "front" | "back";
+enum BlockFaceEnum {
+  left,
+  right,
+  top,
+  bottom,
+  front,
+  back,
+}
+
+export type BlockFace = keyof typeof BlockFaceEnum;
 type BlockTextureFace = "top" | "bottom" | "side";
 
 type BlockFaceGeometry = {
   normal: [number, number, number];
-  corners: {
+  vertices: {
     pos: [number, number, number];
     uv: [number, number];
   }[];
@@ -173,7 +182,7 @@ export const BlockFaceNormal: Record<BlockFace, [number, number, number]> = {
 export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   left: {
     normal: BlockFaceNormal.left,
-    corners: [
+    vertices: [
       { pos: [0, 1, 0], uv: [0, 1] },
       { pos: [0, 0, 0], uv: [0, 0] },
       { pos: [0, 1, 1], uv: [1, 1] },
@@ -182,7 +191,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   },
   right: {
     normal: BlockFaceNormal.right,
-    corners: [
+    vertices: [
       { pos: [1, 1, 1], uv: [0, 1] },
       { pos: [1, 0, 1], uv: [0, 0] },
       { pos: [1, 1, 0], uv: [1, 1] },
@@ -191,7 +200,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   },
   top: {
     normal: BlockFaceNormal.top,
-    corners: [
+    vertices: [
       { pos: [0, 1, 1], uv: [1, 1] },
       { pos: [1, 1, 1], uv: [0, 1] },
       { pos: [0, 1, 0], uv: [1, 0] },
@@ -200,7 +209,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   },
   bottom: {
     normal: BlockFaceNormal.bottom,
-    corners: [
+    vertices: [
       { pos: [1, 0, 1], uv: [1, 0] },
       { pos: [0, 0, 1], uv: [0, 0] },
       { pos: [1, 0, 0], uv: [1, 1] },
@@ -209,7 +218,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   },
   front: {
     normal: BlockFaceNormal.front,
-    corners: [
+    vertices: [
       { pos: [0, 0, 1], uv: [0, 0] },
       { pos: [1, 0, 1], uv: [1, 0] },
       { pos: [0, 1, 1], uv: [0, 1] },
@@ -218,7 +227,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   },
   back: {
     normal: BlockFaceNormal.back,
-    corners: [
+    vertices: [
       { pos: [1, 0, 0], uv: [0, 0] },
       { pos: [0, 0, 0], uv: [1, 0] },
       { pos: [1, 1, 0], uv: [0, 1] },
@@ -226,45 +235,6 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
     ],
   },
 };
-
-export function isTransparent(type: BlockType) {
-  return Block[type].isTransparent;
-}
-
-export function getBlockFaceFromNormal(
-  normal: THREE.Vector3
-): BlockFace | null {
-  for (const [face, faceNormal] of Object.entries(BlockFaceNormal)) {
-    if (new THREE.Vector3().fromArray(faceNormal).equals(normal)) {
-      return face as BlockFace;
-    }
-  }
-  return null;
-}
-
-export function getBlockNormalFromPosition(
-  blockOrigin: THREE.Vector3,
-  position: THREE.Vector3
-) {
-  const voxelCenter = new THREE.Vector3(
-    blockOrigin.x + 0.5,
-    blockOrigin.y + 0.5,
-    blockOrigin.z + 0.5
-  );
-  const xDiff = Math.abs(position.x - voxelCenter.x);
-  const yDiff = Math.abs(position.y - voxelCenter.y);
-  const zDiff = Math.abs(position.z - voxelCenter.z);
-  const normal = new THREE.Vector3();
-
-  if (xDiff > yDiff && xDiff > zDiff) {
-    normal.set(position.x > voxelCenter.x ? 1 : -1, 0, 0);
-  } else if (yDiff > zDiff) {
-    normal.set(0, position.y > voxelCenter.y ? 1 : -1, 0);
-  } else {
-    normal.set(0, 0, position.z > voxelCenter.z ? 1 : -1);
-  }
-  return normal;
-}
 
 const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
   top: "top",
@@ -275,18 +245,69 @@ const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
   back: "side",
 };
 
-export function getBlockTextureCoordinates(
-  block: BlockType,
-  face: BlockFace,
-  [u, v]: [number, number]
-) {
-  const textureFace = blockFaceToTextureFace[face];
-  const { row, col } = Block[block].texture[textureFace];
+export class BlockUtils {
+  static isBlockTransparent(type: BlockType | null) {
+    // a null block can be considered transparent
+    if (type == null) {
+      return true;
+    }
+    return Block[type].isTransparent;
+  }
 
-  return {
-    x: ((col + u) * TILE_SIZE) / TILE_TEXTURES_WIDTH,
-    y: 1 - ((row + 1 - v) * TILE_SIZE) / TILE_TEXTURE_HEIGHT,
-  };
+  static getBlockFaces(): BlockFace[] {
+    return Object.values(BlockFaceEnum) as BlockFace[];
+  }
+
+  static getBlockFaceGeometry(face: BlockFace) {
+    return BlockFacesGeometry[face];
+  }
+
+  static getBlockUVCoordinates(
+    block: BlockType,
+    face: BlockFace,
+    [uOff, vOff]: [number, number]
+  ) {
+    const textureFace = blockFaceToTextureFace[face];
+    const { row, col } = Block[block].texture[textureFace];
+
+    return {
+      u: ((col + uOff) * TILE_SIZE) / TILE_TEXTURES_WIDTH,
+      v: 1 - ((row + 1 - vOff) * TILE_SIZE) / TILE_TEXTURE_HEIGHT,
+    };
+  }
+
+  static getBlockFaceFromNormal(normal: THREE.Vector3): BlockFace | null {
+    for (const [face, faceNormal] of Object.entries(BlockFaceNormal)) {
+      if (new THREE.Vector3().fromArray(faceNormal).equals(normal)) {
+        return face as BlockFace;
+      }
+    }
+    return null;
+  }
+
+  static getBlockNormalFromPosition(
+    blockOrigin: THREE.Vector3,
+    position: THREE.Vector3
+  ) {
+    const voxelCenter = new THREE.Vector3(
+      blockOrigin.x + 0.5,
+      blockOrigin.y + 0.5,
+      blockOrigin.z + 0.5
+    );
+    const xDiff = Math.abs(position.x - voxelCenter.x);
+    const yDiff = Math.abs(position.y - voxelCenter.y);
+    const zDiff = Math.abs(position.z - voxelCenter.z);
+    const normal = new THREE.Vector3();
+
+    if (xDiff > yDiff && xDiff > zDiff) {
+      normal.set(position.x > voxelCenter.x ? 1 : -1, 0, 0);
+    } else if (yDiff > zDiff) {
+      normal.set(0, position.y > voxelCenter.y ? 1 : -1, 0);
+    } else {
+      normal.set(0, 0, position.z > voxelCenter.z ? 1 : -1);
+    }
+    return normal;
+  }
 }
 
 export interface ChunkModel {
