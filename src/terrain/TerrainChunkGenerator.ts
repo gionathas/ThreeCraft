@@ -14,6 +14,7 @@ import Chunk from "./Chunk";
 export default class TerrainChunkGenerator {
   private noise: NoiseFunction2D;
 
+  // TODO take in input the seed value (in order to be shared by the workers)
   constructor() {
     this.noise = createNoise2D(alea("seed")); //FIXME add seed
   }

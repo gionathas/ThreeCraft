@@ -66,7 +66,7 @@ export default class TerrainChunksFactory {
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunks) => {
       const { solidGeometry, transparentGeometry, blocksBuffer } =
-        await generateChunks(chunkCoord, chunkWidth, chunkHeight);
+        await generateChunks(chunkId, chunkWidth, chunkHeight);
 
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);
@@ -147,7 +147,7 @@ export default class TerrainChunksFactory {
    * @returns a list of all the updated chunk mesh
    */
   updateChunk(chunkId: ChunkID) {
-    const { x, y, z } = ChunkUtils.computeChunkOriginPosition(
+    const { x, y, z } = ChunkUtils.computeChunkAbsolutePosition(
       chunkId,
       this.chunkWidth,
       this.chunkHeight
@@ -184,7 +184,7 @@ export default class TerrainChunksFactory {
 
         if (chunkToUpdate) {
           // get the chunk  origin position
-          const chunkOriginOffset = ChunkUtils.computeChunkOriginPosition(
+          const chunkOriginOffset = ChunkUtils.computeChunkAbsolutePosition(
             chunkId,
             this.chunkWidth,
             this.chunkHeight

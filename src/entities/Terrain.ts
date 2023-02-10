@@ -93,7 +93,7 @@ export default class Terrain implements ChunkModel {
     const loadedChunks = this.chunkFactory.loadedChunks;
 
     for (const chunk of loadedChunks) {
-      const chunkOriginPosition = ChunkUtils.computeChunkOriginPosition(
+      const chunkOriginPosition = ChunkUtils.computeChunkAbsolutePosition(
         chunk.id,
         CHUNK_WIDTH,
         CHUNK_HEIGHT
