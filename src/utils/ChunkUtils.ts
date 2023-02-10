@@ -11,6 +11,17 @@ export default class ChunkUtils {
     return { x, y, z };
   }
 
+  static getChunkIdNeighbour(chunkID: ChunkID, neighbour: "left" | "right") {
+    const { x, y, z } = ChunkUtils.chunkIdAsCoordinate(chunkID);
+
+    switch (neighbour) {
+      case "left":
+        return ChunkUtils.coordinateAsChunkId({ x: x - 1, y, z });
+      case "right":
+        return ChunkUtils.coordinateAsChunkId({ x: x + 1, y, z });
+    }
+  }
+
   /**
    * Return the chunkID of the chunk that is supposed to contain the specified position
    *

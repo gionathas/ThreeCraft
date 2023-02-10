@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { SEA_LEVEL } from "../config/constants";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 import {
@@ -33,17 +34,21 @@ export default class Chunk {
   computeGeometryData({ x: startX, y: startY, z: startZ }: Coordinate) {
     const { chunkWidth, chunkHeight } = this;
 
-    const positions = [];
-    const normals = [];
-    const indices = [];
-    const uvs = [];
+    const soldidPositions: number[] = [];
+    const solidNormals: number[] = [];
+    const solidIndices: number[] = [];
+    const solidUVs: number[] = [];
+
+    const transparentPositions: number[] = [];
+    const transparentNormals: number[] = [];
+    const transparentIndices: number[] = [];
+    const transparentUVs: number[] = [];
 
     // voxels generation
     for (let y = 0; y < chunkHeight; ++y) {
       const blockY = startY + y;
       for (let z = 0; z < chunkWidth; ++z) {
         const blockZ = startZ + z;
-
         for (let x = 0; x < chunkWidth; ++x) {
           const blockX = startX + x;
 
@@ -52,10 +57,30 @@ export default class Chunk {
           const isBlockTransparent =
             block === Voxel.GLASS || block === Voxel.WATER;
 
+          if (block === Voxel.WATER && blockY !== SEA_LEVEL - 1) {
+            continue;
+          }
+
+          const positions = isBlockTransparent
+            ? transparentPositions
+            : soldidPositions;
+          const normals = isBlockTransparent
+            ? transparentNormals
+            : solidNormals;
+          const indices = isBlockTransparent
+            ? transparentIndices
+            : solidIndices;
+          const uvs = isBlockTransparent ? transparentUVs : solidUVs;
+
           if (block) {
             // iterate over each face of this block
             for (const face of Object.keys(VoxelFacesGeometry)) {
               const voxelFace = face as VoxelFace;
+
+              if (block === Voxel.WATER && voxelFace !== "Top") {
+                continue;
+              }
+
               const { normal: dir, corners } = VoxelFacesGeometry[voxelFace];
 
               // let's check the block neighbour of this face of the block
@@ -106,10 +131,18 @@ export default class Chunk {
     }
 
     return {
-      positions,
-      normals,
-      indices,
-      uvs,
+      solid: {
+        positions: soldidPositions,
+        normals: solidNormals,
+        indices: solidIndices,
+        uvs: solidUVs,
+      },
+      transparent: {
+        positions: transparentPositions,
+        normals: transparentNormals,
+        indices: transparentIndices,
+        uvs: transparentUVs,
+      },
     };
   }
 

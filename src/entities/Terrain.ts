@@ -60,7 +60,8 @@ export default class Terrain implements VoxelModel {
       this.loadTerrain(terrainBoundaries);
       this.previousCenterPosition.copy(newCenterPosition);
 
-      // console.debug(`meshPool: ${this.chunkFactory._poolMeshSize}`);
+      // console.debug(`solidPool: ${this.chunkFactory._poolSolidMeshSize}`);
+      // console.log(`transPool: ${this.chunkFactory._poolTransparentMeshSize}`);
     }
   }
 
@@ -69,9 +70,18 @@ export default class Terrain implements VoxelModel {
     for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
       for (let z = lowerZ; z < upperZ; z += CHUNK_WIDTH) {
         for (let y = lowerY; y < upperY; y += CHUNK_HEIGHT) {
-          this.chunkFactory.generateChunk({ x, y, z }, (newChunkMesh) => {
-            this.scene.add(newChunkMesh);
-          });
+          this.chunkFactory.generateChunk(
+            { x, y, z },
+            (solidMesh, transparentMesh) => {
+              if (solidMesh) {
+                this.scene.add(solidMesh);
+              }
+
+              if (transparentMesh) {
+                this.scene.add(transparentMesh);
+              }
+            }
+          );
         }
       }
     }
@@ -96,12 +106,16 @@ export default class Terrain implements VoxelModel {
         chunkOriginPosition.z < lowerZ ||
         chunkOriginPosition.z > upperZ
       ) {
-        const { chunkMesh: removedMesh } = this.chunkFactory.removeChunk(
+        const { solidMesh, transparentMesh } = this.chunkFactory.removeChunk(
           chunk.id
         );
 
-        if (removedMesh) {
-          this.scene.remove(removedMesh);
+        if (solidMesh) {
+          this.scene.remove(solidMesh);
+        }
+
+        if (transparentMesh) {
+          this.scene.remove(transparentMesh);
         }
       }
     }
@@ -123,8 +137,8 @@ export default class Terrain implements VoxelModel {
 
     // keep rendering at least 1 chunk as far as we are below the cloud level
     // and above the terrain surface
-    if (lowerY < CLOUD_LEVEL && lowerY > 0) {
-      lowerY = 0;
+    if (lowerY < CLOUD_LEVEL && lowerY > -CHUNK_HEIGHT) {
+      lowerY = -CHUNK_HEIGHT;
     }
 
     return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
@@ -169,10 +183,10 @@ export default class Terrain implements VoxelModel {
     }
 
     chunk.setVoxel(blockCoord, voxel);
-    const { updatedChunks, removedChunksIds } =
+    const { updatedChunkMesh, removedChunksIds } =
       this.chunkFactory.updateChunk(chunkId);
 
-    for (const updatedChunk of updatedChunks) {
+    for (const updatedChunk of updatedChunkMesh) {
       // if the chunk was not already in the scene, add it
       if (!this.scene.getObjectByName(updatedChunk.name)) {
         this.scene.add(updatedChunk);
@@ -180,9 +194,19 @@ export default class Terrain implements VoxelModel {
     }
 
     for (const removedChunkId of removedChunksIds) {
-      const removedMesh = this.scene.getObjectByName(removedChunkId);
-      if (removedMesh) {
-        this.scene.remove(removedMesh);
+      const removedSolidMesh = this.scene.getObjectByName(
+        TerrainChunksFactory.getChunkSolidMeshId(removedChunkId)
+      );
+      const removedTransparentMesh = this.scene.getObjectByName(
+        TerrainChunksFactory.getChunkTransparentMeshId(removedChunkId)
+      );
+
+      if (removedSolidMesh) {
+        this.scene.remove(removedSolidMesh);
+      }
+
+      if (removedTransparentMesh) {
+        this.scene.remove(removedTransparentMesh);
       }
     }
   }
@@ -203,7 +227,15 @@ export default class Terrain implements VoxelModel {
     return this.chunkFactory.totalChunks;
   }
 
-  get _totalMesh() {
-    return this.chunkFactory.totalChunksMesh;
+  get _totalSolidMesh() {
+    return this.chunkFactory.totalSolidChunksMesh;
+  }
+
+  get _totalTransparentMesh() {
+    return this.chunkFactory.totalTransparentChunksMesh;
+  }
+
+  get _poolSolidMeshSize() {
+    return this.chunkFactory._poolSolidMeshSize;
   }
 }

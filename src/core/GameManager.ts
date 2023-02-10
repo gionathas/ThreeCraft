@@ -52,8 +52,10 @@ export default class GameManager {
 
     const [px, py, pz] = this.player.getPosition().toArray();
     const [vx, vy, vz] = this.player.getVelocity().toArray();
+    const currentChunkId = this.player._currentChunkCoordinates;
     const totalChunks = this.terrain.totalChunks;
-    const totalMesh = this.terrain._totalMesh;
+    const totalSolidMesh = this.terrain._totalSolidMesh;
+    const transparentMesh = this.terrain._totalTransparentMesh;
 
     infoUI!.innerHTML = `<p>x: ${px.toFixed(2)} y: ${py.toFixed(
       2
@@ -62,8 +64,10 @@ export default class GameManager {
       2
     )} vz: ${vz.toFixed(2)}</p>`;
 
+    infoUI!.innerHTML += `<p>Current Chunk: (${currentChunkId})</p>`;
     infoUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
-    infoUI!.innerHTML += `<p>Mesh: ${totalMesh}</p>`;
+    infoUI!.innerHTML += `<p>Solid Mesh: ${totalSolidMesh}</p>`;
+    infoUI!.innerHTML += `<p>Transparent Mesh: ${transparentMesh}</p>`;
   }
 
   private initTerrain() {

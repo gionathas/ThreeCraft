@@ -1,9 +1,15 @@
 import * as THREE from "three";
-import { EDITING_DISTANCE, EDITING_ENABLED } from "../config/constants";
+import {
+  CHUNK_HEIGHT,
+  CHUNK_WIDTH,
+  EDITING_DISTANCE,
+  EDITING_ENABLED,
+} from "../config/constants";
 import InputController from "../io/InputController";
 import PlayerControls from "../player/PlayerControls";
 import VoxelMarker from "../player/VoxelMarker";
 import { Voxel } from "../terrain/Voxel";
+import ChunkUtils from "../utils/ChunkUtils";
 import { intersectVoxel } from "../utils/helpers";
 import Terrain from "./Terrain";
 
@@ -153,5 +159,16 @@ export default class Player {
 
   getVelocity() {
     return this.playerControls.getVelocity().clone();
+  }
+
+  get _currentChunkCoordinates() {
+    const currentPosition = this.playerControls.position;
+    const chunkId = ChunkUtils.computeChunkIdFromPosition(
+      currentPosition,
+      CHUNK_WIDTH,
+      CHUNK_HEIGHT
+    );
+
+    return chunkId;
   }
 }

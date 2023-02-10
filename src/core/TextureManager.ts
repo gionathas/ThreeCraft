@@ -1,6 +1,5 @@
 import * as THREE from "three";
 
-// const TEXTURE_RELATIVE_PATH = "src/assets/textures/flourish.png";
 const TEXTURE_RELATIVE_PATH = "src/assets/textures/block_atlas.png";
 export const TILE_SIZE = 16;
 export const TILE_TEXTURES_WIDTH = 128;
@@ -11,10 +10,25 @@ export default class TextureManager {
 
   texture: THREE.Texture;
 
+  private blockSolidMaterial: THREE.MeshStandardMaterial;
+  private blockTransparentMaterial: THREE.MeshStandardMaterial;
+
   private constructor() {
     this.texture = new THREE.TextureLoader().load(TEXTURE_RELATIVE_PATH);
     this.texture.minFilter = THREE.NearestFilter;
     this.texture.magFilter = THREE.NearestFilter;
+
+    this.blockSolidMaterial = new THREE.MeshStandardMaterial({
+      map: this.texture,
+      side: THREE.FrontSide,
+    });
+
+    this.blockTransparentMaterial = new THREE.MeshStandardMaterial({
+      map: this.texture,
+      side: THREE.DoubleSide,
+      alphaTest: 0.1,
+      transparent: true,
+    });
   }
 
   public static getInstance(): TextureManager {
@@ -22,5 +36,13 @@ export default class TextureManager {
       this.instance = new TextureManager();
     }
     return this.instance;
+  }
+
+  getSolidBlockMaterial() {
+    return this.blockSolidMaterial;
+  }
+
+  getBlockTransparentMaterial() {
+    return this.blockTransparentMaterial;
   }
 }
