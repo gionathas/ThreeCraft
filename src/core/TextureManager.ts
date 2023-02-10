@@ -28,6 +28,9 @@ export default class TextureManager {
       side: THREE.DoubleSide,
       alphaTest: 0.1,
       transparent: true,
+      polygonOffset: true,
+      polygonOffsetUnits: 1,
+      polygonOffsetFactor: 1,
     });
   }
 
