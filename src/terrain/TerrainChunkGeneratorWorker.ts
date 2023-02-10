@@ -29,7 +29,7 @@ function generateTerrainChunk(
 
   // apply the terrain
   chunkGenerator.fillTerrain(chunk, x, y, z);
-  const voxels = chunk.getBlocks();
+  const chunkBlocks = chunk.getBlocks();
 
   const { solid, transparent } = chunk.computeGeometryData({
     x: chunkX,
@@ -41,7 +41,7 @@ function generateTerrainChunk(
     chunkID,
     solidGeometry: solid,
     transparentGeometry: transparent,
-    voxelsBuffer: Transfer(voxels.buffer),
+    blocksBuffer: Transfer(chunkBlocks.buffer),
   };
 }
 

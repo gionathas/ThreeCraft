@@ -65,17 +65,17 @@ export default class TerrainChunksFactory {
 
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunks) => {
-      const { solidGeometry, transparentGeometry, voxelsBuffer } =
+      const { solidGeometry, transparentGeometry, blocksBuffer } =
         await generateChunks(chunkCoord, chunkWidth, chunkHeight);
 
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);
 
-      // @ts-ignore retrieve the chunk voxels
-      const voxels = new Uint8Array(...voxelsBuffer.transferables);
+      // @ts-ignore retrieve the chunk blocks
+      const chunkBlocks = new Uint8Array(...blocksBuffer.transferables);
 
       // create the new chunk
-      this.createChunk(chunkId, voxels);
+      this.createChunk(chunkId, chunkBlocks);
 
       let solidMesh = null;
       let transparentMesh = null;
@@ -142,7 +142,7 @@ export default class TerrainChunksFactory {
    * Trigger a chunk update on the chunk which contains the current position.
    *
    * This operation will update also the chunk neighbours,
-   * in case the voxel is in the edge of the chunk
+   * in case the block is in the edge of the chunk
    *
    * @returns a list of all the updated chunk mesh
    */
@@ -318,10 +318,10 @@ export default class TerrainChunksFactory {
   /**
    * Create a new chunk with the specifed chunkId and add it inside chunks map
    */
-  createChunk(chunkID: ChunkID, voxels?: Uint8Array): Chunk {
+  createChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
     const { chunkWidth, chunkHeight } = this;
 
-    const chunk = new Chunk(chunkID, chunkWidth, chunkHeight, voxels);
+    const chunk = new Chunk(chunkID, chunkWidth, chunkHeight, blocks);
     this.chunks.set(chunkID, chunk);
 
     return chunk;

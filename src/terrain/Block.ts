@@ -285,22 +285,22 @@ export class BlockUtils {
     blockOrigin: THREE.Vector3,
     position: THREE.Vector3
   ) {
-    const voxelCenter = new THREE.Vector3(
+    const blockCenter = new THREE.Vector3(
       blockOrigin.x + 0.5,
       blockOrigin.y + 0.5,
       blockOrigin.z + 0.5
     );
-    const xDiff = Math.abs(position.x - voxelCenter.x);
-    const yDiff = Math.abs(position.y - voxelCenter.y);
-    const zDiff = Math.abs(position.z - voxelCenter.z);
+    const xDiff = Math.abs(position.x - blockCenter.x);
+    const yDiff = Math.abs(position.y - blockCenter.y);
+    const zDiff = Math.abs(position.z - blockCenter.z);
     const normal = new THREE.Vector3();
 
     if (xDiff > yDiff && xDiff > zDiff) {
-      normal.set(position.x > voxelCenter.x ? 1 : -1, 0, 0);
+      normal.set(position.x > blockCenter.x ? 1 : -1, 0, 0);
     } else if (yDiff > zDiff) {
-      normal.set(0, position.y > voxelCenter.y ? 1 : -1, 0);
+      normal.set(0, position.y > blockCenter.y ? 1 : -1, 0);
     } else {
-      normal.set(0, 0, position.z > voxelCenter.z ? 1 : -1);
+      normal.set(0, 0, position.z > blockCenter.z ? 1 : -1);
     }
     return normal;
   }
@@ -373,7 +373,7 @@ export class BlockUtils {
             steppedIndex === 1 ? -stepY : 0,
             steppedIndex === 2 ? -stepZ : 0,
           ],
-          voxel: block,
+          block,
         };
       }
 

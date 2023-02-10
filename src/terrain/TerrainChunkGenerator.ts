@@ -25,33 +25,33 @@ export default class TerrainChunkGenerator {
     const endX = startX + chunkWidth;
     const endZ = startZ + chunkWidth;
 
-    // filling the chunk with voxels from bottom to top
+    // filling the chunk with blocks from bottom to top
     for (let y = startY; y < chunkHeight; y++) {
       for (let z = startZ; z < endZ; z++) {
         for (let x = startX; x < endX; x++) {
-          this.generateVoxel(chunk, { x, y, z });
+          this.generateBlock(chunk, { x, y, z });
         }
       }
     }
   }
 
-  private generateVoxel(chunk: Chunk, { x, y, z }: Coordinate) {
+  private generateBlock(chunk: Chunk, { x, y, z }: Coordinate) {
     const surfaceHeight =
       BASE_HEIGHT + this.noise(x / NOISE_SCALE, z / NOISE_SCALE) * HILL_OFFSET;
 
-    let voxelType: BlockType;
+    let blockType: BlockType;
     if (y < surfaceHeight) {
-      voxelType = this.generateVoxelBelowSurface(y, surfaceHeight);
+      blockType = this.generateBlockBelowSurface(y, surfaceHeight);
     } else {
-      voxelType = this.generateVoxelAboveSurface(y, surfaceHeight);
+      blockType = this.generateBlockAboveSurface(y, surfaceHeight);
     }
 
-    if (voxelType) {
-      chunk.setBlock({ x, y, z }, voxelType);
+    if (blockType) {
+      chunk.setBlock({ x, y, z }, blockType);
     }
   }
 
-  private generateVoxelBelowSurface(y: number, surfaceHeight: number) {
+  private generateBlockBelowSurface(y: number, surfaceHeight: number) {
     if (y > surfaceHeight - 1) {
       if (y < SEA_LEVEL + 2) {
         return BlockType.SAND;
@@ -65,7 +65,7 @@ export default class TerrainChunkGenerator {
     return BlockType.COBBLESTONE;
   }
 
-  private generateVoxelAboveSurface(y: number, surfaceHeight: number) {
+  private generateBlockAboveSurface(y: number, surfaceHeight: number) {
     if (y < SEA_LEVEL) {
       return BlockType.WATER;
     }

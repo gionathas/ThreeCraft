@@ -33,7 +33,7 @@ export default class Chunk {
   }
 
   //TODO optimization: to decrease the number of meshes, we could pass an object
-  // which stores which borders this voxel must have visible
+  // which stores which borders this chunk must have visible
   computeGeometryData({ x: startX, y: startY, z: startZ }: Coordinate) {
     const { chunkWidth, chunkHeight } = this;
 
@@ -47,7 +47,6 @@ export default class Chunk {
     const transparentIndices: number[] = [];
     const transparentUVs: number[] = [];
 
-    // voxels generation
     for (let y = 0; y < chunkHeight; ++y) {
       const blockY = startY + y;
       for (let z = 0; z < chunkWidth; ++z) {
@@ -158,20 +157,15 @@ export default class Chunk {
     };
   }
 
-  setBlock(coord: Coordinate, voxel: BlockType) {
-    // the voxel does not belong to this chunk, skip
+  setBlock(coord: Coordinate, block: BlockType) {
     if (!this.isBlockInChunk(coord)) {
       return;
     }
 
     const blockIndex = this.computeBlockIndex(coord);
-    this.blocks[blockIndex] = voxel;
+    this.blocks[blockIndex] = block;
   }
 
-  /**
-   *
-   * @returns true if the voxel belongs to this chunk
-   */
   isBlockInChunk(blockCoord: Coordinate) {
     const { chunkWidth, chunkHeight } = this;
     const actualChunkId = ChunkUtils.computeChunkIdFromPosition(

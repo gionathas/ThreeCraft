@@ -70,16 +70,16 @@ export default class Player {
 
     if (!EDITING_ENABLED) return;
 
-    const targetVoxel = this.getTargetBlock();
+    const targetBlock = this.getTargetBlock();
 
-    if (targetVoxel) {
+    if (targetBlock) {
       // the intersection point is on the face. That means
       // the math imprecision could put us on either side of the face.
       // so go half a normal into the voxel if removing (currentVoxel = 0)
       // our out of the voxel if adding (currentVoxel  > 0)
-      const [x, y, z] = targetVoxel.position.map((v, ndx) => {
+      const [x, y, z] = targetBlock.position.map((v, ndx) => {
         return (
-          v + targetVoxel.normal[ndx] * (block != BlockType.AIR ? 0.5 : -0.5)
+          v + targetBlock.normal[ndx] * (block != BlockType.AIR ? 0.5 : -0.5)
         );
       });
 
