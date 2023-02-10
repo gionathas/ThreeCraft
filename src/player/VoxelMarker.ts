@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { BLOCK_SIZE, detectBlockFace } from "../terrain/Block";
+import { BLOCK_SIZE, getBlockFaceFromNormal } from "../terrain/Block";
 
 export default class BlockMarker extends THREE.LineSegments {
   private edgesMaterial!: THREE.LineBasicMaterial;
@@ -36,7 +36,7 @@ export default class BlockMarker extends THREE.LineSegments {
     const planeY = toBlockCenterCoord(y);
     const planeZ = toBlockCenterCoord(z);
 
-    const face = detectBlockFace(blockNormal);
+    const face = getBlockFaceFromNormal(blockNormal);
 
     switch (face) {
       case "top": {

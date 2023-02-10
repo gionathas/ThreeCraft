@@ -19,6 +19,147 @@ export enum BlockType {
 }
 
 export type BlockFace = "left" | "right" | "top" | "bottom" | "front" | "back";
+type BlockTextureFace = "top" | "bottom" | "side";
+
+type BlockFaceGeometry = {
+  normal: [number, number, number];
+  corners: {
+    pos: [number, number, number];
+    uv: [number, number];
+  }[];
+};
+
+type BlockInfo = {
+  isTransparent: boolean;
+  texture: {
+    [key in BlockTextureFace]: {
+      row: number;
+      col: number;
+    };
+  };
+};
+
+export const Block: Record<BlockType, BlockInfo> = {
+  [BlockType.AIR]: {
+    isTransparent: true,
+    texture: {
+      top: {
+        row: -1,
+        col: -1,
+      },
+      bottom: {
+        row: -1,
+        col: -1,
+      },
+      side: {
+        row: -1,
+        col: -1,
+      },
+    },
+  },
+  [BlockType.COBBLESTONE]: {
+    isTransparent: false,
+    texture: {
+      top: {
+        row: 0,
+        col: 4,
+      },
+      bottom: {
+        row: 0,
+        col: 4,
+      },
+      side: {
+        row: 0,
+        col: 4,
+      },
+    },
+  },
+  [BlockType.GRASS]: {
+    isTransparent: false,
+    texture: {
+      top: {
+        row: 0,
+        col: 1,
+      },
+      bottom: {
+        row: 0,
+        col: 2,
+      },
+      side: {
+        row: 0,
+        col: 0,
+      },
+    },
+  },
+  [BlockType.DIRT]: {
+    isTransparent: false,
+    texture: {
+      top: {
+        row: 0,
+        col: 2,
+      },
+      bottom: {
+        row: 0,
+        col: 2,
+      },
+      side: {
+        row: 0,
+        col: 2,
+      },
+    },
+  },
+  [BlockType.SAND]: {
+    isTransparent: false,
+    texture: {
+      top: {
+        row: 1,
+        col: 6,
+      },
+      bottom: {
+        row: 1,
+        col: 6,
+      },
+      side: {
+        row: 1,
+        col: 6,
+      },
+    },
+  },
+  [BlockType.WATER]: {
+    isTransparent: true,
+    texture: {
+      side: {
+        row: 1,
+        col: 7,
+      },
+      top: {
+        row: 1,
+        col: 7,
+      },
+      bottom: {
+        row: 1,
+        col: 7,
+      },
+    },
+  },
+  [BlockType.GLASS]: {
+    isTransparent: true,
+    texture: {
+      side: {
+        row: 2,
+        col: 0,
+      },
+      top: {
+        row: 2,
+        col: 0,
+      },
+      bottom: {
+        row: 2,
+        col: 0,
+      },
+    },
+  },
+};
 
 export const BlockFaceNormal: Record<BlockFace, [number, number, number]> = {
   left: [-1, 0, 0],
@@ -27,14 +168,6 @@ export const BlockFaceNormal: Record<BlockFace, [number, number, number]> = {
   bottom: [0, -1, 0],
   front: [0, 0, 1],
   back: [0, 0, -1],
-};
-
-type BlockFaceGeometry = {
-  normal: [number, number, number];
-  corners: {
-    pos: [number, number, number];
-    uv: [number, number];
-  }[];
 };
 
 export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
@@ -94,7 +227,13 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   },
 };
 
-export function detectBlockFace(normal: THREE.Vector3): BlockFace | null {
+export function isTransparent(type: BlockType) {
+  return Block[type].isTransparent;
+}
+
+export function getBlockFaceFromNormal(
+  normal: THREE.Vector3
+): BlockFace | null {
   for (const [face, faceNormal] of Object.entries(BlockFaceNormal)) {
     if (new THREE.Vector3().fromArray(faceNormal).equals(normal)) {
       return face as BlockFace;
@@ -103,41 +242,14 @@ export function detectBlockFace(normal: THREE.Vector3): BlockFace | null {
   return null;
 }
 
-export function getBlockTextureCoordinates(
-  block: BlockType,
-  face: BlockFace,
-  [u, v]: [number, number]
-) {
-  const textureFace = getTextureFace(face);
-  const { row, col } = BlockTextures[block][textureFace];
-
-  return {
-    x: ((col + u) * TILE_SIZE) / TILE_TEXTURES_WIDTH,
-    y: 1 - ((row + 1 - v) * TILE_SIZE) / TILE_TEXTURE_HEIGHT,
-  };
-}
-
-const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
-  top: "top",
-  bottom: "bottom",
-  left: "side",
-  right: "side",
-  front: "side",
-  back: "side",
-};
-
-function getTextureFace(face: BlockFace): BlockTextureFace {
-  return blockFaceToTextureFace[face];
-}
-
-export function getVoxelNormal(
-  voxelOrigin: THREE.Vector3,
+export function getBlockNormalFromPosition(
+  blockOrigin: THREE.Vector3,
   position: THREE.Vector3
 ) {
   const voxelCenter = new THREE.Vector3(
-    voxelOrigin.x + 0.5,
-    voxelOrigin.y + 0.5,
-    voxelOrigin.z + 0.5
+    blockOrigin.x + 0.5,
+    blockOrigin.y + 0.5,
+    blockOrigin.z + 0.5
   );
   const xDiff = Math.abs(position.x - voxelCenter.x);
   const yDiff = Math.abs(position.y - voxelCenter.y);
@@ -154,109 +266,29 @@ export function getVoxelNormal(
   return normal;
 }
 
-type BlockTextureFace = "top" | "bottom" | "side";
-type BlockTextureCoordinate = {
-  [key in BlockTextureFace]: { row: number; col: number };
+const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
+  top: "top",
+  bottom: "bottom",
+  left: "side",
+  right: "side",
+  front: "side",
+  back: "side",
 };
-const BlockTextures: Record<number, BlockTextureCoordinate> = {
-  [BlockType.COBBLESTONE]: {
-    top: {
-      row: 0,
-      col: 4,
-    },
-    bottom: {
-      row: 0,
-      col: 4,
-    },
-    side: {
-      row: 0,
-      col: 4,
-    },
-  },
-  [BlockType.GRASS]: {
-    top: {
-      row: 0,
-      col: 1,
-    },
-    bottom: {
-      row: 0,
-      col: 2,
-    },
-    side: {
-      row: 0,
-      col: 0,
-    },
-  },
-  [BlockType.DIRT]: {
-    top: {
-      row: 0,
-      col: 2,
-    },
-    bottom: {
-      row: 0,
-      col: 2,
-    },
-    side: {
-      row: 0,
-      col: 2,
-    },
-  },
-  [BlockType.SAND]: {
-    top: {
-      row: 1,
-      col: 6,
-    },
-    bottom: {
-      row: 1,
-      col: 6,
-    },
-    side: {
-      row: 1,
-      col: 6,
-    },
-  },
-  [BlockType.WATER]: {
-    side: {
-      row: 1,
-      col: 7,
-    },
-    top: {
-      row: 1,
-      col: 7,
-    },
-    bottom: {
-      row: 1,
-      col: 7,
-    },
-  },
-  [BlockType.GLASS]: {
-    side: {
-      row: 2,
-      col: 0,
-    },
-    top: {
-      row: 2,
-      col: 0,
-    },
-    bottom: {
-      row: 2,
-      col: 0,
-    },
-  },
-};
+
+export function getBlockTextureCoordinates(
+  block: BlockType,
+  face: BlockFace,
+  [u, v]: [number, number]
+) {
+  const textureFace = blockFaceToTextureFace[face];
+  const { row, col } = Block[block].texture[textureFace];
+
+  return {
+    x: ((col + u) * TILE_SIZE) / TILE_TEXTURES_WIDTH,
+    y: 1 - ((row + 1 - v) * TILE_SIZE) / TILE_TEXTURE_HEIGHT,
+  };
+}
 
 export interface ChunkModel {
   getBlock: (blockCoord: Coordinate) => BlockType | null;
-}
-
-export class Block {
-  private type: BlockType;
-
-  constructor(type: BlockType) {
-    this.type = type;
-  }
-
-  getType() {
-    return this.type;
-  }
 }
