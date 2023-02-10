@@ -47,7 +47,7 @@ export default class TerrainChunkGenerator {
     }
 
     if (voxelType) {
-      chunk.setVoxel({ x, y, z }, voxelType);
+      chunk.setBlock({ x, y, z }, voxelType);
     }
   }
 

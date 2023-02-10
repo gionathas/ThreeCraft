@@ -164,7 +164,7 @@ export default class Terrain implements ChunkModel {
       return null;
     }
 
-    return chunk.getVoxel(blockCoord);
+    return chunk.getBlock(blockCoord);
   }
 
   /**
@@ -182,7 +182,7 @@ export default class Terrain implements ChunkModel {
       chunk = this.chunkFactory.createChunk(chunkId);
     }
 
-    chunk.setVoxel(blockCoord, voxel);
+    chunk.setBlock(blockCoord, voxel);
     const { updatedChunkMesh, removedChunksIds } =
       this.chunkFactory.updateChunk(chunkId);
 
