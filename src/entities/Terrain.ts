@@ -66,6 +66,10 @@ export default class Terrain implements ChunkModel {
     }
   }
 
+  //TODO optimization: instead of doing a 3 nested loop every frame,
+  // to detect the new chunk to load (except for the initial terrain generation),
+  // we can implement a diff between the previous terrain boundaries and the current boundaries
+  // to find the chunk that needs to be loaded
   private loadTerrain(boundaries: TerrainBoundaries) {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
     for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
@@ -185,8 +189,6 @@ export default class Terrain implements ChunkModel {
 
     // for each removed chunk, we need to remove both the solid and transparent mesh
     for (const removedMesh of removedMeshList) {
-      // const removedMesh = this.scene.getObjectByName(removedMesh?.name);
-
       if (removedMesh) {
         this.scene.remove(removedMesh);
       }

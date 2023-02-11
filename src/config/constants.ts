@@ -15,8 +15,8 @@ export const EDITING_DISTANCE = 7;
 /**
  * Terrain Chunks
  */
-export const CHUNK_WIDTH = 5;
-export const CHUNK_HEIGHT = 1;
+export const CHUNK_WIDTH = 10;
+export const CHUNK_HEIGHT = 10;
 
 /**
  * Terrain Generation
@@ -26,8 +26,8 @@ export const CHUNK_HEIGHT = 1;
  * TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 5
  * BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 1
  */
-export const TERRAIN_GENERATION_ENABLED = false;
-export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 1;
+export const TERRAIN_GENERATION_ENABLED = true;
+export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 5;
 export const TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 1;
 export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 1;
 
