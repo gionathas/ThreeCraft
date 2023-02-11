@@ -2,7 +2,11 @@ import { Pool, spawn } from "threads";
 import * as THREE from "three";
 import TextureManager from "../core/TextureManager";
 import ChunkUtils from "../utils/ChunkUtils";
-import { BufferGeometryData, Coordinate } from "../utils/helpers";
+import {
+  BufferGeometryData,
+  Coordinate,
+  isEmptyGeometry,
+} from "../utils/helpers";
 import Chunk, { ChunkID } from "./Chunk";
 import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";
 import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
@@ -72,20 +76,24 @@ export default class TerrainChunksFactory {
       this.processingChunks.delete(chunkId);
 
       // @ts-ignore retrieve the chunk blocks
-      const chunkBlocks = new Uint8Array(...blocksBuffer.transferables);
+      const blocks = new Uint8Array(...blocksBuffer.transferables);
 
-      // create the new chunk
-      this.createChunk(chunkId, chunkBlocks);
-
+      const hasSolidMesh = !isEmptyGeometry(solidGeometry);
+      const hasTransparentMesh = !isEmptyGeometry(transparentGeometry);
+      const isEmptyChunk = !hasSolidMesh && !hasTransparentMesh;
       let solidMesh = null;
       let transparentMesh = null;
 
-      // avoid generating generating the mesh if its completely empty
-      if (solidGeometry.positions.length > 0) {
+      // create the new chunk, if its not completely empty
+      if (!isEmptyChunk) {
+        this.createChunk(chunkId, blocks);
+      }
+
+      if (hasSolidMesh) {
         solidMesh = this.generateSolidMesh(chunkId, solidGeometry);
       }
 
-      if (transparentGeometry.positions.length > 0) {
+      if (hasTransparentMesh) {
         transparentMesh = this.generateTransparentMesh(
           chunkId,
           transparentGeometry
@@ -99,13 +107,20 @@ export default class TerrainChunksFactory {
   removeChunk(chunkId: ChunkID) {
     // find the chunk and the relative mesh
     const chunk = this.chunks.get(chunkId);
-    const solidMesh = this.solidMesh.get(chunkId);
-    const transparentMesh = this.transparentMesh.get(chunkId);
 
     // remove the chunk from the map
     if (chunk) {
       this.chunks.delete(chunkId);
     }
+
+    const solidMesh = this.removeChunkSolidMesh(chunkId);
+    const transparentMesh = this.removeChunkTransparentMesh(chunkId);
+
+    return { chunk, solidMesh, transparentMesh };
+  }
+
+  private removeChunkSolidMesh(chunkId: ChunkID) {
+    const solidMesh = this.solidMesh.get(chunkId);
 
     // remove chunk solid mesh
     if (solidMesh) {
@@ -121,6 +136,12 @@ export default class TerrainChunksFactory {
       }
     }
 
+    return solidMesh;
+  }
+
+  private removeChunkTransparentMesh(chunkId: ChunkID) {
+    const transparentMesh = this.transparentMesh.get(chunkId);
+
     // remove chunk transparent mesh
     if (transparentMesh) {
       // remove from the chunks mesh map
@@ -135,7 +156,7 @@ export default class TerrainChunksFactory {
       }
     }
 
-    return { chunk, solidMesh, transparentMesh };
+    return transparentMesh;
   }
 
   /**
@@ -163,8 +184,8 @@ export default class TerrainChunksFactory {
       [0, 0, 1], // front
     ];
 
-    const updatedChunkMesh = [];
-    const removedChunksIds = [];
+    const updatedMesh = [];
+    const removedMesh = [];
 
     // to avoid updating same chunks
     const visitedChunks: Record<ChunkID, boolean | undefined> = {};
@@ -191,48 +212,59 @@ export default class TerrainChunksFactory {
           );
 
           // compute the new chunk geometry data
-          const { solid: solidGeometry, transparent: transparentGeometry } =
-            chunkToUpdate.computeGeometryData(chunkOriginOffset);
+          const {
+            solid: chunkSolidGeometry,
+            transparent: chunkTransparentGeometry,
+          } = chunkToUpdate.computeGeometryData(chunkOriginOffset);
 
-          const canRemoveChunk =
-            solidGeometry.positions.length === 0 &&
-            transparentGeometry.positions.length === 0;
+          const hasSolidMesh = !isEmptyGeometry(chunkSolidGeometry);
+          const hasTransparentMesh = !isEmptyGeometry(chunkTransparentGeometry);
+          const canRemoveChunk = !hasSolidMesh && !hasTransparentMesh;
 
+          // remove the entire chunk if we dont have any more solid or transparent geometries
           if (canRemoveChunk) {
-            // remove the chunk
-            this.removeChunk(chunkId);
-
-            // mark this chunk as removed since it has no vertices
-            removedChunksIds.push(chunkId);
+            // remove both the solid and transparent mesh
+            const { solidMesh, transparentMesh } = this.removeChunk(chunkId);
+            removedMesh.push(solidMesh, transparentMesh);
           } else {
-            // avoid re generate the chunk mesh if its empty
-            if (solidGeometry.positions.length > 0) {
-              // update the solid mesh
+            // update the chunk solid mesh
+            if (hasSolidMesh) {
               const updatedSolidMesh = this.generateSolidMesh(
                 chunkId,
-                solidGeometry
+                chunkSolidGeometry
               );
 
               // add to the list of updated chunks mesh
-              updatedChunkMesh.push(updatedSolidMesh);
+              updatedMesh.push(updatedSolidMesh);
+            } else {
+              // remove the chunk solid mesh since is empty
+              const removedSolidMesh = this.removeChunkSolidMesh(chunkId);
+              if (removedSolidMesh) {
+                removedMesh.push(removedSolidMesh);
+              }
             }
 
-            if (transparentGeometry.positions.length > 0) {
-              // update the transparent mesh
+            // update the chunk transparent mesh
+            if (hasTransparentMesh) {
               const updatedTransparentMesh = this.generateTransparentMesh(
                 chunkId,
-                transparentGeometry
+                chunkTransparentGeometry
               );
 
               // add to the list of updated chunks mesh
-              updatedChunkMesh.push(updatedTransparentMesh);
+              updatedMesh.push(updatedTransparentMesh);
+            } else {
+              // remove the chunk transparent mesh since is empty
+              const removedTransparentMesh =
+                this.removeChunkTransparentMesh(chunkId);
+              removedMesh.push(removedTransparentMesh);
             }
           }
         }
       }
     }
 
-    return { updatedChunkMesh, removedChunksIds };
+    return { updatedMesh, removedMesh };
   }
 
   /**
@@ -270,7 +302,7 @@ export default class TerrainChunksFactory {
     chunkGeometry.computeBoundingSphere();
 
     // update the chunk mesh name and add it to chunks mesh map
-    chunkMesh.name = TerrainChunksFactory.getChunkSolidMeshId(chunkId);
+    chunkMesh.name = this.getChunkSolidMeshId(chunkId);
     this.solidMesh.set(chunkId, chunkMesh);
 
     return chunkMesh;
@@ -308,8 +340,7 @@ export default class TerrainChunksFactory {
     chunkGeometry.computeBoundingSphere();
 
     // update the chunk mesh name and add it to chunks mesh map
-    transparentMesh.name =
-      TerrainChunksFactory.getChunkTransparentMeshId(chunkId);
+    transparentMesh.name = this.getChunkTransparentMeshId(chunkId);
     this.transparentMesh.set(chunkId, transparentMesh);
 
     return transparentMesh;
@@ -395,11 +426,11 @@ export default class TerrainChunksFactory {
     );
   }
 
-  static getChunkSolidMeshId(chunkId: ChunkID) {
+  private getChunkSolidMeshId(chunkId: ChunkID) {
     return chunkId.concat("-solid");
   }
 
-  static getChunkTransparentMeshId(chunkId: ChunkID) {
+  private getChunkTransparentMeshId(chunkId: ChunkID) {
     return chunkId.concat("-transparent");
   }
 

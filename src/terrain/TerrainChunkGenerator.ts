@@ -1,7 +1,6 @@
 import alea from "alea";
 import { createNoise2D, NoiseFunction2D } from "simplex-noise";
 import {
-  BASE_HEIGHT,
   HILL_OFFSET,
   NOISE_SCALE,
   SEA_LEVEL,
@@ -58,7 +57,8 @@ export default class TerrainChunkGenerator {
     }
 
     const value =
-      BASE_HEIGHT + this.noise(x / NOISE_SCALE, z / NOISE_SCALE) * HILL_OFFSET;
+      TERRAIN_LEVEL +
+      this.noise(x / NOISE_SCALE, z / NOISE_SCALE) * HILL_OFFSET;
     this.heightMap[key] = value;
     return value;
   }

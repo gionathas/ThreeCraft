@@ -49,7 +49,6 @@ export default class AnimatedApp {
     this.config = config;
     this.setupRenderer();
     this.setupStats();
-    // this.setupTextures();
     this.setupCamera();
     this.setupControls();
     this.setupScene();

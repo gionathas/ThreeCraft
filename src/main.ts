@@ -22,7 +22,7 @@ const app = new AnimatedApp({
   //   target: new THREE.Vector3(chunkWidth / 2, chunkHeight / 2, chunkWidth / 2),
   // },
   guiConfig: {
-    grid: true,
+    grid: false,
     axes: false,
   },
 });

@@ -173,30 +173,22 @@ export default class Terrain implements ChunkModel {
     }
 
     chunk.setBlock(blockCoord, block);
-    const { updatedChunkMesh, removedChunksIds } =
+    const { updatedMesh: updatedMeshList, removedMesh: removedMeshList } =
       this.chunkFactory.updateChunk(chunkId);
 
-    for (const updatedChunk of updatedChunkMesh) {
-      // if the chunk was not already in the scene, add it
-      if (!this.scene.getObjectByName(updatedChunk.name)) {
-        this.scene.add(updatedChunk);
+    for (const updatedMesh of updatedMeshList) {
+      // if the chunk mesh was not already in the scene, add it
+      if (!this.scene.getObjectByName(updatedMesh.name)) {
+        this.scene.add(updatedMesh);
       }
     }
 
-    for (const removedChunkId of removedChunksIds) {
-      const removedSolidMesh = this.scene.getObjectByName(
-        TerrainChunksFactory.getChunkSolidMeshId(removedChunkId)
-      );
-      const removedTransparentMesh = this.scene.getObjectByName(
-        TerrainChunksFactory.getChunkTransparentMeshId(removedChunkId)
-      );
+    // for each removed chunk, we need to remove both the solid and transparent mesh
+    for (const removedMesh of removedMeshList) {
+      // const removedMesh = this.scene.getObjectByName(removedMesh?.name);
 
-      if (removedSolidMesh) {
-        this.scene.remove(removedSolidMesh);
-      }
-
-      if (removedTransparentMesh) {
-        this.scene.remove(removedTransparentMesh);
+      if (removedMesh) {
+        this.scene.remove(removedMesh);
       }
     }
   }

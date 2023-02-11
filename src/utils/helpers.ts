@@ -19,6 +19,10 @@ export type BufferGeometryData = {
   uvs: number[];
 };
 
+export function isEmptyGeometry(geometry: BufferGeometryData) {
+  return geometry.positions.length === 0;
+}
+
 export function determineAngleQuadrant(angle: number): 1 | 2 | 3 | 4 {
   if (angle > 0 && angle <= Math.PI / 2) {
     return 1;
@@ -30,5 +34,6 @@ export function determineAngleQuadrant(angle: number): 1 | 2 | 3 | 4 {
     return 4;
   }
 
+  console.error("invalid angle", angle);
   throw new Error("Invalid angle");
 }
