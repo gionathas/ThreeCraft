@@ -1,3 +1,10 @@
+import {
+  CONTINENTALNESS_MAX_HEIGHT,
+  CONTINENTALNESS_MIN_HEIGHT,
+  MAX_EROSION,
+  MIN_EROSION,
+} from "../config/constants";
+import { lerp } from "../utils/helpers";
 import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
 import { NoiseMap } from "./NoiseMap";
@@ -22,47 +29,71 @@ export default class TerrainMap extends NoiseMap {
       return cachedValue;
     }
 
-    const continentalness = this.continentalMap.getContinentalness(x, z);
     // const continentalness = 0;
+    const continentalness = this.continentalMap.getContinentalness(x, z);
     const baseHeight = this.getBaseHeight(continentalness);
 
-    const pv = this.pvMap.getPV(x, z);
-    const pvHeight = this.getPvHeight(pv);
-
-    // const erosion = 1;
+    // const erosion = -0.5;
     const erosion = this.erosionMap.getErosion(x, z);
-    let erosionHeight = this.getErosionHeight(erosion, pvHeight);
-    // let erosionHeight = 0;
+    const erosionFactor = this.getErosionFactor(erosion);
 
-    // const height = baseHeight + this.noise(x / scale, z / scale) * amp;
-    // const height = baseHeight + erosionHeight + pvHeight;
+    const pv = this.pvMap.getPV(x, z, erosion);
+    const pvHeight = this.getPvHeight(pv, erosionFactor);
 
-    const height = baseHeight + pvHeight + erosionHeight;
+    const height = baseHeight + pvHeight;
 
     this.setCacheValue(x, z, height);
     return height;
   }
 
   private getBaseHeight(continentalness: number) {
-    return this.lerp(-30, 30, (continentalness + 1) / 2);
+    return lerp(
+      CONTINENTALNESS_MIN_HEIGHT,
+      CONTINENTALNESS_MAX_HEIGHT,
+      (continentalness + 1) / 2
+    );
   }
 
-  private getErosionHeight(erosion: number, pvHeight: number) {
+  // high erosion -> flat terrain
+  // low erosion -> steep terrain
+  private getErosionFactor(erosion: number) {
+    const min = MIN_EROSION;
+    const max = MAX_EROSION;
+
+    const step1 = min + 9;
+    const step2 = step1 + 15;
+
+    // high erosion
     if (erosion >= 0) {
       const t = (erosion - 1) / -1;
-      return this.lerp(-pvHeight, 0, t);
-    } else {
-      return 0;
+      return lerp(min, step1, t);
+    }
+    // mid low erosion
+    else if (erosion >= -0.5 && erosion < 0) {
+      const t = erosion / -0.5;
+      return lerp(step1, step2, t);
+    }
+    // very low erosion
+    else {
+      const t = (erosion + 0.5) / -0.5;
+      return lerp(step2, max, t);
     }
   }
 
-  private getPvHeight(pv: number) {
-    if (pv <= -0.5) {
-      return this.lerp(0, 5, (pv + 1) / 0.5);
-    } else if (pv > -0.7 && pv < 0) {
-      return 5;
-    } else {
-      return this.lerp(5, 50, pv);
+  private getPvHeight(pv: number, erosionHeight: number) {
+    // valley
+    if (pv <= -0.1) {
+      const t = (pv + 1) / 0.9;
+      return lerp(-erosionHeight, -erosionHeight / 4, t);
+    }
+    // small flat area between a valley and an hill
+    else if (pv > -0.1 && pv < 0.1) {
+      return -erosionHeight / 4;
+    }
+    // hill
+    else {
+      const t = (pv - 0.1) / 0.9;
+      return lerp(-erosionHeight / 4, erosionHeight, t);
     }
   }
 
@@ -76,9 +107,5 @@ export default class TerrainMap extends NoiseMap {
 
   getPV(x: number, z: number) {
     return this.pvMap.getPV(x, z);
-  }
-
-  private lerp(start: number, end: number, amount: number) {
-    return start + (end - start) * amount;
   }
 }

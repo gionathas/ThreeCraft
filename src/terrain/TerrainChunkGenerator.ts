@@ -87,7 +87,11 @@ export default class TerrainChunkGenerator {
     }
 
     if (Math.abs(y - surfaceHeight) < 1) {
-      return BlockType.GRASS;
+      if (y < SEA_LEVEL + 2) {
+        return BlockType.SAND;
+      } else {
+        return BlockType.GRASS;
+      }
     }
 
     return BlockType.COBBLESTONE;

@@ -1,3 +1,4 @@
+import { CONTINENTALNESS_NOISE_SCALE } from "../config/constants";
 import { NoiseMap } from "./NoiseMap";
 
 /**
@@ -15,25 +16,10 @@ export default class ContinentalMap extends NoiseMap {
       return cachedValue;
     }
 
-    const continentalness = this.noise(x / 5000, z / 5000);
-
-    // const octaves = 1;
-    // const persistence = 0.5;
-    // const scale = 1024;
-
-    // let continentalness = 0;
-    // let maxAmplitude = 0;
-
-    // for (let i = 0; i < octaves; i++) {
-    //   const frequency = Math.pow(2, i);
-    //   const amplitude = Math.pow(persistence, i);
-    //   maxAmplitude += amplitude;
-    //   continentalness +=
-    //     this.noise((x / scale) * frequency, (z / scale) * frequency) *
-    //     amplitude;
-    // }
-
-    // continentalness /= maxAmplitude;
+    const continentalness = this.noise(
+      x / CONTINENTALNESS_NOISE_SCALE,
+      z / CONTINENTALNESS_NOISE_SCALE
+    );
 
     this.setCacheValue(x, z, continentalness);
     return continentalness;

@@ -19,6 +19,10 @@ export type BufferGeometryData = {
   uvs: number[];
 };
 
+export function lerp(start: number, end: number, amount: number) {
+  return start + (end - start) * amount;
+}
+
 export function isEmptyGeometry(geometry: BufferGeometryData) {
   return geometry.positions.length === 0;
 }
@@ -36,4 +40,22 @@ export function determineAngleQuadrant(angle: number): 1 | 2 | 3 | 4 {
 
   console.error("invalid angle", angle);
   throw new Error("Invalid angle");
+}
+
+export function getOrientationFromAngle(angle: number): "n" | "e" | "s" | "w" {
+  const pi = Math.PI;
+  const northRange = [-pi / 4, pi / 4];
+  const eastRange = [(-3 * pi) / 4, -pi / 4];
+  const westRange = [pi / 4, (3 * pi) / 4];
+  const southRange = [(-3 * pi) / 4, pi / 4];
+
+  if (angle >= northRange[0] && angle <= northRange[1]) {
+    return "n";
+  } else if (angle > eastRange[0] && angle <= eastRange[1]) {
+    return "e";
+  } else if (angle >= westRange[0] && angle <= westRange[1]) {
+    return "w";
+  } else {
+    return "s";
+  }
 }

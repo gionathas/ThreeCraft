@@ -52,6 +52,7 @@ export default class GameManager {
 
     const [px, py, pz] = this.player.getPosition().toArray();
     const [vx, vy, vz] = this.player.getVelocity().toArray();
+    const orientation = this.player.getOrientation();
     const currentChunkId = this.player._currentChunkCoordinates;
     const totalChunks = this.terrain.totalChunks;
     const totalSolidMesh = this.terrain._totalSolidMesh;
@@ -60,7 +61,8 @@ export default class GameManager {
     const erosion = this.terrain._getErosion(px, pz);
     const pv = this.terrain._getPV(px, pz);
 
-    infoUI!.innerHTML = `<p>x: ${px.toFixed(2)} y: ${py.toFixed(
+    infoUI!.innerHTML = `<p>Orientation: ${orientation}</p>`;
+    infoUI!.innerHTML += `<p>x: ${px.toFixed(2)} y: ${py.toFixed(
       2
     )} z: ${pz.toFixed(2)}</p>`;
     infoUI!.innerHTML += `<p>vx: ${vx.toFixed(2)} vy: ${vy.toFixed(
@@ -71,11 +73,11 @@ export default class GameManager {
     infoUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
     infoUI!.innerHTML += `<p>Solid Mesh: ${totalSolidMesh}</p>`;
     infoUI!.innerHTML += `<p>Transparent Mesh: ${transparentMesh}</p>`;
+    infoUI!.innerHTML += `<p>Erosion: ${erosion.toFixed(3)}</p>`;
+    infoUI!.innerHTML += `<p>PV: ${pv.toFixed(3)}</p>`;
     infoUI!.innerHTML += `<p>Continentalness: ${continentalness.toFixed(
       3
     )}</p>`;
-    infoUI!.innerHTML += `<p>Erosion: ${erosion.toFixed(3)}</p>`;
-    infoUI!.innerHTML += `<p>PV: ${pv.toFixed(3)}</p>`;
   }
 
   private initTerrain() {

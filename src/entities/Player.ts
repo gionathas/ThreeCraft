@@ -3,6 +3,7 @@ import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
 import EditingControls from "../player/EditingControls";
 import PlayerControls from "../player/PlayerControls";
 import ChunkUtils from "../utils/ChunkUtils";
+import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
 export type PlayerMode = "sim" | "dev";
@@ -68,6 +69,14 @@ export default class Player {
 
   getCamera() {
     return this.playerControls.getCamera();
+  }
+
+  getOrientation() {
+    const lookDirection = this.playerControls
+      .getCamera()
+      .getWorldDirection(new THREE.Vector3());
+    const angle = Math.atan2(lookDirection.x, lookDirection.z);
+    return getOrientationFromAngle(angle);
   }
 
   get _currentChunkCoordinates() {
