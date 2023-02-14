@@ -1,7 +1,10 @@
+import { PlayerMode } from "../entities/Player";
+
 /**
  * Game Settings
  */
 export const TARGET_FRAME_RATE = 1 / 60;
+export const PLAYER_MODE: PlayerMode = "dev";
 
 /**
  * Editing settings
@@ -24,22 +27,21 @@ export const CHUNK_HEIGHT = 16;
  * BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 1
  */
 export const TERRAIN_GENERATION_ENABLED = true;
-export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 5;
-export const TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 3;
-export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 1;
+export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 6;
+export const TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 5;
+export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 3;
+
+export const HEIGHT_FACTOR = 100;
+export const NOISE_SCALE = 70;
 
 /**
  * Terrain Decoration
  */
-export const NOISE_SCALE = 150;
-export const BASE_HEIGHT = 10;
-export const HILL_OFFSET = 20;
-export const TERRAIN_LEVEL = -20;
-export const SEA_LEVEL = 3;
-export const CLOUD_LEVEL = 70;
+export const SEA_LEVEL = -15;
+export const CLOUD_LEVEL = 100;
 
 /**
  * Physics
  */
-export const FALLING_GRAVITY = 10;
-export const JUMPING_GRAVITY = 10;
+export const FALLING_GRAVITY = 18;
+export const JUMPING_GRAVITY = 15;

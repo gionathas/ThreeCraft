@@ -3,13 +3,15 @@ import {
   BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
   CHUNK_HEIGHT,
   CHUNK_WIDTH,
-  CLOUD_LEVEL,
   HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
   TERRAIN_GENERATION_ENABLED,
   TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
 } from "../config/constants";
+import TerrainMap from "../noise/TerrainMap";
+
+import { BlockType, BlockUtils } from "../terrain/Block";
+import { ChunkModel } from "../terrain/Chunk";
 import TerrainChunksFactory from "../terrain/TerrainChunksFactory";
-import { Voxel, VoxelModel } from "../terrain/Voxel";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 
@@ -31,16 +33,24 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
-export default class Terrain implements VoxelModel {
-  private chunkFactory: TerrainChunksFactory;
+export default class Terrain implements ChunkModel {
   private scene: THREE.Scene;
 
+  private seed: string;
+  private chunkFactory: TerrainChunksFactory;
+  private terrainMap: TerrainMap;
   private previousCenterPosition: THREE.Vector3;
 
   constructor(scene: THREE.Scene, centerPosition: THREE.Vector3) {
     this.scene = scene;
     this.previousCenterPosition = centerPosition;
-    this.chunkFactory = new TerrainChunksFactory(CHUNK_WIDTH, CHUNK_HEIGHT);
+    this.seed = "seed"; //FIXME
+    this.terrainMap = new TerrainMap(this.seed);
+    this.chunkFactory = new TerrainChunksFactory(
+      CHUNK_WIDTH,
+      CHUNK_HEIGHT,
+      this.seed
+    );
   }
 
   /**
@@ -65,6 +75,10 @@ export default class Terrain implements VoxelModel {
     }
   }
 
+  //TODO optimization: instead of doing a 3 nested loop every frame,
+  // to detect the new chunk to load (except for the initial terrain generation),
+  // we can implement a diff between the previous terrain boundaries and the current boundaries
+  // to find the chunk that needs to be loaded
   private loadTerrain(boundaries: TerrainBoundaries) {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
     for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
@@ -92,7 +106,7 @@ export default class Terrain implements VoxelModel {
     const loadedChunks = this.chunkFactory.loadedChunks;
 
     for (const chunk of loadedChunks) {
-      const chunkOriginPosition = ChunkUtils.computeChunkOriginPosition(
+      const chunkOriginPosition = ChunkUtils.computeChunkAbsolutePosition(
         chunk.id,
         CHUNK_WIDTH,
         CHUNK_HEIGHT
@@ -135,11 +149,12 @@ export default class Terrain implements VoxelModel {
     const upperY = centerChunkOriginY + verticalTopRenderDistance;
     let lowerY = centerChunkOriginY - verticalBottomRenderDistance;
 
+    const surfaceHeight = this.terrainMap.getHeight(x, z);
+
+    //FIXME 2 is an hacky way that appears to work
     // keep rendering at least 1 chunk as far as we are below the cloud level
     // and above the terrain surface
-    if (lowerY < CLOUD_LEVEL && lowerY > -CHUNK_HEIGHT) {
-      lowerY = -CHUNK_HEIGHT;
-    }
+    lowerY = Math.min(lowerY, surfaceHeight - CHUNK_HEIGHT * 2);
 
     return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
   }
@@ -147,16 +162,10 @@ export default class Terrain implements VoxelModel {
   isSolidBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
-    return block != null && block != Voxel.AIR;
+    return BlockUtils.isSolidBlock(block?.type);
   }
 
-  /**
-   * Given a voxel position returns the value of the voxel there.
-   *
-   * @returns the voxel value or null if the chunk does not exist
-   *
-   */
-  getBlock(blockCoord: Coordinate): Voxel | null {
+  getBlock(blockCoord: Coordinate) {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
     const chunk = this.chunkFactory.getChunk(chunkId);
 
@@ -164,49 +173,34 @@ export default class Terrain implements VoxelModel {
       return null;
     }
 
-    return chunk.getVoxel(blockCoord);
+    return chunk.getBlock(blockCoord);
   }
 
-  /**
-   * Set the specified voxel into his relative chunk.
-   *
-   * If the chunk doesn't exist it will create a new one.
-   */
-  setBlock(blockCoord: Coordinate, voxel: Voxel) {
+  setBlock(blockCoord: Coordinate, block: BlockType) {
     const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
 
     let chunk = this.chunkFactory.getChunk(chunkId);
 
-    // add new chunk if we try to set a voxel in a chunk that does not exist yet
+    // add new chunk if we try to set a block in a chunk that does not exist yet
     if (!chunk) {
       chunk = this.chunkFactory.createChunk(chunkId);
     }
 
-    chunk.setVoxel(blockCoord, voxel);
-    const { updatedChunkMesh, removedChunksIds } =
+    chunk.setBlock(blockCoord, block);
+    const { updatedMesh: updatedMeshList, removedMesh: removedMeshList } =
       this.chunkFactory.updateChunk(chunkId);
 
-    for (const updatedChunk of updatedChunkMesh) {
-      // if the chunk was not already in the scene, add it
-      if (!this.scene.getObjectByName(updatedChunk.name)) {
-        this.scene.add(updatedChunk);
+    for (const updatedMesh of updatedMeshList) {
+      // if the chunk mesh was not already in the scene, add it
+      if (!this.scene.getObjectByName(updatedMesh.name)) {
+        this.scene.add(updatedMesh);
       }
     }
 
-    for (const removedChunkId of removedChunksIds) {
-      const removedSolidMesh = this.scene.getObjectByName(
-        TerrainChunksFactory.getChunkSolidMeshId(removedChunkId)
-      );
-      const removedTransparentMesh = this.scene.getObjectByName(
-        TerrainChunksFactory.getChunkTransparentMeshId(removedChunkId)
-      );
-
-      if (removedSolidMesh) {
-        this.scene.remove(removedSolidMesh);
-      }
-
-      if (removedTransparentMesh) {
-        this.scene.remove(removedTransparentMesh);
+    // for each removed chunk, we need to remove both the solid and transparent mesh
+    for (const removedMesh of removedMeshList) {
+      if (removedMesh) {
+        this.scene.remove(removedMesh);
       }
     }
   }
@@ -237,5 +231,22 @@ export default class Terrain implements VoxelModel {
 
   get _poolSolidMeshSize() {
     return this.chunkFactory._poolSolidMeshSize;
+  }
+
+  /**
+   * //WARN if this function is invoked frequently
+   * it can lead to an high memory usage due to his caching behavior,
+   * use it only in debug mode
+   */
+  _getContinentalness(x: number, z: number) {
+    return this.terrainMap.getContinentalness(x, z);
+  }
+
+  _getErosion(x: number, z: number) {
+    return this.terrainMap.getErosion(x, z);
+  }
+
+  _getPV(x: number, z: number) {
+    return this.terrainMap.getPV(x, z);
   }
 }

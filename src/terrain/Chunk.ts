@@ -2,35 +2,38 @@ import * as THREE from "three";
 import { SEA_LEVEL } from "../config/constants";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
-import {
-  getBlockTextureCoordinates,
-  Voxel,
-  VoxelFace,
-  VoxelFacesGeometry,
-} from "./Voxel";
+import { BlockInfo, Blocks, BlockType, BlockUtils } from "./Block";
 
 export type ChunkID = string;
+
+export type Block = {
+  type: BlockType;
+} & BlockInfo;
+
+export interface ChunkModel {
+  getBlock: (blockCoord: Coordinate) => Block | null;
+}
 export default class Chunk {
-  private _chunkID: ChunkID;
+  private _chunkId: ChunkID;
   private chunkWidth: number;
   private chunkHeight: number;
-  private voxels: Uint8Array;
+  private blocks: Uint8Array;
 
   constructor(
-    chunkID: ChunkID,
+    chunkId: ChunkID,
     chunkWidth: number,
     chunkHeight: number,
-    voxels?: Uint8Array
+    blocks?: Uint8Array
   ) {
-    this._chunkID = chunkID;
+    this._chunkId = chunkId;
     this.chunkWidth = chunkWidth;
     this.chunkHeight = chunkHeight;
-    this.voxels =
-      voxels ?? new Uint8Array(chunkHeight * chunkWidth * chunkWidth);
+    this.blocks =
+      blocks ?? new Uint8Array(chunkHeight * chunkWidth * chunkWidth);
   }
 
   //TODO optimization: to decrease the number of meshes, we could pass an object
-  // which stores which borders this voxel must have visible
+  // which stores which borders this chunk must have visible
   computeGeometryData({ x: startX, y: startY, z: startZ }: Coordinate) {
     const { chunkWidth, chunkHeight } = this;
 
@@ -44,7 +47,6 @@ export default class Chunk {
     const transparentIndices: number[] = [];
     const transparentUVs: number[] = [];
 
-    // voxels generation
     for (let y = 0; y < chunkHeight; ++y) {
       const blockY = startY + y;
       for (let z = 0; z < chunkWidth; ++z) {
@@ -52,57 +54,52 @@ export default class Chunk {
         for (let x = 0; x < chunkWidth; ++x) {
           const blockX = startX + x;
 
-          const block = this.getVoxel({ x: blockX, y: blockY, z: blockZ });
-          //FIXME
-          const isBlockTransparent =
-            block === Voxel.GLASS || block === Voxel.WATER;
+          const block = this.getBlock({ x: blockX, y: blockY, z: blockZ });
+          const isSolidBlock = BlockUtils.isSolidBlock(block?.type);
 
-          if (block === Voxel.WATER && blockY !== SEA_LEVEL - 1) {
-            continue;
-          }
+          if (block && isSolidBlock) {
+            const isBlockTransparent = block.isTransparent;
+            const isWater = block.type === BlockType.WATER;
 
-          const positions = isBlockTransparent
-            ? transparentPositions
-            : soldidPositions;
-          const normals = isBlockTransparent
-            ? transparentNormals
-            : solidNormals;
-          const indices = isBlockTransparent
-            ? transparentIndices
-            : solidIndices;
-          const uvs = isBlockTransparent ? transparentUVs : solidUVs;
+            if (isWater && blockY !== SEA_LEVEL - 1) {
+              continue;
+            }
 
-          if (block) {
+            const positions = isBlockTransparent
+              ? transparentPositions
+              : soldidPositions;
+            const normals = isBlockTransparent
+              ? transparentNormals
+              : solidNormals;
+            const indices = isBlockTransparent
+              ? transparentIndices
+              : solidIndices;
+            const uvs = isBlockTransparent ? transparentUVs : solidUVs;
+
             // iterate over each face of this block
-            for (const face of Object.keys(VoxelFacesGeometry)) {
-              const voxelFace = face as VoxelFace;
-
-              if (block === Voxel.WATER && voxelFace !== "Top") {
+            for (const blockFace of BlockUtils.getBlockFaces()) {
+              if (isWater && blockFace !== "top") {
                 continue;
               }
 
-              const { normal: dir, corners } = VoxelFacesGeometry[voxelFace];
+              const { normal: dir, vertices } =
+                BlockUtils.getBlockFaceGeometry(blockFace);
 
               // let's check the block neighbour of this face of the block
-              const neighborBlock = this.getVoxel({
+              const neighborBlock = this.getBlock({
                 x: blockX + dir[0],
                 y: blockY + dir[1],
                 z: blockZ + dir[2],
               });
 
-              //FIXME
-              const isNeighbourTransparent =
-                neighborBlock === Voxel.GLASS || neighborBlock === Voxel.WATER;
+              const isNeighbourTransparent = neighborBlock?.isTransparent;
 
               // if the current block has no neighbor or has a transparent neighbour
               // we need to show this block face
-              if (
-                !neighborBlock ||
-                (isNeighbourTransparent && !isBlockTransparent)
-              ) {
+              if (!neighborBlock || isNeighbourTransparent) {
                 const ndx = positions.length / 3;
 
-                for (const { pos, uv } of corners) {
+                for (const { pos, uv } of vertices) {
                   // add corner position
                   positions.push(
                     pos[0] + blockX,
@@ -113,13 +110,13 @@ export default class Chunk {
                   // add normal for this corner
                   normals.push(...dir);
 
-                  const textureCoords = getBlockTextureCoordinates(
-                    block,
-                    voxelFace,
+                  const textureCoords = BlockUtils.getBlockUVCoordinates(
+                    block.type,
+                    blockFace,
                     [uv[0], uv[1]]
                   );
 
-                  uvs.push(textureCoords.x, textureCoords.y);
+                  uvs.push(textureCoords.u, textureCoords.v);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -146,68 +143,63 @@ export default class Chunk {
     };
   }
 
-  /**
-   * Given a voxel position returns the value of the voxel in there.
-   *
-   * @returns the voxel value or null if the voxel does not belong to this chunk.
-   */
-  getVoxel(coord: Coordinate): Voxel | null {
-    if (!this.isVoxelInChunk(coord)) {
+  getBlock(coord: Coordinate): Block | null {
+    if (!this.isBlockInChunk(coord)) {
       return null;
     }
 
-    const voxelOffset = this.computeVoxelOffset(coord);
-    return this.voxels[voxelOffset];
+    const blockIndex = this.computeBlockIndex(coord);
+    const blockType = this.blocks[blockIndex] as BlockType;
+
+    return {
+      type: blockType,
+      ...Blocks[blockType],
+    };
   }
 
-  setVoxel(coord: Coordinate, voxel: Voxel) {
-    // the voxel does not belong to this chunk, skip
-    if (!this.isVoxelInChunk(coord)) {
+  setBlock(coord: Coordinate, block: BlockType) {
+    if (!this.isBlockInChunk(coord)) {
       return;
     }
 
-    const voxelOffset = this.computeVoxelOffset(coord);
-    this.voxels[voxelOffset] = voxel;
+    const blockIndex = this.computeBlockIndex(coord);
+    this.blocks[blockIndex] = block;
   }
 
-  /**
-   *
-   * @returns true if the voxel belongs to this chunk
-   */
-  isVoxelInChunk(voxelCoord: Coordinate) {
+  isBlockInChunk(blockCoord: Coordinate) {
     const { chunkWidth, chunkHeight } = this;
     const actualChunkId = ChunkUtils.computeChunkIdFromPosition(
-      voxelCoord,
+      blockCoord,
       chunkWidth,
       chunkHeight
     );
-    return actualChunkId === this._chunkID;
+    return actualChunkId === this._chunkId;
   }
 
-  private computeVoxelOffset({ x, y, z }: Coordinate) {
+  private computeBlockIndex({ x, y, z }: Coordinate) {
     const { chunkWidth } = this;
 
-    const [voxelX, voxelY, voxelZ] = this.getVoxelLocalCoordinates(x, y, z);
+    const [blockX, blockY, blockZ] = this.getBlockChunkCoordinates(x, y, z);
 
-    return voxelY * chunkWidth * chunkWidth + voxelZ * chunkWidth + voxelX;
+    return blockY * chunkWidth * chunkWidth + blockZ * chunkWidth + blockX;
   }
 
-  private getVoxelLocalCoordinates(x: number, y: number, z: number) {
+  private getBlockChunkCoordinates(x: number, y: number, z: number) {
     const { chunkWidth, chunkHeight } = this;
 
-    const voxelX = THREE.MathUtils.euclideanModulo(x, chunkWidth) | 0;
-    const voxelY = THREE.MathUtils.euclideanModulo(y, chunkHeight) | 0;
-    const voxelZ = THREE.MathUtils.euclideanModulo(z, chunkWidth) | 0;
+    const blockX = THREE.MathUtils.euclideanModulo(x, chunkWidth) | 0;
+    const blockY = THREE.MathUtils.euclideanModulo(y, chunkHeight) | 0;
+    const blockZ = THREE.MathUtils.euclideanModulo(z, chunkWidth) | 0;
 
-    return [voxelX, voxelY, voxelZ];
+    return [blockX, blockY, blockZ];
   }
 
-  getVoxels() {
-    return this.voxels;
+  getBlocks() {
+    return this.blocks;
   }
 
   get id() {
-    return this._chunkID;
+    return this._chunkId;
   }
 
   get width() {
@@ -219,6 +211,6 @@ export default class Chunk {
   }
 
   _debug() {
-    console.log(this.voxels);
+    console.log(this.blocks);
   }
 }

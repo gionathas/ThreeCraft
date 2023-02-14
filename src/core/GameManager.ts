@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CHUNK_HEIGHT } from "../config/constants";
+import { CHUNK_HEIGHT, PLAYER_MODE } from "../config/constants";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -56,6 +56,9 @@ export default class GameManager {
     const totalChunks = this.terrain.totalChunks;
     const totalSolidMesh = this.terrain._totalSolidMesh;
     const transparentMesh = this.terrain._totalTransparentMesh;
+    const continentalness = this.terrain._getContinentalness(px, pz);
+    const erosion = this.terrain._getErosion(px, pz);
+    const pv = this.terrain._getPV(px, pz);
 
     infoUI!.innerHTML = `<p>x: ${px.toFixed(2)} y: ${py.toFixed(
       2
@@ -68,6 +71,11 @@ export default class GameManager {
     infoUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
     infoUI!.innerHTML += `<p>Solid Mesh: ${totalSolidMesh}</p>`;
     infoUI!.innerHTML += `<p>Transparent Mesh: ${transparentMesh}</p>`;
+    infoUI!.innerHTML += `<p>Continentalness: ${continentalness.toFixed(
+      3
+    )}</p>`;
+    infoUI!.innerHTML += `<p>Erosion: ${erosion.toFixed(3)}</p>`;
+    infoUI!.innerHTML += `<p>PV: ${pv.toFixed(3)}</p>`;
   }
 
   private initTerrain() {
@@ -124,11 +132,11 @@ export default class GameManager {
         app.renderer.domElement,
         app.scene,
         terrain,
-        "dev" //FIXME
+        PLAYER_MODE
       );
 
       //FIXME wait the terrain finished being created
-      this.player.setSpawn(0, CHUNK_HEIGHT + 3, 0);
+      this.player.setSpawn(0, CHUNK_HEIGHT + 30, 0);
     }
 
     return this.player;

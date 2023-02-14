@@ -8,7 +8,7 @@ import {
 import { PlayerMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import { VOXEL_SIZE } from "../terrain/Voxel";
+import { BLOCK_SIZE } from "../terrain/Block";
 import { determineAngleQuadrant } from "../utils/helpers";
 
 export interface PlayerControlsProperties {
@@ -24,7 +24,7 @@ export interface PlayerControlsProperties {
 export const devPlayerProperties: PlayerControlsProperties = {
   width: 0.5,
   height: 2,
-  horizontalSpeed: 2,
+  horizontalSpeed: 5,
   verticalSpeed: 2,
   dampingCoefficient: 10,
   physicsEnabled: false,
@@ -34,8 +34,8 @@ export const devPlayerProperties: PlayerControlsProperties = {
 export const simPlayerProperties: PlayerControlsProperties = {
   width: 0.4,
   height: 1.8,
-  horizontalSpeed: 0.5,
-  verticalSpeed: 5,
+  horizontalSpeed: 0.8,
+  verticalSpeed: 6,
   dampingCoefficient: 10,
   physicsEnabled: true,
   showHitbox: false,
@@ -200,7 +200,7 @@ export default class PlayerControls extends PointerLockControls {
         this.state = "onGround";
         // move slightly below the surface to keep the collision with the ground
         const groundY =
-          Math.floor(this.position.y - height) + VOXEL_SIZE - 0.01;
+          Math.floor(this.position.y - height) + BLOCK_SIZE - 0.01;
         this.position.y = groundY + height;
         this.velocity.y = 0;
       }

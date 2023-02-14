@@ -1,35 +1,28 @@
 import { expose, Transfer } from "threads/worker";
 import ChunkUtils from "../utils/ChunkUtils";
-import { Coordinate } from "../utils/helpers";
-import Chunk from "./Chunk";
+import Chunk, { ChunkID } from "./Chunk";
 import TerrainChunkGenerator from "./TerrainChunkGenerator";
 
 function generateTerrainChunk(
-  chunkCoord: Coordinate,
+  chunkId: ChunkID,
+  seed: string,
   chunkWidth: number,
   chunkHeight: number
 ) {
-  const chunkGenerator = new TerrainChunkGenerator();
-
-  const { x, y, z } = chunkCoord;
-  const chunkID = ChunkUtils.computeChunkIdFromPosition(
-    chunkCoord,
-    chunkWidth,
-    chunkHeight
-  );
+  const chunkGenerator = new TerrainChunkGenerator(seed);
 
   const {
     x: chunkX,
     y: chunkY,
     z: chunkZ,
-  } = ChunkUtils.computeChunkOriginPosition(chunkID, chunkWidth, chunkHeight);
+  } = ChunkUtils.computeChunkAbsolutePosition(chunkId, chunkWidth, chunkHeight);
 
   // create the chunk
-  const chunk = new Chunk(chunkID, chunkWidth, chunkHeight);
+  const chunk = new Chunk(chunkId, chunkWidth, chunkHeight);
 
   // apply the terrain
-  chunkGenerator.fillTerrain(chunk, x, y, z);
-  const voxels = chunk.getVoxels();
+  chunkGenerator.fillTerrain(chunk, chunkX, chunkY, chunkZ);
+  const chunkBlocks = chunk.getBlocks();
 
   const { solid, transparent } = chunk.computeGeometryData({
     x: chunkX,
@@ -38,10 +31,9 @@ function generateTerrainChunk(
   });
 
   return {
-    chunkID,
     solidGeometry: solid,
     transparentGeometry: transparent,
-    voxelsBuffer: Transfer(voxels.buffer),
+    blocksBuffer: Transfer(chunkBlocks.buffer),
   };
 }
 
