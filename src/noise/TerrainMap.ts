@@ -3,12 +3,25 @@ import {
   CONTINENTALNESS_MIN_HEIGHT,
   MAX_EROSION,
   MIN_EROSION,
+  TEST_MAP_ENABLED,
 } from "../config/constants";
 import { lerp } from "../utils/helpers";
 import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
 import { NoiseMap } from "./NoiseMap";
 import PVMap from "./PVMap";
+
+type TestMap = {
+  continentalness?: number;
+  erosion?: number;
+  pv?: number;
+};
+
+const TestMap: TestMap = {
+  continentalness: -1,
+  erosion: -1,
+  // pv: 1,
+};
 
 export default class TerrainMap extends NoiseMap {
   private continentalMap: ContinentalMap;
@@ -29,15 +42,13 @@ export default class TerrainMap extends NoiseMap {
       return cachedValue;
     }
 
-    // const continentalness = 0;
-    const continentalness = this.continentalMap.getContinentalness(x, z);
+    const continentalness = this.getContinentalness(x, z);
     const baseHeight = this.getBaseHeight(continentalness);
 
-    // const erosion = -0.5;
-    const erosion = this.erosionMap.getErosion(x, z);
+    const erosion = this.getErosion(x, z);
     const erosionFactor = this.getErosionFactor(erosion);
 
-    const pv = this.pvMap.getPV(x, z, erosion);
+    const pv = this.getPV(x, z, erosion);
     const pvHeight = this.getPvHeight(pv, erosionFactor);
 
     const height = baseHeight + pvHeight;
@@ -97,15 +108,26 @@ export default class TerrainMap extends NoiseMap {
     }
   }
 
-  getContinentalness(x: number, z: number) {
+  getContinentalness(x: number, z: number): number {
+    if (TEST_MAP_ENABLED && TestMap.continentalness != null) {
+      return TestMap.continentalness;
+    }
+
     return this.continentalMap.getContinentalness(x, z);
   }
 
-  getErosion(x: number, z: number) {
+  getErosion(x: number, z: number): number {
+    if (TEST_MAP_ENABLED && TestMap.erosion != null) {
+      return TestMap.erosion;
+    }
     return this.erosionMap.getErosion(x, z);
   }
 
-  getPV(x: number, z: number) {
-    return this.pvMap.getPV(x, z);
+  getPV(x: number, z: number, erosion: number): number {
+    if (TEST_MAP_ENABLED && TestMap.pv != null) {
+      return TestMap.pv;
+    }
+
+    return this.pvMap.getPV(x, z, erosion);
   }
 }

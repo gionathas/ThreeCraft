@@ -34,6 +34,7 @@ export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 3;
 /**
  * Terrain Noise
  */
+export const TEST_MAP_ENABLED = true;
 export const CONTINENTALNESS_NOISE_SCALE = 5000;
 export const EROSION_NOISE_SCALE = 1024;
 export const PV_BASE_SCALE = 200;
@@ -49,7 +50,7 @@ export const MAX_EROSION = 50;
  */
 export const MAX_TERRAIN_HEIGHT = CONTINENTALNESS_MAX_HEIGHT + MAX_EROSION;
 export const MIN_TERRAIN_HEIGHT = CONTINENTALNESS_MIN_HEIGHT - MAX_EROSION;
-export const SEA_LEVEL = MIN_TERRAIN_HEIGHT + 20;
+export const SEA_LEVEL = MIN_TERRAIN_HEIGHT + 40;
 export const CLOUD_LEVEL = MAX_TERRAIN_HEIGHT - 10;
 
 /**
