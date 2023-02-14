@@ -18,6 +18,7 @@ const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 export default class TerrainChunksFactory {
   private chunkHeight: number;
   private chunkWidth: number;
+  private seed: string;
 
   private chunks: Map<ChunkID, Chunk>;
   private solidMesh: Map<ChunkID, THREE.Mesh>;
@@ -27,9 +28,10 @@ export default class TerrainChunksFactory {
   private processingChunks: Set<ChunkID>;
   private generatorsPool;
 
-  constructor(chunkWidth: number, chunkHeight: number) {
+  constructor(chunkWidth: number, chunkHeight: number, seed: string) {
     this.chunkWidth = chunkWidth;
     this.chunkHeight = chunkHeight;
+    this.seed = seed;
 
     this.chunks = new Map();
     this.solidMesh = new Map();
@@ -49,7 +51,7 @@ export default class TerrainChunksFactory {
       transparentMesh: THREE.Mesh | null
     ) => void
   ) {
-    const { chunkWidth, chunkHeight } = this;
+    const { chunkWidth, chunkHeight, seed } = this;
 
     const chunkId = ChunkUtils.computeChunkIdFromPosition(
       chunkCoord,
@@ -70,7 +72,7 @@ export default class TerrainChunksFactory {
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunks) => {
       const { solidGeometry, transparentGeometry, blocksBuffer } =
-        await generateChunks(chunkId, chunkWidth, chunkHeight);
+        await generateChunks(chunkId, seed, chunkWidth, chunkHeight);
 
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);

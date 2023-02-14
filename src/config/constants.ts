@@ -15,8 +15,8 @@ export const EDITING_DISTANCE = 7;
 /**
  * Terrain Chunks
  */
-export const CHUNK_WIDTH = 10;
-export const CHUNK_HEIGHT = 10;
+export const CHUNK_WIDTH = 16;
+export const CHUNK_HEIGHT = 16;
 
 /**
  * Terrain Generation
@@ -27,18 +27,18 @@ export const CHUNK_HEIGHT = 10;
  * BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 1
  */
 export const TERRAIN_GENERATION_ENABLED = true;
-export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 5;
-export const TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 1;
-export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 1;
+export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 6;
+export const TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 5;
+export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 3;
+
+export const HEIGHT_FACTOR = 100;
+export const NOISE_SCALE = 70;
 
 /**
  * Terrain Decoration
  */
-export const NOISE_SCALE = 64;
-export const HILL_OFFSET = 5;
-export const TERRAIN_LEVEL = 0;
-export const SEA_LEVEL = -5;
-export const CLOUD_LEVEL = 70;
+export const SEA_LEVEL = -15;
+export const CLOUD_LEVEL = 100;
 
 /**
  * Physics

@@ -24,7 +24,7 @@ export interface PlayerControlsProperties {
 export const devPlayerProperties: PlayerControlsProperties = {
   width: 0.5,
   height: 2,
-  horizontalSpeed: 2,
+  horizontalSpeed: 5,
   verticalSpeed: 2,
   dampingCoefficient: 10,
   physicsEnabled: false,

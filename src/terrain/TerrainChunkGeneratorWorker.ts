@@ -5,10 +5,11 @@ import TerrainChunkGenerator from "./TerrainChunkGenerator";
 
 function generateTerrainChunk(
   chunkId: ChunkID,
+  seed: string,
   chunkWidth: number,
   chunkHeight: number
 ) {
-  const chunkGenerator = new TerrainChunkGenerator();
+  const chunkGenerator = new TerrainChunkGenerator(seed);
 
   const {
     x: chunkX,

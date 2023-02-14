@@ -3,11 +3,12 @@ import {
   BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
   CHUNK_HEIGHT,
   CHUNK_WIDTH,
-  CLOUD_LEVEL,
   HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
   TERRAIN_GENERATION_ENABLED,
   TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
 } from "../config/constants";
+import TerrainMap from "../noise/TerrainMap";
+
 import { BlockType, BlockUtils } from "../terrain/Block";
 import { ChunkModel } from "../terrain/Chunk";
 import TerrainChunksFactory from "../terrain/TerrainChunksFactory";
@@ -33,15 +34,23 @@ type TerrainBoundaries = {
 };
 
 export default class Terrain implements ChunkModel {
-  private chunkFactory: TerrainChunksFactory;
   private scene: THREE.Scene;
 
+  private seed: string;
+  private chunkFactory: TerrainChunksFactory;
+  private terrainMap: TerrainMap;
   private previousCenterPosition: THREE.Vector3;
 
   constructor(scene: THREE.Scene, centerPosition: THREE.Vector3) {
     this.scene = scene;
     this.previousCenterPosition = centerPosition;
-    this.chunkFactory = new TerrainChunksFactory(CHUNK_WIDTH, CHUNK_HEIGHT);
+    this.seed = "seed"; //FIXME
+    this.terrainMap = new TerrainMap(this.seed);
+    this.chunkFactory = new TerrainChunksFactory(
+      CHUNK_WIDTH,
+      CHUNK_HEIGHT,
+      this.seed
+    );
   }
 
   /**
@@ -140,11 +149,12 @@ export default class Terrain implements ChunkModel {
     const upperY = centerChunkOriginY + verticalTopRenderDistance;
     let lowerY = centerChunkOriginY - verticalBottomRenderDistance;
 
+    const surfaceHeight = this.terrainMap.getHeight(x, z);
+
+    //FIXME 2 is an hacky way that appears to work
     // keep rendering at least 1 chunk as far as we are below the cloud level
     // and above the terrain surface
-    if (lowerY < CLOUD_LEVEL && lowerY > -CHUNK_HEIGHT) {
-      lowerY = -CHUNK_HEIGHT;
-    }
+    lowerY = Math.min(lowerY, surfaceHeight - CHUNK_HEIGHT * 2);
 
     return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
   }
@@ -221,5 +231,22 @@ export default class Terrain implements ChunkModel {
 
   get _poolSolidMeshSize() {
     return this.chunkFactory._poolSolidMeshSize;
+  }
+
+  /**
+   * //WARN if this function is invoked frequently
+   * it can lead to an high memory usage due to his caching behavior,
+   * use it only in debug mode
+   */
+  _getContinentalness(x: number, z: number) {
+    return this.terrainMap.getContinentalness(x, z);
+  }
+
+  _getErosion(x: number, z: number) {
+    return this.terrainMap.getErosion(x, z);
+  }
+
+  _getPV(x: number, z: number) {
+    return this.terrainMap.getPV(x, z);
   }
 }
