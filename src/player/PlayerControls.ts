@@ -121,6 +121,7 @@ export default class PlayerControls extends PointerLockControls {
 
   update(dt: number) {
     const timeStep = TARGET_FRAME_RATE;
+    this.updateMode();
 
     this.updateHorizontalVelocity();
     this.updateVerticalVelocity();
@@ -134,6 +135,19 @@ export default class PlayerControls extends PointerLockControls {
 
     this.applyVelocityDamping(timeStep);
     this.updateHitBox();
+  }
+
+  private updateMode() {
+    const currentMode = this.mode;
+    if (this.hasSwitchedMode()) {
+      if (currentMode === "sim") {
+        this.mode = "dev";
+        this.properties = devPlayerProperties;
+      } else {
+        this.mode = "sim";
+        this.properties = simPlayerProperties;
+      }
+    }
   }
 
   private updateHitBox() {
@@ -1371,6 +1385,13 @@ export default class PlayerControls extends PointerLockControls {
     return (
       this.inputController.getKey("Space") &&
       !this.inputController.getPrevKey("Space")
+    );
+  }
+
+  private hasSwitchedMode() {
+    return (
+      this.inputController.getKey("KeyP") &&
+      !this.inputController.getPrevKey("KeyP")
     );
   }
 

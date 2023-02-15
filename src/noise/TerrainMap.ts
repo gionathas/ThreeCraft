@@ -18,7 +18,7 @@ type TestMap = {
 };
 
 const TestMap: TestMap = {
-  continentalness: -1,
+  continentalness: 0,
   erosion: -1,
   // pv: 1,
 };
