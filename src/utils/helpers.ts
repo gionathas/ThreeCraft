@@ -20,7 +20,7 @@ export type BufferGeometryData = {
 };
 
 export function lerp(start: number, end: number, amount: number) {
-  return start + (end - start) * amount;
+  return Math.round(start + (end - start) * amount);
 }
 
 export function isEmptyGeometry(geometry: BufferGeometryData) {

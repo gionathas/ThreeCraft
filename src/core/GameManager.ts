@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CHUNK_HEIGHT, PLAYER_MODE } from "../config/constants";
+import { CHUNK_HEIGHT, DEFAULT_PLAYER_MODE } from "../config/constants";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -134,7 +134,7 @@ export default class GameManager {
         app.renderer.domElement,
         app.scene,
         terrain,
-        PLAYER_MODE
+        DEFAULT_PLAYER_MODE
       );
 
       //FIXME wait the terrain finished being created

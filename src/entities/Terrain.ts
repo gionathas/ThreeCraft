@@ -247,6 +247,7 @@ export default class Terrain implements ChunkModel {
   }
 
   _getPV(x: number, z: number) {
-    return this.terrainMap.getPV(x, z);
+    const erosion = this._getErosion(x, z);
+    return this.terrainMap.getPV(x, z, erosion);
   }
 }

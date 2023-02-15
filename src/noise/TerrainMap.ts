@@ -71,40 +71,75 @@ export default class TerrainMap extends NoiseMap {
     const min = MIN_EROSION;
     const max = MAX_EROSION;
 
-    const step1 = min + 9;
-    const step2 = step1 + 15;
+    const lowSlope = min + 6; // 6
+    const midSlope = lowSlope * 2; // 12
+    const highSlope = midSlope * 2; // 24
 
-    // high erosion
-    if (erosion >= 0) {
-      const t = (erosion - 1) / -1;
-      return lerp(min, step1, t);
+    const lowPeak = Math.floor(max * (1 / 3));
+
+    // high erosion, mostly flat terrain
+    if (erosion >= 0.5) {
+      const t = (erosion - 1) / -0.5;
+      return lerp(min, lowSlope, t);
+    }
+    // gentle hill/valley ridge
+    else if (erosion >= 0.4 && erosion < 0.5) {
+      const t = (erosion - 0.5) / -0.1;
+      return lerp(lowSlope, lowPeak, t);
+    }
+    // gentle hill/valley plateau
+    else if (erosion >= 0.3 && erosion < 0.4) {
+      return lowPeak;
+    }
+    // gentle hill/valley ridge
+    else if (erosion >= 0.2 && erosion < 0.3) {
+      const t = (erosion - 0.2) / 0.1;
+      return lerp(lowSlope, lowPeak, t);
+    }
+    // mostly flat
+    else if (erosion >= -0.1 && erosion < 0.2) {
+      const t = (erosion - 0.2) / -0.3;
+      return lerp(lowSlope, midSlope, t);
     }
     // mid low erosion
-    else if (erosion >= -0.5 && erosion < 0) {
-      const t = erosion / -0.5;
-      return lerp(step1, step2, t);
+    else if (erosion >= -0.5 && erosion < -0.1) {
+      const t = (erosion + 0.1) / -0.4;
+      return lerp(midSlope, highSlope, t);
     }
     // very low erosion
     else {
       const t = (erosion + 0.5) / -0.5;
-      return lerp(step2, max, t);
+      return lerp(highSlope, max, t);
     }
   }
 
   private getPvHeight(pv: number, erosionHeight: number) {
+    const min = Math.round(-erosionHeight * (2 / 3));
+    const mid = Math.round(-erosionHeight / 4);
+    const peak = erosionHeight;
+
+    // flat valley area
+    if (pv <= -0.7) {
+      return min;
+    }
     // valley
-    if (pv <= -0.1) {
-      const t = (pv + 1) / 0.9;
-      return lerp(-erosionHeight, -erosionHeight / 4, t);
+    else if (pv > -0.7 && pv < -0.4) {
+      const t = (pv + 0.7) / 0.3;
+      return lerp(min, mid, t);
     }
     // small flat area between a valley and an hill
-    else if (pv > -0.1 && pv < 0.1) {
-      return -erosionHeight / 4;
+    else if (pv >= -0.4 && pv < -0.1) {
+      const t = (pv + 0.4) / 0.2;
+      return lerp(mid, mid + 2, t);
     }
     // hill
+    else if (pv >= -0.1 && pv < 0.8) {
+      const t = (pv + 0.1) / 0.9;
+      return lerp(mid + 2, peak, t);
+    }
+    // peak flat
     else {
-      const t = (pv - 0.1) / 0.9;
-      return lerp(-erosionHeight / 4, erosionHeight, t);
+      return peak;
     }
   }
 
@@ -123,7 +158,7 @@ export default class TerrainMap extends NoiseMap {
     return this.erosionMap.getErosion(x, z);
   }
 
-  getPV(x: number, z: number, erosion: number): number {
+  getPV(x: number, z: number, erosion?: number): number {
     if (TEST_MAP_ENABLED && TestMap.pv != null) {
       return TestMap.pv;
     }

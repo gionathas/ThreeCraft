@@ -1,5 +1,4 @@
 import { PV_BASE_SCALE } from "../config/constants";
-import { lerp } from "../utils/helpers";
 import { NoiseMap } from "./NoiseMap";
 
 export default class PVMap extends NoiseMap {
@@ -44,9 +43,9 @@ export default class PVMap extends NoiseMap {
     const baseScale = PV_BASE_SCALE;
     const lowScale = baseScale - 20;
 
-    if (erosion <= -0.8) {
-      return lerp(lowScale, baseScale, (erosion + 1) / 0.2);
-    }
+    // if (erosion <= -0.8) {
+    //   return lerp(lowScale, baseScale, (erosion + 1) / 0.2);
+    // }
 
     return baseScale;
   }

@@ -4,7 +4,7 @@ import { PlayerMode } from "../entities/Player";
  * Game Settings
  */
 export const TARGET_FRAME_RATE = 1 / 60;
-export const PLAYER_MODE: PlayerMode = "dev";
+export const DEFAULT_PLAYER_MODE: PlayerMode = "dev";
 
 /**
  * Editing settings
@@ -21,7 +21,6 @@ export const CHUNK_HEIGHT = 16;
 /**
  * Terrain Generation
  *
- * Top Config
  * HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS: 15
  * TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 5
  * BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 1
@@ -33,16 +32,18 @@ export const BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS = 3;
 
 /**
  * Terrain Noise
+ *
+ * CONTINENTALNESS_NOISE_SCALE = 10000;
  */
-export const TEST_MAP_ENABLED = true;
-export const CONTINENTALNESS_NOISE_SCALE = 5000;
+export const TEST_MAP_ENABLED = false;
+export const CONTINENTALNESS_NOISE_SCALE = 10000;
 export const EROSION_NOISE_SCALE = 1024;
-export const PV_BASE_SCALE = 200;
+export const PV_BASE_SCALE = 180;
 
 export const CONTINENTALNESS_MAX_HEIGHT = 30;
 export const CONTINENTALNESS_MIN_HEIGHT = -30;
 
-export const MIN_EROSION = 1;
+export const MIN_EROSION = 0;
 export const MAX_EROSION = 50;
 
 /**

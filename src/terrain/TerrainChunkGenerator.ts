@@ -82,7 +82,7 @@ export default class TerrainChunkGenerator {
   ) {
     const pv = this.terrainMap.getPV(x, z);
 
-    if (pv > 0.5) {
+    if (pv <= -0.6 || pv >= 0.5) {
       return BlockType.COBBLESTONE;
     }
 
@@ -94,7 +94,7 @@ export default class TerrainChunkGenerator {
       }
     }
 
-    return BlockType.COBBLESTONE;
+    return BlockType.GRASS;
   }
 
   private generateBlockAboveSurface(y: number, surfaceHeight: number) {
