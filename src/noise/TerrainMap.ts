@@ -18,9 +18,9 @@ type TestMap = {
 };
 
 const TestMap: TestMap = {
-  continentalness: -0.5,
-  erosion: -0.5,
-  // pv: 1,
+  continentalness: 0,
+  erosion: -1,
+  // pv: -1,
 };
 
 export default class TerrainMap extends NoiseMap {
@@ -35,7 +35,7 @@ export default class TerrainMap extends NoiseMap {
     this.pvMap = new PVMap(seed + "-pv");
   }
 
-  getHeight(x: number, z: number) {
+  getSurfaceHeight(x: number, z: number) {
     const cachedValue = this.getCacheValue(x, z);
 
     if (cachedValue != null) {

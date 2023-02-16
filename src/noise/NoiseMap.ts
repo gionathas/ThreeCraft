@@ -2,10 +2,12 @@ import alea from "alea";
 import { createNoise2D, NoiseFunction2D } from "simplex-noise";
 
 export abstract class NoiseMap {
+  protected seed: string;
   protected noise: NoiseFunction2D;
   protected cache: Record<string, number>;
 
   constructor(seed: string) {
+    this.seed = seed;
     this.noise = createNoise2D(alea(seed));
     this.cache = {};
   }
@@ -26,5 +28,9 @@ export abstract class NoiseMap {
 
   get _cacheSize() {
     return Object.keys(this.cache).length;
+  }
+
+  getSeed() {
+    return this.seed;
   }
 }

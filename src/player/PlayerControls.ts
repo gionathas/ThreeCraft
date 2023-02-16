@@ -225,7 +225,7 @@ export default class PlayerControls extends PointerLockControls {
     const { width, height } = this.properties;
     const position = this.position;
 
-    const isBlockBeneathSolid = this.terrain.isSolidBlock({
+    const isBlockBeneathSolid = this.terrain.isVisibleBlock({
       x: position.x,
       y: position.y - height,
       z: position.z,
@@ -237,7 +237,7 @@ export default class PlayerControls extends PointerLockControls {
   private isTopColliding() {
     const position = this.position;
 
-    const isBlockAboveSolid = this.terrain.isSolidBlock({
+    const isBlockAboveSolid = this.terrain.isVisibleBlock({
       x: position.x,
       y: position.y,
       z: position.z,
@@ -301,13 +301,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const rightBound = position.x - width / 2 - slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: rightBound,
           y: bottom,
           z: position.z,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: rightBound,
           y: top,
           z: position.z,
@@ -327,13 +327,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const leftBound = position.x + width / 2 + slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: leftBound,
           y: bottom,
           z: position.z,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: leftBound,
           y: top,
           z: position.z,
@@ -358,13 +358,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const right = position.x + width / 2 + slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: right,
           y: bottom,
           z: position.z,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: right,
           y: top,
           z: position.z,
@@ -386,13 +386,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const left = position.x - width / 2 - slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: left,
           y: bottom,
           z: position.z,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: left,
           y: top,
           z: position.z,
@@ -417,13 +417,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.x + width / 2 + slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: bottom,
           z: position.z,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: top,
           z: position.z,
@@ -446,13 +446,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.x - width / 2 - slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: bottom,
           z: position.z,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: top,
           z: position.z,
@@ -478,13 +478,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.x - width / 2 - slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: bottom,
           z: position.z,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: top,
           z: position.z,
@@ -506,13 +506,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.x + width / 2 + slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: bottom,
           z: position.z,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: top,
           z: position.z,
@@ -549,13 +549,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const rightBound = position.x + width / 2 + slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: rightBound,
           y: bottom,
           z: position.z,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: rightBound,
           y: top,
           z: position.z,
@@ -575,13 +575,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const leftBound = position.x - width / 2 - slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: leftBound,
           y: bottom,
           z: position.z,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: leftBound,
           y: top,
           z: position.z,
@@ -606,13 +606,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const right = position.x - width / 2 + -slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: right,
           y: bottom,
           z: position.z,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: right,
           y: top,
           z: position.z,
@@ -634,13 +634,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const left = position.x + width / 2 + slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: left,
           y: bottom,
           z: position.z,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: left,
           y: top,
           z: position.z,
@@ -665,13 +665,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.x - width / 2 - slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: bottom,
           z: position.z,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: top,
           z: position.z,
@@ -694,13 +694,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.x + width / 2 + slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: bottom,
           z: position.z,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: top,
           z: position.z,
@@ -726,13 +726,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.x + width / 2 + slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: bottom,
           z: position.z,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: front,
           y: top,
           z: position.z,
@@ -754,13 +754,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.x - width / 2 - slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: bottom,
           z: position.z,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: back,
           y: top,
           z: position.z,
@@ -797,13 +797,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const rightBound = position.z - width / 2 - slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: rightBound,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: rightBound,
@@ -823,13 +823,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const leftBound = position.z + width / 2 + slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: leftBound,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: leftBound,
@@ -854,13 +854,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const right = position.z + width / 2 + slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: right,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: right,
@@ -882,13 +882,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const left = position.z - width / 2 - slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: left,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: left,
@@ -913,13 +913,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.z + width / 2 + slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: front,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: front,
@@ -942,13 +942,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.z - width / 2 - slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: back,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: back,
@@ -974,13 +974,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.z - width / 2 - slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: front,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: front,
@@ -1002,13 +1002,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.z + width / 2 + slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: back,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: back,
@@ -1045,13 +1045,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const rightBound = position.z + width / 2 + slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: rightBound,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: rightBound,
@@ -1071,13 +1071,13 @@ export default class PlayerControls extends PointerLockControls {
         );
         const leftBound = position.z - width / 2 - slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: leftBound,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: leftBound,
@@ -1102,13 +1102,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const right = position.z - width / 2 - slidingVel;
 
-        const isBottomRightBlocked = this.terrain.isSolidBlock({
+        const isBottomRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: right,
         });
 
-        const isTopRightBlocked = this.terrain.isSolidBlock({
+        const isTopRightBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: right,
@@ -1130,13 +1130,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const left = position.z + width / 2 + slidingVel;
 
-        const isBottomLeftBlocked = this.terrain.isSolidBlock({
+        const isBottomLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: left,
         });
 
-        const isTopLeftBlocked = this.terrain.isSolidBlock({
+        const isTopLeftBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: left,
@@ -1161,13 +1161,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.z - width / 2 - slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: front,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: front,
@@ -1190,13 +1190,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.z + width / 2 + slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: back,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: back,
@@ -1222,13 +1222,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const front = position.z + width / 2 + slidingVel;
 
-        const isBottomFrontBlocked = this.terrain.isSolidBlock({
+        const isBottomFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: front,
         });
 
-        const isTopFrontBlocked = this.terrain.isSolidBlock({
+        const isTopFrontBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: front,
@@ -1250,13 +1250,13 @@ export default class PlayerControls extends PointerLockControls {
 
         const back = position.z - width / 2 - slidingVel;
 
-        const isBottomBackBlocked = this.terrain.isSolidBlock({
+        const isBottomBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: bottom,
           z: back,
         });
 
-        const isTopBackBlocked = this.terrain.isSolidBlock({
+        const isTopBackBlocked = this.terrain.isVisibleBlock({
           x: position.x,
           y: top,
           z: back,
@@ -1295,7 +1295,7 @@ export default class PlayerControls extends PointerLockControls {
 
     for (let y = bottom; y <= top; y += yInc) {
       for (let x = right; x <= left; x += xInc) {
-        const isColliding = this.terrain.isSolidBlock({
+        const isColliding = this.terrain.isVisibleBlock({
           x,
           y,
           z: side === "front" ? position.z + width / 2 : position.z - width / 2,
@@ -1326,7 +1326,7 @@ export default class PlayerControls extends PointerLockControls {
 
     for (let y = bottom; y <= top; y += yInc) {
       for (let z = back; z <= front; z += zInc) {
-        const isColliding = this.terrain.isSolidBlock({
+        const isColliding = this.terrain.isVisibleBlock({
           x: side === "left" ? position.x + width / 2 : position.x - width / 2,
           y,
           z,

@@ -5,8 +5,9 @@ import { BlockType } from "./Block";
 import Chunk from "./Chunk";
 
 /**
- * //TODO optimization: instead of creating an heightmap for each chunk,
- * we can create a bigger heightmap shared by all chunks.
+ * //TODO optimization: instead of creating an heightmap for each chunk worker,
+ * we can share an unique heightmap between all workers.
+ *
  * In this way we calculate the heightMap for the entire terrain only one time.
  * The heightMap will be shared by all workers, such that they will not need to compute
  * the heightMap at first pass.
@@ -15,25 +16,26 @@ import Chunk from "./Chunk";
  *  (nested loop that iterate over the x and z plane), whereas with the current implementation
  *  workers are calculating (and caching) the heightMap by themself but wasting computation
  */
-export default class TerrainChunkGenerator {
+export default class TerrainChunkDecorator {
   private terrainMap: TerrainMap;
 
-  constructor(seed: string) {
-    this.terrainMap = new TerrainMap(seed);
+  constructor(terrainMap: TerrainMap) {
+    this.terrainMap = terrainMap;
   }
 
-  fillTerrain(chunk: Chunk, startX: number, startY: number, startZ: number) {
+  fillChunk(chunk: Chunk, { x: startX, y: startY, z: startZ }: Coordinate) {
     const chunkWidth = chunk.width;
     const chunkHeight = chunk.height;
 
     const endX = startX + chunkWidth;
     const endZ = startZ + chunkWidth;
+    const endY = startY + chunkHeight;
 
     // filling the chunk with blocks from bottom to top
-    for (let y = startY; y < startY + chunkHeight; y++) {
+    for (let y = startY; y < endY; y++) {
       for (let z = startZ; z < endZ; z++) {
         for (let x = startX; x < endX; x++) {
-          const surfaceHeight = this.terrainMap.getHeight(x, z);
+          const surfaceHeight = this.terrainMap.getSurfaceHeight(x, z);
           this.generateBlock(chunk, { x, y, z }, surfaceHeight);
         }
       }

@@ -246,7 +246,7 @@ const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
 };
 
 export class BlockUtils {
-  static isSolidBlock(block?: BlockType) {
+  static isVisibleBlock(block: BlockType | null | undefined) {
     return block != null && block !== BlockType.AIR;
   }
 
@@ -358,10 +358,10 @@ export class BlockUtils {
     // until the current position along the ray is greater than the length of the ray
     while (t <= len) {
       const block = blocks.getBlock({ x: ix, y: iy, z: iz });
-      const isSolidBlock = BlockUtils.isSolidBlock(block?.type);
+      const isVisibleBlock = BlockUtils.isVisibleBlock(block?.type);
 
       // return position, normal and voxel value of the first voxel that we have found
-      if (isSolidBlock) {
+      if (isVisibleBlock) {
         return {
           position: [
             rayStart.x + t * dx,

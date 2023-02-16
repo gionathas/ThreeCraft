@@ -1,13 +1,15 @@
 import { Pool, spawn } from "threads";
 import * as THREE from "three";
+import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
 import TextureManager from "../core/TextureManager";
+import TerrainMap from "../noise/TerrainMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import {
   BufferGeometryData,
   Coordinate,
   isEmptyGeometry,
 } from "../utils/helpers";
-import Chunk, { ChunkID } from "./Chunk";
+import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";
 import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
 
@@ -15,10 +17,8 @@ import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
 const MAX_SOLID_MESH_POOL_SIZE = 200;
 const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 
-export default class TerrainChunksFactory {
-  private chunkHeight: number;
-  private chunkWidth: number;
-  private seed: string;
+export default class TerrainChunksManager implements ChunkModel {
+  private terrainMap: TerrainMap;
 
   private chunks: Map<ChunkID, Chunk>;
   private solidMesh: Map<ChunkID, THREE.Mesh>;
@@ -28,11 +28,8 @@ export default class TerrainChunksFactory {
   private processingChunks: Set<ChunkID>;
   private generatorsPool;
 
-  constructor(chunkWidth: number, chunkHeight: number, seed: string) {
-    this.chunkWidth = chunkWidth;
-    this.chunkHeight = chunkHeight;
-    this.seed = seed;
-
+  constructor(terrainMap: TerrainMap) {
+    this.terrainMap = terrainMap;
     this.chunks = new Map();
     this.solidMesh = new Map();
     this.transparentMesh = new Map();
@@ -51,12 +48,10 @@ export default class TerrainChunksFactory {
       transparentMesh: THREE.Mesh | null
     ) => void
   ) {
-    const { chunkWidth, chunkHeight, seed } = this;
-
     const chunkId = ChunkUtils.computeChunkIdFromPosition(
       chunkCoord,
-      chunkWidth,
-      chunkHeight
+      CHUNK_WIDTH,
+      CHUNK_HEIGHT
     );
 
     const existChunk = this.chunks.has(chunkId);
@@ -71,8 +66,10 @@ export default class TerrainChunksFactory {
 
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunks) => {
-      const { solidGeometry, transparentGeometry, blocksBuffer } =
-        await generateChunks(chunkId, seed, chunkWidth, chunkHeight);
+      const { solidGeometry, transparentGeometry, blocksBuffer, time } =
+        await generateChunks(chunkId, this.terrainMap.getSeed());
+
+      // console.log(time);
 
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);
@@ -82,14 +79,11 @@ export default class TerrainChunksFactory {
 
       const hasSolidMesh = !isEmptyGeometry(solidGeometry);
       const hasTransparentMesh = !isEmptyGeometry(transparentGeometry);
-      const isEmptyChunk = !hasSolidMesh && !hasTransparentMesh;
+
       let solidMesh = null;
       let transparentMesh = null;
 
-      // create the new chunk, if its not completely empty
-      if (!isEmptyChunk) {
-        this.createChunk(chunkId, blocks);
-      }
+      this.createChunk(chunkId, blocks);
 
       if (hasSolidMesh) {
         solidMesh = this.generateSolidMesh(chunkId, solidGeometry);
@@ -169,13 +163,7 @@ export default class TerrainChunksFactory {
    *
    * @returns a list of all the updated chunk mesh
    */
-  updateChunk(chunkId: ChunkID) {
-    const { x, y, z } = ChunkUtils.computeChunkAbsolutePosition(
-      chunkId,
-      this.chunkWidth,
-      this.chunkHeight
-    );
-
+  updateChunks({ x, y, z }: Coordinate) {
     const neighborChunkOffsets = [
       [0, 0, 0], // self
       [-1, 0, 0], // left
@@ -207,60 +195,58 @@ export default class TerrainChunksFactory {
 
         if (chunkToUpdate) {
           // get the chunk  origin position
-          const chunkOriginOffset = ChunkUtils.computeChunkAbsolutePosition(
+          const chunkOrigin = ChunkUtils.computeChunkAbsolutePosition(
             chunkId,
-            this.chunkWidth,
-            this.chunkHeight
+            CHUNK_WIDTH,
+            CHUNK_HEIGHT
           );
 
           // compute the new chunk geometry data
           const {
             solid: chunkSolidGeometry,
             transparent: chunkTransparentGeometry,
-          } = chunkToUpdate.computeGeometryData(chunkOriginOffset);
+          } = ChunkUtils.computeChunkGeometry(
+            chunkOrigin,
+            this,
+            CHUNK_WIDTH,
+            CHUNK_HEIGHT,
+            this.terrainMap
+          );
 
           const hasSolidMesh = !isEmptyGeometry(chunkSolidGeometry);
           const hasTransparentMesh = !isEmptyGeometry(chunkTransparentGeometry);
-          const canRemoveChunk = !hasSolidMesh && !hasTransparentMesh;
 
-          // remove the entire chunk if we dont have any more solid or transparent geometries
-          if (canRemoveChunk) {
-            // remove both the solid and transparent mesh
-            const { solidMesh, transparentMesh } = this.removeChunk(chunkId);
-            removedMesh.push(solidMesh, transparentMesh);
+          // update the chunk solid mesh
+          if (hasSolidMesh) {
+            const updatedSolidMesh = this.generateSolidMesh(
+              chunkId,
+              chunkSolidGeometry
+            );
+
+            // add to the list of updated chunks mesh
+            updatedMesh.push(updatedSolidMesh);
           } else {
-            // update the chunk solid mesh
-            if (hasSolidMesh) {
-              const updatedSolidMesh = this.generateSolidMesh(
-                chunkId,
-                chunkSolidGeometry
-              );
-
-              // add to the list of updated chunks mesh
-              updatedMesh.push(updatedSolidMesh);
-            } else {
-              // remove the chunk solid mesh since is empty
-              const removedSolidMesh = this.removeChunkSolidMesh(chunkId);
-              if (removedSolidMesh) {
-                removedMesh.push(removedSolidMesh);
-              }
+            // remove the chunk solid mesh since is empty
+            const removedSolidMesh = this.removeChunkSolidMesh(chunkId);
+            if (removedSolidMesh) {
+              removedMesh.push(removedSolidMesh);
             }
+          }
 
-            // update the chunk transparent mesh
-            if (hasTransparentMesh) {
-              const updatedTransparentMesh = this.generateTransparentMesh(
-                chunkId,
-                chunkTransparentGeometry
-              );
+          // update the chunk transparent mesh
+          if (hasTransparentMesh) {
+            const updatedTransparentMesh = this.generateTransparentMesh(
+              chunkId,
+              chunkTransparentGeometry
+            );
 
-              // add to the list of updated chunks mesh
-              updatedMesh.push(updatedTransparentMesh);
-            } else {
-              // remove the chunk transparent mesh since is empty
-              const removedTransparentMesh =
-                this.removeChunkTransparentMesh(chunkId);
-              removedMesh.push(removedTransparentMesh);
-            }
+            // add to the list of updated chunks mesh
+            updatedMesh.push(updatedTransparentMesh);
+          } else {
+            // remove the chunk transparent mesh since is empty
+            const removedTransparentMesh =
+              this.removeChunkTransparentMesh(chunkId);
+            removedMesh.push(removedTransparentMesh);
           }
         }
       }
@@ -349,18 +335,6 @@ export default class TerrainChunksFactory {
   }
 
   /**
-   * Create a new chunk with the specifed chunkId and add it inside chunks map
-   */
-  createChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
-    const { chunkWidth, chunkHeight } = this;
-
-    const chunk = new Chunk(chunkID, chunkWidth, chunkHeight, blocks);
-    this.chunks.set(chunkID, chunk);
-
-    return chunk;
-  }
-
-  /**
    * Return the chunk mesh associated to the chunkID.
    *
    * If the mesh does not exist it will try either to extract one from the mesh pool,
@@ -408,6 +382,27 @@ export default class TerrainChunksFactory {
     return newMesh;
   }
 
+  /**
+   * Create a new chunk with the specifed chunkId and add it inside chunks map
+   */
+  createChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
+    const chunk = new Chunk(chunkID, CHUNK_WIDTH, CHUNK_HEIGHT, blocks);
+    this.chunks.set(chunkID, chunk);
+
+    return chunk;
+  }
+
+  getBlock(blockCoord: Coordinate) {
+    const chunkId = this.computeChunkIdFromPosition(blockCoord);
+    const chunk = this.getChunk(chunkId);
+
+    if (!chunk) {
+      return null;
+    }
+
+    return chunk.getBlock(blockCoord);
+  }
+
   hasChunk(chunkId: ChunkID) {
     return this.chunks.has(chunkId);
   }
@@ -423,8 +418,8 @@ export default class TerrainChunksFactory {
   computeChunkIdFromPosition(coord: Coordinate): ChunkID {
     return ChunkUtils.computeChunkIdFromPosition(
       coord,
-      this.chunkWidth,
-      this.chunkHeight
+      CHUNK_WIDTH,
+      CHUNK_HEIGHT
     );
   }
 

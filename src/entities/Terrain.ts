@@ -1,28 +1,21 @@
 import * as THREE from "three";
 import {
-  BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
   CHUNK_HEIGHT,
   CHUNK_WIDTH,
   HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
+  MAX_WORLD_HEIGHT,
+  MIN_WORLD_HEIGHT,
   TERRAIN_GENERATION_ENABLED,
-  TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
 } from "../config/constants";
 import TerrainMap from "../noise/TerrainMap";
 
 import { BlockType, BlockUtils } from "../terrain/Block";
-import { ChunkModel } from "../terrain/Chunk";
-import TerrainChunksFactory from "../terrain/TerrainChunksFactory";
+import TerrainChunksManager from "../terrain/TerrainChunksManager";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 
 const horizontalRenderDistance =
   HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_WIDTH;
-
-const verticalTopRenderDistance =
-  TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_HEIGHT;
-
-const verticalBottomRenderDistance =
-  BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_HEIGHT;
 
 type TerrainBoundaries = {
   lowerX: number;
@@ -33,11 +26,11 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
-export default class Terrain implements ChunkModel {
+export default class Terrain {
   private scene: THREE.Scene;
 
   private seed: string;
-  private chunkFactory: TerrainChunksFactory;
+  private chunksManager: TerrainChunksManager;
   private terrainMap: TerrainMap;
   private previousCenterPosition: THREE.Vector3;
 
@@ -46,17 +39,9 @@ export default class Terrain implements ChunkModel {
     this.previousCenterPosition = centerPosition;
     this.seed = "seed"; //FIXME
     this.terrainMap = new TerrainMap(this.seed);
-    this.chunkFactory = new TerrainChunksFactory(
-      CHUNK_WIDTH,
-      CHUNK_HEIGHT,
-      this.seed
-    );
+    this.chunksManager = new TerrainChunksManager(this.terrainMap);
   }
 
-  /**
-   * //TODO: optimization: you could do some check between the previous and
-   * current position to prevent the unload/load of the terrain
-   */
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
     const isGenerationEnabled = TERRAIN_GENERATION_ENABLED;
 
@@ -83,8 +68,8 @@ export default class Terrain implements ChunkModel {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
     for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
       for (let z = lowerZ; z < upperZ; z += CHUNK_WIDTH) {
-        for (let y = lowerY; y < upperY; y += CHUNK_HEIGHT) {
-          this.chunkFactory.generateChunk(
+        for (let y = upperY; y > lowerY; y -= CHUNK_HEIGHT) {
+          this.chunksManager.generateChunk(
             { x, y, z },
             (solidMesh, transparentMesh) => {
               if (solidMesh) {
@@ -103,7 +88,7 @@ export default class Terrain implements ChunkModel {
 
   private unloadTerrain(boundaries: TerrainBoundaries) {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    const loadedChunks = this.chunkFactory.loadedChunks;
+    const loadedChunks = this.chunksManager.loadedChunks;
 
     for (const chunk of loadedChunks) {
       const chunkOriginPosition = ChunkUtils.computeChunkAbsolutePosition(
@@ -120,7 +105,7 @@ export default class Terrain implements ChunkModel {
         chunkOriginPosition.z < lowerZ ||
         chunkOriginPosition.z > upperZ
       ) {
-        const { solidMesh, transparentMesh } = this.chunkFactory.removeChunk(
+        const { solidMesh, transparentMesh } = this.chunksManager.removeChunk(
           chunk.id
         );
 
@@ -138,7 +123,6 @@ export default class Terrain implements ChunkModel {
   private getTerrainBoundariesFromPosition({ x, y, z }: Coordinate) {
     const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
     const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
-    const centerChunkOriginY = this.roundToNearestVerticalChunk(y);
 
     const lowerX = centerChunkOriginX - horizontalRenderDistance;
     const upperX = centerChunkOriginX + horizontalRenderDistance;
@@ -146,49 +130,28 @@ export default class Terrain implements ChunkModel {
     const upperZ = centerChunkOriginZ + horizontalRenderDistance;
     const lowerZ = centerChunkOriginZ - horizontalRenderDistance;
 
-    const upperY = centerChunkOriginY + verticalTopRenderDistance;
-    let lowerY = centerChunkOriginY - verticalBottomRenderDistance;
-
-    const surfaceHeight = this.terrainMap.getHeight(x, z);
-
-    //FIXME 2 is an hacky way that appears to work
-    // keep rendering at least 1 chunk as far as we are below the cloud level
-    // and above the terrain surface
-    lowerY = Math.min(lowerY, surfaceHeight - CHUNK_HEIGHT * 2);
+    const upperY = MAX_WORLD_HEIGHT;
+    const lowerY = MIN_WORLD_HEIGHT;
 
     return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
   }
 
-  isSolidBlock(blockCoord: Coordinate): boolean {
-    const block = this.getBlock(blockCoord);
-
-    return BlockUtils.isSolidBlock(block?.type);
-  }
-
-  getBlock(blockCoord: Coordinate) {
-    const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
-    const chunk = this.chunkFactory.getChunk(chunkId);
-
-    if (!chunk) {
-      return null;
-    }
-
-    return chunk.getBlock(blockCoord);
-  }
-
   setBlock(blockCoord: Coordinate, block: BlockType) {
-    const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
+    const chunkId = this.chunksManager.computeChunkIdFromPosition(blockCoord);
 
-    let chunk = this.chunkFactory.getChunk(chunkId);
+    let chunk = this.chunksManager.getChunk(chunkId);
 
-    // add new chunk if we try to set a block in a chunk that does not exist yet
+    // add a new chunk if we are trying to set a block in a chunk that does't exist yet
     if (!chunk) {
-      chunk = this.chunkFactory.createChunk(chunkId);
+      chunk = this.chunksManager.createChunk(chunkId);
     }
 
+    // add/remove the block inside the chunk
     chunk.setBlock(blockCoord, block);
+
+    // update all the affected chunks
     const { updatedMesh: updatedMeshList, removedMesh: removedMeshList } =
-      this.chunkFactory.updateChunk(chunkId);
+      this.chunksManager.updateChunks(blockCoord);
 
     for (const updatedMesh of updatedMeshList) {
       // if the chunk mesh was not already in the scene, add it
@@ -197,12 +160,22 @@ export default class Terrain implements ChunkModel {
       }
     }
 
-    // for each removed chunk, we need to remove both the solid and transparent mesh
+    // remove from the scene all the unnecesary chunk meshes
     for (const removedMesh of removedMeshList) {
       if (removedMesh) {
         this.scene.remove(removedMesh);
       }
     }
+  }
+
+  isVisibleBlock(blockCoord: Coordinate): boolean {
+    const block = this.getBlock(blockCoord);
+
+    return BlockUtils.isVisibleBlock(block?.type);
+  }
+
+  getBlock(blockCoord: Coordinate) {
+    return this.chunksManager.getBlock(blockCoord);
   }
 
   private roundToNearestHorizontalChunk(val: number) {
@@ -214,23 +187,23 @@ export default class Terrain implements ChunkModel {
   }
 
   get loadedChunks() {
-    return this.chunkFactory.loadedChunks;
+    return this.chunksManager.loadedChunks;
   }
 
   get totalChunks() {
-    return this.chunkFactory.totalChunks;
+    return this.chunksManager.totalChunks;
   }
 
   get _totalSolidMesh() {
-    return this.chunkFactory.totalSolidChunksMesh;
+    return this.chunksManager.totalSolidChunksMesh;
   }
 
   get _totalTransparentMesh() {
-    return this.chunkFactory.totalTransparentChunksMesh;
+    return this.chunksManager.totalTransparentChunksMesh;
   }
 
   get _poolSolidMeshSize() {
-    return this.chunkFactory._poolSolidMeshSize;
+    return this.chunksManager._poolSolidMeshSize;
   }
 
   /**
