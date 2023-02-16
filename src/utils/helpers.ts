@@ -32,7 +32,7 @@ export function determineAngleQuadrant(angle: number): 1 | 2 | 3 | 4 {
     return 1;
   } else if (angle > -Math.PI / 2 && angle <= 0) {
     return 2;
-  } else if (angle > -Math.PI && angle <= -Math.PI / 2) {
+  } else if (angle >= -Math.PI && angle <= -Math.PI / 2) {
     return 3;
   } else if (angle > Math.PI / 2 && angle <= Math.PI) {
     return 4;
