@@ -2,7 +2,7 @@ import * as THREE from "three";
 import {
   CHUNK_HEIGHT,
   CHUNK_WIDTH,
-  HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
+  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
   MAX_WORLD_HEIGHT,
   MIN_WORLD_HEIGHT,
   TERRAIN_GENERATION_ENABLED,
@@ -15,7 +15,7 @@ import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
 
 const horizontalRenderDistance =
-  HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_WIDTH;
+  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_WIDTH;
 
 type TerrainBoundaries = {
   lowerX: number;

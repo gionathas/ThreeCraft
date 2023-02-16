@@ -9,7 +9,7 @@ export const DEFAULT_PLAYER_MODE: PlayerMode = "dev";
 /**
  * Editing settings
  */
-export const EDITING_ENABLED = true;
+export const EDITING_ENABLED = getBoolean(import.meta.env.VITE_EDITING_ENABLED);
 export const EDITING_DISTANCE = 7;
 
 /**
@@ -19,23 +19,43 @@ export const CHUNK_WIDTH = 16;
 export const CHUNK_HEIGHT = 16;
 
 /**
- * Terrain Rendering
- *
- * HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS: 15
- * TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 5
- * BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS: 1
+ * Terrain Generation
  */
-export const TERRAIN_GENERATION_ENABLED = false;
-export const TERRAIN_OPTIMIZATION_ENABLED = false;
-export const HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = 7;
-export const TOP_RENDER_DISTANCE_IN_CHUNKS = 5;
-export const BOTTOM_RENDER_DISTANCE_IN_CHUNKS = 5;
+export const TERRAIN_GENERATION_ENABLED = getBoolean(
+  import.meta.env.VITE_TERRAIN_GENERATION_ENABLED
+);
+export const TERRAIN_OPTIMIZATION_ENABLED = getBoolean(
+  import.meta.env.VITE_TERRAIN_OPTIMIZATION_ENABLED
+);
 
 /**
- * Terrain Map Noise
- *
+ * Rendering Distance
  */
-export const TEST_MAP_ENABLED = true;
+export const DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS = getNumber(
+  import.meta.env.VITE_DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS
+);
+export const TOP_RENDER_DISTANCE_IN_CHUNKS = getNumber(
+  import.meta.env.VITE_TOP_RENDER_DISTANCE_IN_CHUNKS
+);
+export const BOTTOM_RENDER_DISTANCE_IN_CHUNKS = getNumber(
+  import.meta.env.VITE_BOTTOM_RENDER_DISTANCE_IN_CHUNKS
+);
+
+/** Testing Map */
+export const TESTING_MAP_ENABLED = getBoolean(
+  import.meta.env.VITE_TESTING_MAP_ENABLED
+);
+export const TESTING_MAP_EROSION = getOptionalNumber(
+  import.meta.env.VITE_TESTING_MAP_EROSION
+);
+export const TESTING_MAP_CONTINENTALNESS = getOptionalNumber(
+  import.meta.env.VITE_TESTING_MAP_CONTINENTALNESS
+);
+export const TESTING_MAP_PV = getOptionalNumber(
+  import.meta.env.VITE_TESTING_MAP_PV
+);
+
+/** Terrain Noise */
 export const CONTINENTALNESS_NOISE_SCALE = 10000;
 export const EROSION_NOISE_SCALE = 1024;
 export const PV_BASE_SCALE = 180;
@@ -62,3 +82,20 @@ export const CLOUD_LEVEL = MAX_TERRAIN_HEIGHT - 10;
  */
 export const FALLING_GRAVITY = 18;
 export const JUMPING_GRAVITY = 15;
+
+/** Utilities */
+function getBoolean(key: keyof ImportMetaEnv): boolean {
+  return key === "true";
+}
+
+function getNumber(key: keyof ImportMetaEnv): number {
+  return parseInt(key as string);
+}
+
+function getOptionalNumber(key?: keyof ImportMetaEnv): number | undefined {
+  if (key) {
+    return parseInt(key as string);
+  }
+
+  return undefined;
+}

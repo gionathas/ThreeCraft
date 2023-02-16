@@ -3,25 +3,16 @@ import {
   CONTINENTALNESS_MIN_HEIGHT,
   MAX_EROSION,
   MIN_EROSION,
-  TEST_MAP_ENABLED,
+  TESTING_MAP_CONTINENTALNESS,
+  TESTING_MAP_ENABLED,
+  TESTING_MAP_EROSION,
+  TESTING_MAP_PV,
 } from "../config/constants";
 import { lerp } from "../utils/helpers";
 import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
 import { NoiseMap } from "./NoiseMap";
 import PVMap from "./PVMap";
-
-type TestMap = {
-  continentalness?: number;
-  erosion?: number;
-  pv?: number;
-};
-
-const TestMap: TestMap = {
-  continentalness: 0,
-  erosion: -1,
-  // pv: -1,
-};
 
 export default class TerrainMap extends NoiseMap {
   private continentalMap: ContinentalMap;
@@ -144,23 +135,23 @@ export default class TerrainMap extends NoiseMap {
   }
 
   getContinentalness(x: number, z: number): number {
-    if (TEST_MAP_ENABLED && TestMap.continentalness != null) {
-      return TestMap.continentalness;
+    if (TESTING_MAP_ENABLED && TESTING_MAP_CONTINENTALNESS != null) {
+      return TESTING_MAP_CONTINENTALNESS;
     }
 
     return this.continentalMap.getContinentalness(x, z);
   }
 
   getErosion(x: number, z: number): number {
-    if (TEST_MAP_ENABLED && TestMap.erosion != null) {
-      return TestMap.erosion;
+    if (TESTING_MAP_ENABLED && TESTING_MAP_EROSION != null) {
+      return TESTING_MAP_EROSION;
     }
     return this.erosionMap.getErosion(x, z);
   }
 
   getPV(x: number, z: number, erosion?: number): number {
-    if (TEST_MAP_ENABLED && TestMap.pv != null) {
-      return TestMap.pv;
+    if (TESTING_MAP_ENABLED && TESTING_MAP_PV != null) {
+      return TESTING_MAP_PV;
     }
 
     return this.pvMap.getPV(x, z, erosion);
