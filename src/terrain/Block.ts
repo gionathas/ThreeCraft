@@ -35,6 +35,11 @@ type BlockFaceGeometry = {
   vertices: {
     pos: [number, number, number];
     uv: [number, number];
+    ao: {
+      side0: [number, number, number];
+      side1: [number, number, number];
+      side2: [number, number, number];
+    };
   }[];
 };
 
@@ -170,6 +175,40 @@ export const Blocks: Record<BlockType, BlockInfo> = {
   },
 };
 
+export const NeighbourBlockOffsets = [
+  [0, 0, 0], // self
+  [0, 1, 0], // up
+  [0, -1, 0], // down
+  // left
+  [-1, 0, 0], // left
+  [-1, 1, 0], // top left
+  [-1, -1, 0], // bottom left
+  // right
+  [1, 0, 0], // right
+  [1, 1, 0], // top right
+  [1, -1, 0], // bottom right
+  // front
+  [0, 0, 1], // front
+  [0, 1, 1], // top front
+  [0, -1, 1], // bottom front
+  [-1, 0, 1], // front left
+  [-1, 1, 1], // top front left
+  [-1, -1, 1], // bottom front left
+  [1, 0, 1], // front right
+  [1, 1, 1], // top front right
+  [1, -1, 1], // bottom front right
+  // back
+  [0, 0, -1], // back
+  [0, 1, -1], // top back
+  [0, -1, -1], // bottom back
+  [-1, 0, -1], // back left
+  [-1, 1, -1], // top back left
+  [-1, -1, -1], // bottom back left
+  [1, 0, -1], // back right
+  [1, 1, -1], // top back right
+  [1, -1, -1], // bottom back right
+];
+
 export const BlockFaceNormal: Record<BlockFace, [number, number, number]> = {
   left: [-1, 0, 0],
   right: [1, 0, 0],
@@ -183,55 +222,247 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   left: {
     normal: BlockFaceNormal.left,
     vertices: [
-      { pos: [0, 1, 0], uv: [0, 1] },
-      { pos: [0, 0, 0], uv: [0, 0] },
-      { pos: [0, 1, 1], uv: [1, 1] },
-      { pos: [0, 0, 1], uv: [1, 0] },
+      {
+        pos: [0, 1, 0],
+        uv: [0, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 0, 0],
+        uv: [0, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 1, 1],
+        uv: [1, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 0, 1],
+        uv: [1, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
     ],
   },
   right: {
     normal: BlockFaceNormal.right,
     vertices: [
-      { pos: [1, 1, 1], uv: [0, 1] },
-      { pos: [1, 0, 1], uv: [0, 0] },
-      { pos: [1, 1, 0], uv: [1, 1] },
-      { pos: [1, 0, 0], uv: [1, 0] },
+      {
+        pos: [1, 1, 1],
+        uv: [0, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 0, 1],
+        uv: [0, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 1, 0],
+        uv: [1, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 0, 0],
+        uv: [1, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
     ],
   },
   top: {
     normal: BlockFaceNormal.top,
     vertices: [
-      { pos: [0, 1, 1], uv: [1, 1] },
-      { pos: [1, 1, 1], uv: [0, 1] },
-      { pos: [0, 1, 0], uv: [1, 0] },
-      { pos: [1, 1, 0], uv: [0, 0] },
+      {
+        pos: [0, 1, 1],
+        uv: [1, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, 0.01],
+          side2: [-0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 1, 1],
+        uv: [0, 1],
+        ao: {
+          side0: [0.01, 0.5, 0.01],
+          side1: [-0.5, 0.5, 0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 1, 0],
+        uv: [1, 0],
+        ao: {
+          side0: [-0.01, 0.5, -0.01],
+          side1: [0.5, 0.5, -0.01],
+          side2: [-0.01, 0.5, 0.5],
+        },
+      },
+      {
+        pos: [1, 1, 0],
+        uv: [0, 0],
+        ao: {
+          side0: [0.01, 0.5, -0.01],
+          side1: [-0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, 0.5],
+        },
+      },
     ],
   },
   bottom: {
     normal: BlockFaceNormal.bottom,
     vertices: [
-      { pos: [1, 0, 1], uv: [1, 0] },
-      { pos: [0, 0, 1], uv: [0, 0] },
-      { pos: [1, 0, 0], uv: [1, 1] },
-      { pos: [0, 0, 0], uv: [0, 1] },
+      {
+        pos: [1, 0, 1],
+        uv: [1, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 0, 1],
+        uv: [0, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 0, 0],
+        uv: [1, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 0, 0],
+        uv: [0, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
     ],
   },
   front: {
     normal: BlockFaceNormal.front,
     vertices: [
-      { pos: [0, 0, 1], uv: [0, 0] },
-      { pos: [1, 0, 1], uv: [1, 0] },
-      { pos: [0, 1, 1], uv: [0, 1] },
-      { pos: [1, 1, 1], uv: [1, 1] },
+      {
+        pos: [0, 0, 1],
+        uv: [0, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 0, 1],
+        uv: [1, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [0, 1, 1],
+        uv: [0, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
+      {
+        pos: [1, 1, 1],
+        uv: [1, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [0.5, 0.5, -0.01],
+          side2: [0.01, 0.5, -0.5],
+        },
+      },
     ],
   },
   back: {
     normal: BlockFaceNormal.back,
     vertices: [
-      { pos: [1, 0, 0], uv: [0, 0] },
-      { pos: [0, 0, 0], uv: [1, 0] },
-      { pos: [1, 1, 0], uv: [0, 1] },
-      { pos: [0, 1, 0], uv: [1, 1] },
+      {
+        pos: [1, 0, 0],
+        uv: [0, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [1, 1, 1],
+          side2: [1, 1, 1],
+        },
+      },
+      {
+        pos: [0, 0, 0],
+        uv: [1, 0],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [1, 1, 1],
+          side2: [1, 1, 1],
+        },
+      },
+      {
+        pos: [1, 1, 0],
+        uv: [0, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [1, 1, 1],
+          side2: [1, 1, 1],
+        },
+      },
+      {
+        pos: [0, 1, 0],
+        uv: [1, 1],
+        ao: {
+          side0: [-0.1, 0.5, 0.1],
+          side1: [1, 1, 1],
+          side2: [1, 1, 1],
+        },
+      },
     ],
   },
 };

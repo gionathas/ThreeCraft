@@ -34,7 +34,7 @@ export default class EditingControls {
     if (leftButton) {
       this.placeBlock(BlockType.AIR); // erasing
     } else if (rightButton) {
-      this.placeBlock(BlockType.GLASS); //FIXME
+      this.placeBlock(BlockType.GRASS); //FIXME
     }
   }
 

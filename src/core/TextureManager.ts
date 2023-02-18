@@ -21,6 +21,7 @@ export default class TextureManager {
     this.blockSolidMaterial = new THREE.MeshStandardMaterial({
       map: this.texture,
       side: THREE.FrontSide,
+      vertexColors: true,
     });
 
     this.blockTransparentMaterial = new THREE.MeshStandardMaterial({

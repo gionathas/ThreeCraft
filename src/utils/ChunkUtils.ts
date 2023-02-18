@@ -1,6 +1,6 @@
 import { SEA_LEVEL, TERRAIN_OPTIMIZATION_ENABLED } from "../config/constants";
 import TerrainMap from "../noise/TerrainMap";
-import { BlockType, BlockUtils } from "../terrain/Block";
+import { BlockFace, BlockType, BlockUtils } from "../terrain/Block";
 import { ChunkID, ChunkModel } from "../terrain/Chunk";
 import { Coordinate } from "./helpers";
 
@@ -82,11 +82,13 @@ export default class ChunkUtils {
     const solidNormals: number[] = [];
     const solidIndices: number[] = [];
     const solidUVs: number[] = [];
+    const solidAo: number[] = [];
 
     const transparentPositions: number[] = [];
     const transparentNormals: number[] = [];
     const transparentIndices: number[] = [];
     const transparentUVs: number[] = [];
+    const transparentAo: number[] = [];
 
     // iterate over each block
     for (let y = 0; y < chunkHeight; ++y) {
@@ -118,6 +120,7 @@ export default class ChunkUtils {
               ? transparentIndices
               : solidIndices;
             const uvs = isTransparentBlock ? transparentUVs : solidUVs;
+            const aos = isTransparentBlock ? transparentAo : solidAo;
 
             // iterate over each face of this block
             for (const blockFace of BlockUtils.getBlockFaces()) {
@@ -161,18 +164,21 @@ export default class ChunkUtils {
 
               const isNeighbourTransparent = neighbourBlock?.isTransparent;
 
+              let vertexAos = [];
+
               // if the current block has no neighbor or has a transparent neighbour
               // we need to show this block face
               if (!neighbourBlock || isNeighbourTransparent) {
                 const ndx = positions.length / 3;
 
-                for (const { pos, uv } of vertices) {
-                  // add corner position
-                  positions.push(
-                    pos[0] + blockX,
-                    pos[1] + blockY,
-                    pos[2] + blockZ
-                  );
+                // for each vertex of the current face
+                for (const { pos, uv, ao: aoSides } of vertices) {
+                  const vertexX = pos[0] + blockX;
+                  const vertexY = pos[1] + blockY;
+                  const vertexZ = pos[2] + blockZ;
+
+                  // add vertex position
+                  positions.push(vertexX, vertexY, vertexZ);
 
                   // add normal for this corner
                   normals.push(...dir);
@@ -184,6 +190,19 @@ export default class ChunkUtils {
                   );
 
                   uvs.push(textureCoords.u, textureCoords.v);
+
+                  const vertexAO = this.computeVertexAO(
+                    {
+                      x: vertexX,
+                      y: vertexY,
+                      z: vertexZ,
+                    },
+                    blockFace,
+                    aoSides,
+                    chunk
+                  );
+
+                  aos.push(...vertexAO);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -200,13 +219,67 @@ export default class ChunkUtils {
         normals: solidNormals,
         indices: solidIndices,
         uvs: solidUVs,
+        aos: solidAo,
       },
       transparent: {
         positions: transparentPositions,
         normals: transparentNormals,
         indices: transparentIndices,
         uvs: transparentUVs,
+        aos: transparentAo,
       },
     };
+  }
+
+  private static computeVertexAO(
+    { x, y, z }: Coordinate,
+    blockFace: BlockFace,
+    {
+      side0,
+      side1,
+      side2,
+    }: {
+      side0: [number, number, number];
+      side1: [number, number, number];
+      side2: [number, number, number];
+    },
+    chunk: ChunkModel
+  ) {
+    const aoIntensity = 0.8;
+    let rgb = 1.0;
+
+    if (blockFace === "top") {
+      const t0 = chunk.getBlock({
+        x: x + side0[0],
+        y: y + side0[1],
+        z: z + side0[2],
+      });
+
+      if (t0 && BlockUtils.isVisibleBlock(t0.type)) {
+        rgb *= aoIntensity;
+      }
+
+      const t1 = chunk.getBlock({
+        x: x + side1[0],
+        y: y + side1[1],
+        z: z + side1[2],
+      });
+
+      if (t1 && BlockUtils.isVisibleBlock(t1.type)) {
+        rgb *= aoIntensity;
+      }
+
+      const t2 = chunk.getBlock({
+        x: x + side2[0],
+        y: y + side2[1],
+        z: z + side2[2],
+      });
+
+      if (t2 && BlockUtils.isVisibleBlock(t2.type)) {
+        rgb *= aoIntensity;
+      }
+    }
+
+    return [rgb, rgb, rgb];
   }
 }

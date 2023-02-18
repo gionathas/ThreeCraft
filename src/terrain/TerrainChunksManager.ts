@@ -9,6 +9,7 @@ import {
   Coordinate,
   isEmptyGeometry,
 } from "../utils/helpers";
+import { NeighbourBlockOffsets } from "./Block";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";
 import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
@@ -164,23 +165,13 @@ export default class TerrainChunksManager implements ChunkModel {
    * @returns a list of all the updated chunk mesh
    */
   updateChunks({ x, y, z }: Coordinate) {
-    const neighborChunkOffsets = [
-      [0, 0, 0], // self
-      [-1, 0, 0], // left
-      [1, 0, 0], // right
-      [0, -1, 0], // down
-      [0, 1, 0], // up
-      [0, 0, -1], // back
-      [0, 0, 1], // front
-    ];
-
     const updatedMesh = [];
     const removedMesh = [];
 
-    // to avoid updating same chunks
+    // to keep track of the chunks already updated
     const visitedChunks: Record<ChunkID, boolean | undefined> = {};
 
-    for (const offset of neighborChunkOffsets) {
+    for (const offset of NeighbourBlockOffsets) {
       const ox = x + offset[0];
       const oy = y + offset[1];
       const oz = z + offset[2];
@@ -194,14 +185,14 @@ export default class TerrainChunksManager implements ChunkModel {
         const chunkToUpdate = this.chunks.get(chunkId);
 
         if (chunkToUpdate) {
-          // get the chunk  origin position
+          // get the chunk origin position
           const chunkOrigin = ChunkUtils.computeChunkAbsolutePosition(
             chunkId,
             CHUNK_WIDTH,
             CHUNK_HEIGHT
           );
 
-          // compute the new chunk geometry data
+          // update the chunk geometry
           const {
             solid: chunkSolidGeometry,
             transparent: chunkTransparentGeometry,
@@ -260,11 +251,12 @@ export default class TerrainChunksManager implements ChunkModel {
    */
   private generateSolidMesh(
     chunkId: ChunkID,
-    { positions, normals, uvs, indices }: BufferGeometryData
+    { positions, normals, uvs, indices, aos }: BufferGeometryData
   ) {
     const positionNumComponents = 3;
     const normalNumComponents = 3;
     const uvNumComponents = 2;
+    const aoNumComponents = 3;
 
     const chunkMesh = this.getNewSolidMesh(chunkId);
     const chunkGeometry = chunkMesh.geometry;
@@ -284,6 +276,10 @@ export default class TerrainChunksManager implements ChunkModel {
     chunkGeometry.setAttribute(
       "uv",
       new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents)
+    );
+    chunkGeometry.setAttribute(
+      "color",
+      new THREE.BufferAttribute(new Float32Array(aos), aoNumComponents)
     );
 
     chunkGeometry.setIndex(indices);

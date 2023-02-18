@@ -62,42 +62,62 @@ export default class TerrainChunkDecorator {
   //   return BlockType.COBBLESTONE;
   // }
 
-  // private generateBlockBelowSurface(y: number, surfaceHeight: number) {
-  //   if (y > surfaceHeight - 1) {
-  //     if (y < SEA_LEVEL + 2) {
-  //       return BlockType.SAND;
-  //     } else {
-  //       return BlockType.GRASS;
-  //     }
-  //   } else if (Math.abs(y - surfaceHeight) > 10) {
-  //     return BlockType.DIRT;
-  //   }
-
-  //   return BlockType.COBBLESTONE;
-  // }
-
   private generateBlockBelowSurface(
     x: number,
     y: number,
     z: number,
     surfaceHeight: number
   ) {
+    const distFromSurface = Math.abs(y - surfaceHeight);
     const pv = this.terrainMap.getPV(x, z);
+    const erosion = this.terrainMap.getErosion(x, z);
 
-    if (pv <= -0.6 || pv >= 0.5) {
-      return BlockType.COBBLESTONE;
-    }
+    const isMountain = pv >= 0.5;
 
-    if (Math.abs(y - surfaceHeight) < 1) {
+    // first layer (0 - 1)
+    if (distFromSurface <= 2) {
       if (y < SEA_LEVEL + 2) {
         return BlockType.SAND;
+      } else if (isMountain) {
+        return BlockType.COBBLESTONE;
       } else {
         return BlockType.GRASS;
       }
     }
+    // second layer (3 , 5)
+    else if (distFromSurface <= 5) {
+      if (erosion <= -0.3 && pv >= 0) {
+        return BlockType.COBBLESTONE;
+      } else {
+        return BlockType.DIRT;
+      }
+    }
 
-    return BlockType.GRASS;
+    return BlockType.COBBLESTONE;
   }
+
+  // private generateBlockBelowSurface(
+  //   x: number,
+  //   y: number,
+  //   z: number,
+  //   surfaceHeight: number
+  // ) {
+  //   const pv = this.terrainMap.getPV(x, z);
+
+  //   if (pv <= -0.6 || pv >= 0.5) {
+  //     return BlockType.COBBLESTONE;
+  //   }
+
+  //   if (Math.abs(y - surfaceHeight) < 1) {
+  //     if (y < SEA_LEVEL + 2) {
+  //       return BlockType.SAND;
+  //     } else {
+  //       return BlockType.GRASS;
+  //     }
+  //   }
+
+  //   return BlockType.GRASS;
+  // }
 
   private generateBlockAboveSurface(y: number, surfaceHeight: number) {
     if (y < SEA_LEVEL) {

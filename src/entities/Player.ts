@@ -71,6 +71,10 @@ export default class Player {
     return this.playerControls.getCamera();
   }
 
+  getTargetBlock() {
+    return this.editingControls.getTargetBlock();
+  }
+
   getOrientation() {
     const lookDirection = this.playerControls
       .getCamera()
