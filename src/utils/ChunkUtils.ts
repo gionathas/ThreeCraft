@@ -164,8 +164,6 @@ export default class ChunkUtils {
 
               const isNeighbourTransparent = neighbourBlock?.isTransparent;
 
-              let vertexAos = [];
-
               // if the current block has no neighbor or has a transparent neighbour
               // we need to show this block face
               if (!neighbourBlock || isNeighbourTransparent) {

@@ -101,61 +101,6 @@ export default class TerrainChunksManager implements ChunkModel {
     });
   }
 
-  removeChunk(chunkId: ChunkID) {
-    // find the chunk and the relative mesh
-    const chunk = this.chunks.get(chunkId);
-
-    // remove the chunk from the map
-    if (chunk) {
-      this.chunks.delete(chunkId);
-    }
-
-    const solidMesh = this.removeChunkSolidMesh(chunkId);
-    const transparentMesh = this.removeChunkTransparentMesh(chunkId);
-
-    return { chunk, solidMesh, transparentMesh };
-  }
-
-  private removeChunkSolidMesh(chunkId: ChunkID) {
-    const solidMesh = this.solidMesh.get(chunkId);
-
-    // remove chunk solid mesh
-    if (solidMesh) {
-      // remove from the chunks mesh map
-      this.solidMesh.delete(chunkId);
-
-      // let's reuse this mesh if the pool is not filled up
-      if (this.solidMeshPool.length <= MAX_SOLID_MESH_POOL_SIZE) {
-        this.solidMeshPool.push(solidMesh);
-      } else {
-        // dispose the mesh
-        solidMesh.geometry.dispose();
-      }
-    }
-
-    return solidMesh;
-  }
-
-  private removeChunkTransparentMesh(chunkId: ChunkID) {
-    const transparentMesh = this.transparentMesh.get(chunkId);
-
-    // remove chunk transparent mesh
-    if (transparentMesh) {
-      // remove from the chunks mesh map
-      this.transparentMesh.delete(chunkId);
-
-      // let's reuse this mesh if the pool is not filled up
-      if (this.transparentMeshPool.length <= MAX_TRANSPARENT_MESH_POOL_SIZE) {
-        this.transparentMeshPool.push(transparentMesh);
-      } else {
-        // dispose the mesh
-        transparentMesh.geometry.dispose();
-      }
-    }
-
-    return transparentMesh;
-  }
-
   /**
    * Trigger a chunk update on the chunk which contains the current position.
    *
@@ -244,6 +189,61 @@ export default class TerrainChunksManager implements ChunkModel {
     }
 
     return { updatedMesh, removedMesh };
+  }
+
+  removeChunk(chunkId: ChunkID) {
+    // find the chunk and the relative mesh
+    const chunk = this.chunks.get(chunkId);
+
+    // remove the chunk from the map
+    if (chunk) {
+      this.chunks.delete(chunkId);
+    }
+
+    const solidMesh = this.removeChunkSolidMesh(chunkId);
+    const transparentMesh = this.removeChunkTransparentMesh(chunkId);
+
+    return { chunk, solidMesh, transparentMesh };
+  }
+
+  private removeChunkSolidMesh(chunkId: ChunkID) {
+    const solidMesh = this.solidMesh.get(chunkId);
+
+    // remove chunk solid mesh
+    if (solidMesh) {
+      // remove from the chunks mesh map
+      this.solidMesh.delete(chunkId);
+
+      // let's reuse this mesh if the pool is not filled up
+      if (this.solidMeshPool.length <= MAX_SOLID_MESH_POOL_SIZE) {
+        this.solidMeshPool.push(solidMesh);
+      } else {
+        // dispose the mesh
+        solidMesh.geometry.dispose();
+      }
+    }
+
+    return solidMesh;
+  }
+
+  private removeChunkTransparentMesh(chunkId: ChunkID) {
+    const transparentMesh = this.transparentMesh.get(chunkId);
+
+    // remove chunk transparent mesh
+    if (transparentMesh) {
+      // remove from the chunks mesh map
+      this.transparentMesh.delete(chunkId);
+
+      // let's reuse this mesh if the pool is not filled up
+      if (this.transparentMeshPool.length <= MAX_TRANSPARENT_MESH_POOL_SIZE) {
+        this.transparentMeshPool.push(transparentMesh);
+      } else {
+        // dispose the mesh
+        transparentMesh.geometry.dispose();
+      }
+    }
+
+    return transparentMesh;
   }
 
   /**
