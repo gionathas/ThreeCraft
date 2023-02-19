@@ -197,10 +197,12 @@ export default class ChunkUtils {
                     },
                     blockFace,
                     aoSides,
-                    chunk
+                    chunk,
+                    terrainMap
                   );
 
                   aos.push(...vertexAO);
+                  // aos.push(1.0, 1.0, 1.0);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -241,10 +243,11 @@ export default class ChunkUtils {
       side1: [number, number, number];
       side2: [number, number, number];
     },
-    chunk: ChunkModel
+    chunk: ChunkModel,
+    terrainMap: TerrainMap
   ) {
-    const aoIntensity = 0.8;
-    let rgb = 1.0;
+    const aoStep = [1.0, 0.9, 0.85, 0.7];
+    let step = 0;
 
     if (blockFace === "top") {
       const t0 = chunk.getBlock({
@@ -253,18 +256,37 @@ export default class ChunkUtils {
         z: z + side0[2],
       });
 
-      if (t0 && BlockUtils.isVisibleBlock(t0.type)) {
-        rgb *= aoIntensity;
+      if (!t0) {
+        const sHeight = terrainMap.getSurfaceHeight(
+          Math.floor(x + side0[0]),
+          Math.floor(z + side0[2])
+        );
+
+        if (y < sHeight) {
+          step += 1;
+        }
+      } else if (BlockUtils.isVisibleBlock(t0.type)) {
+        step += 1;
       }
 
+      // side 1
       const t1 = chunk.getBlock({
         x: x + side1[0],
         y: y + side1[1],
         z: z + side1[2],
       });
 
-      if (t1 && BlockUtils.isVisibleBlock(t1.type)) {
-        rgb *= aoIntensity;
+      if (!t1) {
+        const sHeight = terrainMap.getSurfaceHeight(
+          Math.floor(x + side1[0]),
+          Math.floor(z + side1[2])
+        );
+
+        if (y < sHeight) {
+          step += 1;
+        }
+      } else if (t1 && BlockUtils.isVisibleBlock(t1.type)) {
+        step += 1;
       }
 
       const t2 = chunk.getBlock({
@@ -273,10 +295,21 @@ export default class ChunkUtils {
         z: z + side2[2],
       });
 
-      if (t2 && BlockUtils.isVisibleBlock(t2.type)) {
-        rgb *= aoIntensity;
+      if (!t2) {
+        const sHeight = terrainMap.getSurfaceHeight(
+          Math.floor(x + side2[0]),
+          Math.floor(z + side2[2])
+        );
+
+        if (y < sHeight) {
+          step += 1;
+        }
+      } else if (BlockUtils.isVisibleBlock(t2.type)) {
+        step += 1;
       }
     }
+
+    const rgb = aoStep[step];
 
     return [rgb, rgb, rgb];
   }

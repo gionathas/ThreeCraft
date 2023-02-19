@@ -151,7 +151,7 @@ export default class Terrain {
 
     // update all the affected chunks
     const { updatedMesh: updatedMeshList, removedMesh: removedMeshList } =
-      this.chunksManager.updateChunks(blockCoord);
+      this.chunksManager.updateChunk(blockCoord);
 
     for (const updatedMesh of updatedMeshList) {
       // if the chunk mesh was not already in the scene, add it

@@ -102,14 +102,13 @@ export default class TerrainChunksManager implements ChunkModel {
   }
 
   /**
-   * Trigger a chunk update on the chunk which contains the current position.
+   * Update the chunk which contain the block in the specified position.
    *
-   * This operation will update also the chunk neighbours,
-   * in case the block is in the edge of the chunk
-   *
-   * @returns a list of all the updated chunk mesh
+   * This operation will update also the neighbours blocks of the current block.
+   * So if a neighbour block is positioned inside a different chunk rather than the original,
+   * it will be updated as well.
    */
-  updateChunks({ x, y, z }: Coordinate) {
+  updateChunk({ x, y, z }: Coordinate) {
     const updatedMesh = [];
     const removedMesh = [];
 
