@@ -15,8 +15,10 @@ export const EDITING_DISTANCE = 7;
 /**
  * Terrain Chunks
  */
-export const CHUNK_WIDTH = 16;
-export const CHUNK_HEIGHT = 16;
+export const CHUNK_WIDTH = getNumber(import.meta.env.VITE_TERRAIN_CHUNK_WIDTH);
+export const CHUNK_HEIGHT = getNumber(
+  import.meta.env.VITE_TERRAIN_CHUNK_HEIGHT
+);
 
 /**
  * Terrain Generation
