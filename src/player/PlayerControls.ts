@@ -41,7 +41,7 @@ export const simPlayerProperties: PlayerControlsProperties = {
   showHitbox: false,
 };
 
-const SLIDING_DEAD_ANGLE = 0.3;
+const SLIDING_DEAD_ANGLE = 0.1;
 const MIN_VELOCITY = 0.001;
 
 /**
