@@ -247,7 +247,7 @@ export default class ChunkUtils {
     const aoIntensity = [1.0, 0.6, 0.5, 0.4];
     let step = 0;
 
-    if (blockFace === "back" || blockFace === "top") {
+    if (blockFace === "left") {
       const cornerBlock = chunk.getBlock({
         x: x + side0[0],
         y: y + side0[1],
