@@ -76,7 +76,7 @@ export const MIN_WORLD_HEIGHT =
   BOTTOM_RENDER_DISTANCE_IN_CHUNKS * -CHUNK_HEIGHT;
 export const MAX_TERRAIN_HEIGHT = CONTINENTALNESS_MAX_HEIGHT + MAX_EROSION;
 export const MIN_TERRAIN_HEIGHT = CONTINENTALNESS_MIN_HEIGHT - MAX_EROSION;
-export const SEA_LEVEL = CONTINENTALNESS_MIN_HEIGHT + 8;
+export const SEA_LEVEL = CONTINENTALNESS_MIN_HEIGHT + 15;
 export const CLOUD_LEVEL = MAX_TERRAIN_HEIGHT - 10;
 
 /**
@@ -91,12 +91,12 @@ function getBoolean(key: keyof ImportMetaEnv): boolean {
 }
 
 function getNumber(key: keyof ImportMetaEnv): number {
-  return parseInt(key as string);
+  return parseFloat(key as string);
 }
 
 function getOptionalNumber(key?: keyof ImportMetaEnv): number | undefined {
   if (key) {
-    return parseInt(key as string);
+    return parseFloat(key as string);
   }
 
   return undefined;

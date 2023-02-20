@@ -1,6 +1,11 @@
 import { SEA_LEVEL, TERRAIN_OPTIMIZATION_ENABLED } from "../config/constants";
 import TerrainMap from "../noise/TerrainMap";
-import { BlockFace, BlockType, BlockUtils } from "../terrain/Block";
+import {
+  BlockFace,
+  BlockFaceAO,
+  BlockType,
+  BlockUtils,
+} from "../terrain/Block";
 import { ChunkID, ChunkModel } from "../terrain/Chunk";
 import { Coordinate } from "./helpers";
 
@@ -234,15 +239,7 @@ export default class ChunkUtils {
   private static computeVertexAO(
     { x, y, z }: Coordinate,
     blockFace: BlockFace,
-    {
-      side0,
-      side1,
-      side2,
-    }: {
-      side0: [number, number, number];
-      side1: [number, number, number];
-      side2: [number, number, number];
-    },
+    { side0, side1, side2 }: BlockFaceAO,
     chunk: ChunkModel,
     terrainMap: TerrainMap
   ) {
@@ -251,13 +248,13 @@ export default class ChunkUtils {
     let step = 0;
 
     if (blockFace === "back" || blockFace === "top") {
-      const t0 = chunk.getBlock({
+      const cornerBlock = chunk.getBlock({
         x: x + side0[0],
         y: y + side0[1],
         z: z + side0[2],
       });
 
-      if (!t0) {
+      if (!cornerBlock) {
         const sHeight = terrainMap.getSurfaceHeight(
           Math.floor(x + side0[0]),
           Math.floor(z + side0[2])
@@ -269,18 +266,18 @@ export default class ChunkUtils {
         ) {
           step += 1;
         }
-      } else if (!t0.isTransparent) {
+      } else if (!cornerBlock.isTransparent) {
         step += 1;
       }
 
       // side 1
-      const t1 = chunk.getBlock({
+      const side1Block = chunk.getBlock({
         x: x + side1[0],
         y: y + side1[1],
         z: z + side1[2],
       });
 
-      if (!t1) {
+      if (!side1Block) {
         const sHeight = terrainMap.getSurfaceHeight(
           Math.floor(x + side1[0]),
           Math.floor(z + side1[2])
@@ -292,17 +289,17 @@ export default class ChunkUtils {
         ) {
           step += 1;
         }
-      } else if (!t1.isTransparent) {
+      } else if (!side1Block.isTransparent) {
         step += 1;
       }
 
-      const t2 = chunk.getBlock({
+      const side2Block = chunk.getBlock({
         x: x + side2[0],
         y: y + side2[1],
         z: z + side2[2],
       });
 
-      if (!t2) {
+      if (!side2Block) {
         const sHeight = terrainMap.getSurfaceHeight(
           Math.floor(x + side2[0]),
           Math.floor(z + side2[2])
@@ -314,7 +311,7 @@ export default class ChunkUtils {
         ) {
           step += 1;
         }
-      } else if (!t2.isTransparent) {
+      } else if (!side2Block.isTransparent) {
         step += 1;
       }
     }

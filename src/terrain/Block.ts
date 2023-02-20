@@ -28,6 +28,11 @@ enum BlockFaceEnum {
 }
 
 export type BlockFace = keyof typeof BlockFaceEnum;
+export type BlockFaceAO = {
+  side0: [number, number, number];
+  side1: [number, number, number];
+  side2: [number, number, number];
+};
 type BlockTextureFace = "top" | "bottom" | "side";
 
 type BlockFaceGeometry = {
@@ -35,11 +40,7 @@ type BlockFaceGeometry = {
   vertices: {
     pos: [number, number, number];
     uv: [number, number];
-    ao: {
-      side0: [number, number, number];
-      side1: [number, number, number];
-      side2: [number, number, number];
-    };
+    ao: BlockFaceAO;
   }[];
 };
 
