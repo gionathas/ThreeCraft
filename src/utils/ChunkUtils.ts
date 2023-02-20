@@ -1,11 +1,6 @@
 import { SEA_LEVEL, TERRAIN_OPTIMIZATION_ENABLED } from "../config/constants";
 import TerrainMap from "../noise/TerrainMap";
-import {
-  BlockFace,
-  BlockFaceAO,
-  BlockType,
-  BlockUtils,
-} from "../terrain/Block";
+import { BlockFaceAO, BlockType, BlockUtils } from "../terrain/Block";
 import { ChunkID, ChunkModel } from "../terrain/Chunk";
 import { Coordinate } from "./helpers";
 
@@ -158,7 +153,7 @@ export default class ChunkUtils {
               const isBelowNeighbourSurface =
                 blockY < neighbourSurfaceHeight - (blockFace === "top" ? 1 : 0);
 
-              // this will prevent all the underneath blocks to be rendered
+              // this will prevent all the underground blocks to be rendered
               if (
                 terrainOptimization &&
                 isEdgeBlock &&
@@ -200,14 +195,12 @@ export default class ChunkUtils {
                       y: vertexY,
                       z: vertexZ,
                     },
-                    blockFace,
                     aoSides,
                     chunk,
                     terrainMap
                   );
 
                   aos.push(...vertexAO);
-                  // aos.push(1.0, 1.0, 1.0);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -236,87 +229,63 @@ export default class ChunkUtils {
     };
   }
 
+  /**
+   * This function compute the ambient occlusion for a particular vertex of a block face.
+   *
+   * It will return an rgb value representing how much occluded the vertex is, from no occlusion
+   * (1.0, 1.0, 1.0) to maximal occlusion (0.7, 0.7, 0.7)
+   *
+   * //TODO fix ambient occlusion asintropy issue
+   */
   private static computeVertexAO(
     { x, y, z }: Coordinate,
-    blockFace: BlockFace,
     { side0, side1, side2 }: BlockFaceAO,
     chunk: ChunkModel,
     terrainMap: TerrainMap
   ) {
-    // const aoIntensity = [1.0, 0.9, 0.8, 0.7];
-    const aoIntensity = [1.0, 0.6, 0.5, 0.4];
-    let step = 0;
+    const aoIntensity = [1.0, 0.9, 0.8, 0.7];
+    // const aoIntensity = [1.0, 0.6, 0.5, 0.4];
 
-    if (blockFace === "bottom") {
-      const cornerBlock = chunk.getBlock({
-        x: x + side0[0],
-        y: y + side0[1],
-        z: z + side0[2],
+    function isOccluded(dx: number, dy: number, dz: number) {
+      const occludingBlock = chunk.getBlock({
+        x: x + dx,
+        y: y + dy,
+        z: z + dz,
       });
 
-      if (!cornerBlock) {
-        const sHeight = terrainMap.getSurfaceHeight(
-          Math.floor(x + side0[0]),
-          Math.floor(z + side0[2])
-        );
-
-        if (
-          (Math.sign(side0[1]) > 0 && y < sHeight) ||
-          (Math.sign(side0[1]) < 0 && Math.abs(y - sHeight) === 0)
-        ) {
-          step += 1;
-        }
-      } else if (!cornerBlock.isTransparent) {
-        step += 1;
+      if (occludingBlock && !occludingBlock.isTransparent) {
+        return true;
       }
 
-      // side 1
-      const side1Block = chunk.getBlock({
-        x: x + side1[0],
-        y: y + side1[1],
-        z: z + side1[2],
-      });
-
-      if (!side1Block) {
-        const sHeight = terrainMap.getSurfaceHeight(
-          Math.floor(x + side1[0]),
-          Math.floor(z + side1[2])
+      // out of the chunk edges, use the surface height as an heuristic check
+      if (!occludingBlock) {
+        const nearbySurfaceHeight = terrainMap.getSurfaceHeight(
+          Math.floor(x + dx),
+          Math.floor(z + dz)
         );
 
+        // if we are checking a block above us we just a need an higher surface height
+        // to get occlusion, whereas if we are checking a block below us we need
+        // a surface height which is at the same level of the vertex y coordinate
         if (
-          (Math.sign(side1[1]) > 0 && y < sHeight) ||
-          (Math.sign(side1[1]) < 0 && Math.abs(y - sHeight) === 0)
+          (Math.sign(dy) > 0 && y < nearbySurfaceHeight) ||
+          (Math.sign(dy) < 0 && Math.abs(y - nearbySurfaceHeight) === 0)
         ) {
-          step += 1;
+          return true;
         }
-      } else if (!side1Block.isTransparent) {
-        step += 1;
       }
 
-      const side2Block = chunk.getBlock({
-        x: x + side2[0],
-        y: y + side2[1],
-        z: z + side2[2],
-      });
+      return false;
+    }
 
-      if (!side2Block) {
-        const sHeight = terrainMap.getSurfaceHeight(
-          Math.floor(x + side2[0]),
-          Math.floor(z + side2[2])
-        );
-
-        if (
-          (Math.sign(side2[1]) > 0 && y < sHeight) ||
-          (Math.sign(side2[1]) < 0 && Math.abs(y - sHeight) === 0)
-        ) {
-          step += 1;
-        }
-      } else if (!side2Block.isTransparent) {
-        step += 1;
+    let occlusionStep = 0;
+    for (const [dx, dy, dz] of [side0, side1, side2]) {
+      if (isOccluded(dx, dy, dz)) {
+        occlusionStep += 1;
       }
     }
 
-    const rgb = aoIntensity[step];
+    const rgb = aoIntensity[occlusionStep];
     return [rgb, rgb, rgb];
   }
 }
