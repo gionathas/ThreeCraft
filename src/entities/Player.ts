@@ -9,6 +9,7 @@ import Terrain from "./Terrain";
 export type PlayerMode = "sim" | "dev";
 
 export default class Player {
+  private terrain: Terrain;
   private playerControls: PlayerControls;
   private editingControls: EditingControls;
 
@@ -19,6 +20,7 @@ export default class Player {
     terrain: Terrain,
     mode: PlayerMode
   ) {
+    this.terrain = terrain;
     this.playerControls = new PlayerControls(
       camera,
       domElement,
@@ -33,6 +35,11 @@ export default class Player {
   update(dt: number) {
     this.playerControls.update(dt);
     this.editingControls.update();
+  }
+
+  setSpawnOnPosition(x: number, z: number) {
+    const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
+    this.setSpawn(x, surfaceHeight + 3, z);
   }
 
   setSpawn(x: number, y: number, z: number) {

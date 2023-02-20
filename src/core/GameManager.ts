@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CHUNK_HEIGHT, DEFAULT_PLAYER_MODE } from "../config/constants";
+import { DEFAULT_PLAYER_MODE } from "../config/constants";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -142,7 +142,7 @@ export default class GameManager {
       );
 
       //FIXME wait the terrain finished being created
-      this.player.setSpawn(0, CHUNK_HEIGHT, 5);
+      this.player.setSpawnOnPosition(0, 0);
     }
 
     return this.player;

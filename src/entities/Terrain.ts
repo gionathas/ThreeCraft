@@ -210,6 +210,10 @@ export default class Terrain {
     return this.chunksManager._poolSolidMeshSize;
   }
 
+  getSurfaceHeight(x: number, z: number) {
+    return this.terrainMap.getSurfaceHeight(x, z);
+  }
+
   /**
    * //WARN if this function is invoked frequently
    * it can lead to an high memory usage due to his caching behavior,
