@@ -71,9 +71,9 @@ export default class GameManager {
       2
     )} vz: ${vz.toFixed(2)}</p>`;
 
-    infoUI!.innerHTML += `<p>Target Block: (${targetBlock?.position.map(
-      (block) => Math.floor(block)
-    )})</p>`;
+    // infoUI!.innerHTML += `<p>Target Block: (${targetBlock?.position.map(
+    //   (block) => Math.floor(block)
+    // )})</p>`;
     infoUI!.innerHTML += `<p>Current Chunk: (${currentChunkId})</p>`;
     infoUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
     infoUI!.innerHTML += `<p>Total Mesh: ${totalMesh}</p>`;

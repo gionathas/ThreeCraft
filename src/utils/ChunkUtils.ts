@@ -246,11 +246,11 @@ export default class ChunkUtils {
     chunk: ChunkModel,
     terrainMap: TerrainMap
   ) {
-    // const aoStep = [1.0, 0.9, 0.85, 0.7];
-    const aoStep = [1.0, 0.6, 0.5, 0.4];
+    // const aoIntensity = [1.0, 0.9, 0.8, 0.7];
+    const aoIntensity = [1.0, 0.6, 0.5, 0.4];
     let step = 0;
 
-    if (blockFace === "back") {
+    if (blockFace === "back" || blockFace === "top") {
       const t0 = chunk.getBlock({
         x: x + side0[0],
         y: y + side0[1],
@@ -263,10 +263,13 @@ export default class ChunkUtils {
           Math.floor(z + side0[2])
         );
 
-        if (y < sHeight) {
+        if (
+          (Math.sign(side0[1]) > 0 && y < sHeight) ||
+          (Math.sign(side0[1]) < 0 && Math.abs(y - sHeight) === 0)
+        ) {
           step += 1;
         }
-      } else if (BlockUtils.isVisibleBlock(t0.type)) {
+      } else if (!t0.isTransparent) {
         step += 1;
       }
 
@@ -283,10 +286,13 @@ export default class ChunkUtils {
           Math.floor(z + side1[2])
         );
 
-        if (y < sHeight) {
+        if (
+          (Math.sign(side1[1]) > 0 && y < sHeight) ||
+          (Math.sign(side1[1]) < 0 && Math.abs(y - sHeight) === 0)
+        ) {
           step += 1;
         }
-      } else if (t1 && BlockUtils.isVisibleBlock(t1.type)) {
+      } else if (!t1.isTransparent) {
         step += 1;
       }
 
@@ -302,16 +308,18 @@ export default class ChunkUtils {
           Math.floor(z + side2[2])
         );
 
-        if (y < sHeight) {
+        if (
+          (Math.sign(side2[1]) > 0 && y < sHeight) ||
+          (Math.sign(side2[1]) < 0 && Math.abs(y - sHeight) === 0)
+        ) {
           step += 1;
         }
-      } else if (BlockUtils.isVisibleBlock(t2.type)) {
+      } else if (!t2.isTransparent) {
         step += 1;
       }
     }
 
-    const rgb = aoStep[step];
-
+    const rgb = aoIntensity[step];
     return [rgb, rgb, rgb];
   }
 }
