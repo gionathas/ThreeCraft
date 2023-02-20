@@ -45,18 +45,20 @@ export function determineAngleQuadrant(angle: number): 1 | 2 | 3 | 4 {
 
 export function getOrientationFromAngle(angle: number): "n" | "e" | "s" | "w" {
   const pi = Math.PI;
-  const northRange = [-pi / 4, pi / 4];
-  const eastRange = [(-3 * pi) / 4, -pi / 4];
-  const westRange = [pi / 4, (3 * pi) / 4];
-  const southRange = [(-3 * pi) / 4, pi / 4];
 
-  if (angle >= northRange[0] && angle <= northRange[1]) {
-    return "n";
+  const northRange = [(-3 * pi) / 4, pi / 4];
+  const southRange = [-pi / 4, pi / 4];
+
+  const eastRange = [pi / 4, (3 * pi) / 4];
+  const westRange = [(-3 * pi) / 4, -pi / 4];
+
+  if (angle >= southRange[0] && angle <= southRange[1]) {
+    return "s";
   } else if (angle > eastRange[0] && angle <= eastRange[1]) {
     return "e";
   } else if (angle >= westRange[0] && angle <= westRange[1]) {
     return "w";
   } else {
-    return "s";
+    return "n";
   }
 }

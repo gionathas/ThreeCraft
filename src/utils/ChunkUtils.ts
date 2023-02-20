@@ -246,7 +246,8 @@ export default class ChunkUtils {
     chunk: ChunkModel,
     terrainMap: TerrainMap
   ) {
-    const aoStep = [1.0, 0.9, 0.85, 0.7];
+    // const aoStep = [1.0, 0.9, 0.85, 0.7];
+    const aoStep = [1.0, 0.6, 0.5, 0.4];
     let step = 0;
 
     if (blockFace === "top") {
