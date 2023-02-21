@@ -26,7 +26,6 @@ export default class Engine {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
 
-    //TODO to improve
     window.addEventListener("resize", () => {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
@@ -44,7 +43,6 @@ export default class Engine {
 
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
-    //TODO add window resizing
     window.addEventListener("resize", () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();

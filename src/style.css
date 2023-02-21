@@ -9,26 +9,7 @@ body {
   font-family: monospace;
 }
 
-.progress-bar {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 80px;
-  color: red;
-}
-
-#infoUI {
-  position: absolute;
-  padding: 4px;
-  color: white;
-  font-size: 18px;
-  line-height: 16px;
-  left: 10px;
-  bottom: 10px;
-  /* background-color: rgb(255, 255, 255, 0.3); */
-}
-
-/* Central cross */
+/* Crosshair */
 #target {
   position: absolute;
   top: 50%;
@@ -64,7 +45,18 @@ body {
   transform: translate(0, -50%);
 }
 
-/* Game paused UI */
+/* UI */
+#debugUI {
+  position: absolute;
+  padding: 4px;
+  color: white;
+  font-size: 18px;
+  line-height: 16px;
+  left: 10px;
+  bottom: 10px;
+  /* background-color: rgb(255, 255, 255, 0.3); */
+}
+
 #game-paused-menu {
   position: absolute;
   backdrop-filter: blur(1px);

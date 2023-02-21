@@ -5,6 +5,7 @@ import { PlayerMode } from "../entities/Player";
  */
 export const TARGET_FRAME_RATE = 1 / 60;
 export const DEFAULT_PLAYER_MODE: PlayerMode = "dev";
+export const SHOW_DEBUG_UI = getBoolean(import.meta.env.VITE_SHOW_DEBUG_UI);
 
 /**
  * Editing settings

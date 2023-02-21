@@ -11,6 +11,15 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { BLOCK_SIZE } from "../terrain/Block";
 import { determineAngleQuadrant } from "../utils/helpers";
+import {
+  JUMP_KEY,
+  MOVE_BACK_KEY,
+  MOVE_FORWARD_KEY,
+  MOVE_LEFT_KEY,
+  MOVE_RIGHT_KEY,
+  SPRINT_KEY,
+  TOGGLE_PLAYER_MODE,
+} from "../utils/KeyBindings";
 
 export interface PlayerControlsProperties {
   width: number;
@@ -181,8 +190,8 @@ export default class PlayerControls extends PointerLockControls {
         break;
       case "dev":
         const upDirection =
-          (this.inputController.getKey("Space") ? 1 : 0) +
-          (this.inputController.getKey("ShiftLeft") ? -1 : 0);
+          (this.inputController.getKey(JUMP_KEY) ? 1 : 0) +
+          (this.inputController.getKey(SPRINT_KEY) ? -1 : 0);
 
         this.velocity.y += upDirection * verticalSpeed;
         break;
@@ -1378,30 +1387,24 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private hasJumped() {
-    return (
-      this.inputController.getKey("Space") &&
-      !this.inputController.getPrevKey("Space")
-    );
+    return this.inputController.hasJustPressedKey(JUMP_KEY);
   }
 
   private hasSwitchedMode() {
-    return (
-      this.inputController.getKey("KeyP") &&
-      !this.inputController.getPrevKey("KeyP")
-    );
+    return this.inputController.hasJustPressedKey(TOGGLE_PLAYER_MODE);
   }
 
   private getControlsForwardDirection() {
     return (
-      (this.inputController.getKey("KeyW") ? 1 : 0) +
-      (this.inputController.getKey("KeyS") ? -1 : 0)
+      (this.inputController.getKey(MOVE_FORWARD_KEY) ? 1 : 0) +
+      (this.inputController.getKey(MOVE_BACK_KEY) ? -1 : 0)
     );
   }
 
   private getControlsRightDirection() {
     return (
-      (this.inputController.getKey("KeyD") ? 1 : 0) +
-      (this.inputController.getKey("KeyA") ? -1 : 0)
+      (this.inputController.getKey(MOVE_RIGHT_KEY) ? 1 : 0) +
+      (this.inputController.getKey(MOVE_LEFT_KEY) ? -1 : 0)
     );
   }
 

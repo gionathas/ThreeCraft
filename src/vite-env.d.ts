@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_SHOW_DEBUG_UI: string;
+
   readonly VITE_EDITING_ENABLED: string;
   readonly VITE_TERRAIN_GENERATION_ENABLED: string;
   readonly VITE_TERRAIN_OPTIMIZATION_ENABLED: string;

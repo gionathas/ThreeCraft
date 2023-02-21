@@ -87,6 +87,10 @@ export default class InputController {
     return this.prevKeys[key];
   }
 
+  hasJustPressedKey(key: KeyCode) {
+    return this.getKey(key) && !this.getPrevKey(key);
+  }
+
   get pointer() {
     const { currentPointer, previousPointer } = this;
     return {
