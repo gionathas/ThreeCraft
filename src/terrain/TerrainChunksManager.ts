@@ -11,6 +11,7 @@ import {
 } from "../utils/helpers";
 import { NeighbourBlockOffsets } from "./Block";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
+import ChunkGeometry from "./ChunkGeometry";
 import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";
 import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
 
@@ -140,7 +141,7 @@ export default class TerrainChunksManager implements ChunkModel {
           const {
             solid: chunkSolidGeometry,
             transparent: chunkTransparentGeometry,
-          } = ChunkUtils.computeChunkGeometry(
+          } = ChunkGeometry.computeChunkGeometry(
             chunkOrigin,
             this,
             CHUNK_WIDTH,

@@ -3,6 +3,7 @@ import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
 import TerrainMap from "../noise/TerrainMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import Chunk, { ChunkID } from "./Chunk";
+import ChunkGeometry from "./ChunkGeometry";
 import TerrainChunkDecorator from "./TerrainChunkDecorator";
 
 function generateTerrainChunk(chunkId: ChunkID, seed: string) {
@@ -23,7 +24,7 @@ function generateTerrainChunk(chunkId: ChunkID, seed: string) {
   chunkDecorator.fillChunk(chunk, chunkOrigin);
   const chunkBlocks = chunk.getBlocks();
 
-  const { solid, transparent } = ChunkUtils.computeChunkGeometry(
+  const { solid, transparent } = ChunkGeometry.computeChunkGeometry(
     chunkOrigin,
     chunk,
     CHUNK_WIDTH,
