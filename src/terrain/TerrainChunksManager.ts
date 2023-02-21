@@ -1,7 +1,6 @@
 import { Pool, spawn } from "threads";
 import * as THREE from "three";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import TextureManager from "../core/TextureManager";
 import TerrainMap from "../noise/TerrainMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import {
@@ -10,6 +9,7 @@ import {
   isEmptyGeometry,
 } from "../utils/helpers";
 import { NeighbourBlockOffsets } from "./Block";
+import BlockMaterial from "./BlockMaterial";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import ChunkGeometry from "./ChunkGeometry";
 import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";
@@ -27,6 +27,7 @@ export default class TerrainChunksManager implements ChunkModel {
   private transparentMesh: Map<ChunkID, THREE.Mesh>;
   private solidMeshPool: Array<THREE.Mesh>;
   private transparentMeshPool: Array<THREE.Mesh>;
+
   private processingChunks: Set<ChunkID>;
   private generatorsPool;
 
@@ -349,8 +350,7 @@ export default class TerrainChunksManager implements ChunkModel {
 
     // pool is empty create a new mesh
     if (!newMesh) {
-      const solidMaterial =
-        TextureManager.getInstance().getSolidBlockMaterial();
+      const solidMaterial = BlockMaterial.getInstance().getSolidBlockMaterial();
       newMesh = new THREE.Mesh(new THREE.BufferGeometry(), solidMaterial);
     }
 
@@ -370,8 +370,7 @@ export default class TerrainChunksManager implements ChunkModel {
 
     if (!newMesh) {
       const transparentMaterial =
-        TextureManager.getInstance().getBlockTransparentMaterial();
-
+        BlockMaterial.getInstance().getBlockTransparentMaterial();
       newMesh = new THREE.Mesh(new THREE.BufferGeometry(), transparentMaterial);
     }
 

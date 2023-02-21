@@ -105,6 +105,6 @@ export default class EditingControls {
     rayLength.multiplyScalar(EDITING_DISTANCE);
     rayEnd.copy(rayStart).add(rayLength);
 
-    return BlockUtils.intersectBlock(rayStart, rayEnd, terrain);
+    return BlockUtils.raycast(rayStart, rayEnd, terrain);
   }
 }

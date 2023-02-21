@@ -3,7 +3,7 @@ import {
   TILE_SIZE,
   TILE_TEXTURES_WIDTH,
   TILE_TEXTURE_HEIGHT,
-} from "../core/TextureManager";
+} from "../core/TextureAtlas";
 import { ChunkModel } from "./Chunk";
 
 export const BLOCK_SIZE = 1;
@@ -540,7 +540,7 @@ export class BlockUtils {
   /**
    * This is a raycast implementation optmized for voxels
    */
-  static intersectBlock(
+  static raycast(
     rayStart: THREE.Vector3,
     rayEnd: THREE.Vector3,
     blocks: ChunkModel

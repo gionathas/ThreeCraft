@@ -1,31 +1,23 @@
 import * as THREE from "three";
+import TextureAtlas from "../core/TextureAtlas";
 
-const TEXTURE_RELATIVE_PATH = "src/assets/textures/block_atlas.png";
-export const TILE_SIZE = 16;
-export const TILE_TEXTURES_WIDTH = 128;
-export const TILE_TEXTURE_HEIGHT = 128;
-
-export default class TextureManager {
-  private static instance: TextureManager;
-
-  texture: THREE.Texture;
+export default class BlockMaterial {
+  private static instance: BlockMaterial;
 
   private blockSolidMaterial: THREE.MeshStandardMaterial;
   private blockTransparentMaterial: THREE.MeshStandardMaterial;
 
   private constructor() {
-    this.texture = new THREE.TextureLoader().load(TEXTURE_RELATIVE_PATH);
-    this.texture.minFilter = THREE.NearestFilter;
-    this.texture.magFilter = THREE.NearestFilter;
+    const texture = TextureAtlas.getInstance().texture;
 
     this.blockSolidMaterial = new THREE.MeshStandardMaterial({
-      map: this.texture,
+      map: texture,
       side: THREE.FrontSide,
       vertexColors: true,
     });
 
     this.blockTransparentMaterial = new THREE.MeshStandardMaterial({
-      map: this.texture,
+      map: texture,
       side: THREE.DoubleSide,
       alphaTest: 0.1,
       transparent: true,
@@ -35,9 +27,9 @@ export default class TextureManager {
     });
   }
 
-  public static getInstance(): TextureManager {
+  public static getInstance(): BlockMaterial {
     if (!this.instance) {
-      this.instance = new TextureManager();
+      this.instance = new BlockMaterial();
     }
     return this.instance;
   }
