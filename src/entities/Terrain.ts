@@ -7,6 +7,7 @@ import {
   MIN_WORLD_HEIGHT,
   TERRAIN_GENERATION_ENABLED,
 } from "../config/constants";
+import Engine from "../core/Engine";
 import TerrainMap from "../noise/TerrainMap";
 
 import { BlockType, BlockUtils } from "../terrain/Block";
@@ -34,8 +35,8 @@ export default class Terrain {
   private terrainMap: TerrainMap;
   private previousCenterPosition: THREE.Vector3;
 
-  constructor(scene: THREE.Scene, centerPosition: THREE.Vector3) {
-    this.scene = scene;
+  constructor(centerPosition: THREE.Vector3) {
+    this.scene = Engine.getInstance().getScene();
     this.previousCenterPosition = centerPosition;
     this.seed = "seed"; //FIXME
     this.terrainMap = new TerrainMap(this.seed);

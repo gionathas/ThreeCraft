@@ -13,23 +13,10 @@ export default class Player {
   private playerControls: PlayerControls;
   private editingControls: EditingControls;
 
-  constructor(
-    camera: THREE.Camera,
-    domElement: HTMLElement,
-    scene: THREE.Scene,
-    terrain: Terrain,
-    mode: PlayerMode
-  ) {
+  constructor(terrain: Terrain, mode: PlayerMode) {
     this.terrain = terrain;
-    this.playerControls = new PlayerControls(
-      camera,
-      domElement,
-      scene,
-      terrain,
-      mode
-    );
-
-    this.editingControls = new EditingControls(scene, this, terrain);
+    this.playerControls = new PlayerControls(terrain, mode);
+    this.editingControls = new EditingControls(this, terrain);
   }
 
   update(dt: number) {

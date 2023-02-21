@@ -1,31 +1,34 @@
 import * as THREE from "three";
+import { AmbientLight } from "three";
 import { DEFAULT_PLAYER_MODE } from "../config/constants";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import AnimatedApp from "./AnimatedApp";
+import Engine from "./Engine";
 
 type GameState = "running" | "paused" | "main-menu";
 
 export default class GameManager {
-  private app: AnimatedApp;
+  private engine: Engine;
+  private scene: THREE.Scene;
+
   private gameState: GameState;
-  private debug: boolean;
 
   private inputController!: InputController;
   private player!: Player;
   private terrain!: Terrain;
 
-  constructor(app: AnimatedApp, debug: boolean) {
-    this.app = app;
-    this.debug = debug;
+  constructor(engine: Engine) {
+    this.engine = engine;
+    this.scene = engine.getScene();
     this.gameState = "main-menu";
   }
 
   initGame() {
     this.inputController = InputController.getInstance();
+    this.initLights();
     this.initTerrain();
-    this.player = this.initPlayer(this.terrain);
+    this.initPlayer(this.terrain);
     this.initEventListeners(this.player);
 
     this.gameState = "running";
@@ -84,11 +87,23 @@ export default class GameManager {
     )}</p>`;
   }
 
+  private initLights() {
+    const sunLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    sunLight.position.set(-1, 2, 4);
+
+    const ambientLight = new AmbientLight(0xffffff, 0.8);
+
+    // add lights
+    this.scene.add(sunLight, ambientLight);
+
+    // set sky color
+    this.scene.background = new THREE.Color("#87CEEB");
+  }
+
   private initTerrain() {
-    const { app } = this;
     const spawn = new THREE.Vector3(0, 0, 0);
 
-    this.terrain = new Terrain(app.scene, spawn);
+    this.terrain = new Terrain(spawn);
     this.terrain.update(spawn, true);
   }
 
@@ -129,23 +144,13 @@ export default class GameManager {
     });
   }
 
+  //TODO wait terrain loading
   private initPlayer(terrain: Terrain) {
-    const { app, debug } = this;
-
     if (!this.player) {
-      this.player = new Player(
-        app.camera,
-        app.renderer.domElement,
-        app.scene,
-        terrain,
-        DEFAULT_PLAYER_MODE
-      );
+      this.player = new Player(terrain, DEFAULT_PLAYER_MODE);
 
-      //FIXME wait the terrain finished being created
       this.player.setSpawnOnPosition(0, 25);
     }
-
-    return this.player;
   }
 
   private isInitialized() {

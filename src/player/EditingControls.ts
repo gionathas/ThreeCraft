@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { EDITING_DISTANCE, EDITING_ENABLED } from "../config/constants";
+import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -7,15 +8,15 @@ import { BlockType, BlockUtils } from "../terrain/Block";
 import BlockMarker from "./BlockMarker";
 
 export default class EditingControls {
+  private scene: THREE.Scene;
   private inputController: InputController;
   private terrain: Terrain;
   private blockMarker: BlockMarker | null;
-  private scene: THREE.Scene;
   private player: Player;
 
-  constructor(scene: THREE.Scene, player: Player, terrain: Terrain) {
+  constructor(player: Player, terrain: Terrain) {
     this.inputController = InputController.getInstance();
-    this.scene = scene;
+    this.scene = Engine.getInstance().getScene();
     this.player = player;
     this.terrain = terrain;
     this.blockMarker = null;

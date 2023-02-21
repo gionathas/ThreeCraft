@@ -5,6 +5,7 @@ import {
   JUMPING_GRAVITY,
   TARGET_FRAME_RATE,
 } from "../config/constants";
+import Engine from "../core/Engine";
 import { PlayerMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -66,14 +67,8 @@ export default class PlayerControls extends PointerLockControls {
   private state: "onGround" | "falling" | "jumping";
   private mode: PlayerMode;
 
-  constructor(
-    camera: THREE.Camera,
-    domElement: HTMLElement,
-    scene: THREE.Scene,
-    terrain: Terrain,
-    mode: PlayerMode
-  ) {
-    super(camera, domElement);
+  constructor(terrain: Terrain, mode: PlayerMode) {
+    super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
     this.terrain = terrain;
     this.velocity = new THREE.Vector3();
     this.controlsDirection = new THREE.Vector3();
@@ -84,11 +79,12 @@ export default class PlayerControls extends PointerLockControls {
       mode === "sim" ? simPlayerProperties : devPlayerProperties;
 
     this.state = "falling";
-    this.initHitBox(scene);
+    this.initHitBox();
   }
 
-  private initHitBox(scene: THREE.Scene) {
+  private initHitBox() {
     const { showHitbox } = this.properties;
+    const scene = Engine.getInstance().getScene();
 
     if (showHitbox) {
       const boxGeom = new THREE.BoxGeometry(
