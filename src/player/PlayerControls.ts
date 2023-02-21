@@ -5,12 +5,6 @@ import {
   JUMPING_GRAVITY,
   TARGET_FRAME_RATE,
 } from "../config/constants";
-import Engine from "../core/Engine";
-import { PlayerMode } from "../entities/Player";
-import Terrain from "../entities/Terrain";
-import InputController from "../io/InputController";
-import { BLOCK_SIZE } from "../terrain/Block";
-import { determineAngleQuadrant } from "../utils/helpers";
 import {
   JUMP_KEY,
   MOVE_BACK_KEY,
@@ -19,7 +13,13 @@ import {
   MOVE_RIGHT_KEY,
   SPRINT_KEY,
   TOGGLE_PLAYER_MODE,
-} from "../utils/KeyBindings";
+} from "../config/keyBindings";
+import Engine from "../core/Engine";
+import { PlayerMode } from "../entities/Player";
+import Terrain from "../entities/Terrain";
+import InputController from "../io/InputController";
+import { BLOCK_SIZE } from "../terrain/Block";
+import { determineAngleQuadrant } from "../utils/helpers";
 
 export interface PlayerControlsProperties {
   width: number;

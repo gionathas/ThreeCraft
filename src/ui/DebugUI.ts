@@ -1,9 +1,9 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import { SHOW_DEBUG_UI } from "../config/constants";
+import { TOGGLE_DEBUG_UI_KEY } from "../config/keyBindings";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import { TOGGLE_DEBUG_UI_KEY } from "../utils/KeyBindings";
 
 export default class DebugUI {
   private player: Player;
