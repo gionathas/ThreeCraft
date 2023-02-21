@@ -50,14 +50,20 @@ export default class GameManager {
     }
   }
 
+  /**
+   * //TODO implement a better light system (smooth lighting)
+   */
   private initLights() {
     const sunLight = new THREE.DirectionalLight(0xffffff, 0.2);
-    sunLight.position.set(-1, 2, 4);
+    sunLight.position.set(100, 100, 0);
+
+    // const helper = new THREE.DirectionalLightHelper(sunLight, 5);
 
     const ambientLight = new AmbientLight(0xffffff, 0.8);
 
     // add lights
     this.scene.add(sunLight, ambientLight);
+    // this.scene.add(helper);
 
     // set sky color
     this.scene.background = new THREE.Color("#87CEEB");
