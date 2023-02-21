@@ -10,14 +10,12 @@ const ambientLight = new AmbientLight(0xffffff, 0.8);
 
 const app = new AnimatedApp({
   sceneConfig: {
-    background: new THREE.Color("lightblue"),
+    background: new THREE.Color("#87CEEB"),
   },
   lightsConfig: {
     lights: [light1, ambientLight],
   },
-  cameraConfig: {
-    position: new THREE.Vector3(0, 0, -20),
-  },
+
   guiConfig: {
     grid: false,
     axes: false,

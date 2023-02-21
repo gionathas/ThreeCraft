@@ -142,7 +142,7 @@ export default class GameManager {
       );
 
       //FIXME wait the terrain finished being created
-      this.player.setSpawnOnPosition(0, 0);
+      this.player.setSpawnOnPosition(0, 25);
     }
 
     return this.player;
