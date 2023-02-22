@@ -5,7 +5,7 @@ import HeightMap from "./HeightMap";
 import PVMap from "./PVMap";
 import TreeMap from "./TreeMap";
 
-export default class TerrainMap extends AbstractMap {
+export default class WorldMap extends AbstractMap {
   private continentalMap: ContinentalMap;
   private erosionMap: ErosionMap;
   private pvMap: PVMap;
@@ -26,10 +26,6 @@ export default class TerrainMap extends AbstractMap {
     this.treeMap = new TreeMap(seed);
   }
 
-  hasTree(x: number, z: number) {
-    return this.treeMap.hasTree(x, z);
-  }
-
   getSurfaceHeight(x: number, z: number) {
     return this.heightMap.getSurfaceHeight(x, z);
   }
@@ -44,5 +40,9 @@ export default class TerrainMap extends AbstractMap {
 
   getPV(x: number, z: number, erosion?: number): number {
     return this.pvMap.getPV(x, z, erosion);
+  }
+
+  getTreeMap() {
+    return this.treeMap;
   }
 }

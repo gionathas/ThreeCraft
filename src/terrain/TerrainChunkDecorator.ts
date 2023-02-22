@@ -1,5 +1,5 @@
 import { SEA_LEVEL } from "../config/constants";
-import TerrainMap from "../noise/TerrainMap";
+import WorldMap from "../noise/WorldMap";
 import { Coordinate } from "../utils/helpers";
 import { BlockType } from "./Block";
 import Chunk from "./Chunk";
@@ -26,10 +26,10 @@ type ChunkBoundaries = {
  *  workers are calculating (and caching) the heightMap by themself but wasting computation
  */
 export default class TerrainChunkDecorator {
-  private terrainMap: TerrainMap;
+  private worldMap: WorldMap;
 
-  constructor(terrainMap: TerrainMap) {
-    this.terrainMap = terrainMap;
+  constructor(worldMap: WorldMap) {
+    this.worldMap = worldMap;
   }
 
   fillChunk(chunk: Chunk, { x: startX, y: startY, z: startZ }: Coordinate) {
@@ -55,8 +55,8 @@ export default class TerrainChunkDecorator {
         for (let x = startX; x < endX; x++) {
           const blockCoord = { x, y, z };
 
-          const surfaceHeight = this.terrainMap.getSurfaceHeight(x, z);
-          this.generateBlock(chunk, blockCoord, surfaceHeight);
+          const surfaceY = this.worldMap.getSurfaceHeight(x, z);
+          this.generateBlock(chunk, blockCoord, surfaceY);
         }
       }
     }
@@ -65,21 +65,21 @@ export default class TerrainChunkDecorator {
   private generateBlock(
     chunk: Chunk,
     blockCoord: Coordinate,
-    surfaceHeight: number
+    surfaceY: number
     // boundaries: ChunkBoundaries
   ) {
-    if (blockCoord.y < surfaceHeight) {
+    if (blockCoord.y < surfaceY) {
       this.generateBlockBelowSurface(
         chunk,
         blockCoord,
-        surfaceHeight
+        surfaceY
         // boundaries
       );
     } else {
       this.generateBlockAboveSurface(
         chunk,
         blockCoord,
-        surfaceHeight
+        surfaceY
         // boundaries
       );
     }
@@ -88,13 +88,13 @@ export default class TerrainChunkDecorator {
   private generateBlockBelowSurface(
     chunk: Chunk,
     blockCoord: Coordinate,
-    surfaceHeight: number
+    surfaceY: number
     // boundaries: ChunkBoundaries
   ) {
     const { x, y, z } = blockCoord;
-    const distFromSurface = Math.abs(y - surfaceHeight);
-    const pv = this.terrainMap.getPV(x, z);
-    const erosion = this.terrainMap.getErosion(x, z);
+    const distFromSurface = Math.abs(y - surfaceY);
+    const pv = this.worldMap.getPV(x, z);
+    const erosion = this.worldMap.getErosion(x, z);
 
     const isMountain = pv >= 0.5;
 
@@ -126,23 +126,19 @@ export default class TerrainChunkDecorator {
   private generateBlockAboveSurface(
     chunk: Chunk,
     blockCoord: Coordinate,
-    surfaceHeight: number
+    surfaceY: number
     // boundaries: ChunkBoundaries
   ) {
     const { x, y, z } = blockCoord;
-    // const { upper } = boundaries;
-    const distFromSurface = Math.abs(y - surfaceHeight);
 
     let blockType: BlockType = BlockType.AIR;
 
     if (y < SEA_LEVEL) {
       blockType = BlockType.WATER;
     } else {
-      const treeHeight = 3;
+      const treeMap = this.worldMap.getTreeMap();
 
-      const placeTree = this.terrainMap.hasTree(x, z);
-
-      if (placeTree && distFromSurface < treeHeight) {
+      if (treeMap.isTreeTrunk(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LOG;
       }
     }

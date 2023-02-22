@@ -1,5 +1,5 @@
 import { SEA_LEVEL, TERRAIN_OPTIMIZATION_ENABLED } from "../config/constants";
-import TerrainMap from "../noise/TerrainMap";
+import WorldMap from "../noise/WorldMap";
 import { Coordinate } from "../utils/helpers";
 import { BlockFaceAO, BlockType, BlockUtils } from "./Block";
 import { ChunkModel } from "./Chunk";
@@ -10,7 +10,7 @@ export default class ChunkGeometry {
     chunk: ChunkModel,
     chunkWidth: number,
     chunkHeight: number,
-    terrainMap: TerrainMap
+    worldMap: WorldMap
   ) {
     const soldidPositions: number[] = [];
     const solidNormals: number[] = [];
@@ -77,7 +77,7 @@ export default class ChunkGeometry {
                 z: neighbourZ,
               });
 
-              const neighbourSurfaceHeight = terrainMap.getSurfaceHeight(
+              const neighbourSurfaceHeight = worldMap.getSurfaceHeight(
                 neighbourX,
                 neighbourZ
               );
@@ -131,7 +131,7 @@ export default class ChunkGeometry {
                     },
                     aoSides,
                     chunk,
-                    terrainMap
+                    worldMap
                   );
 
                   aos.push(...vertexAO);
@@ -175,7 +175,7 @@ export default class ChunkGeometry {
     { x, y, z }: Coordinate,
     { side0, side1, side2 }: BlockFaceAO,
     chunk: ChunkModel,
-    terrainMap: TerrainMap
+    worldMap: WorldMap
   ) {
     const aoIntensity = [1.0, 0.9, 0.8, 0.7];
     // const aoIntensity = [1.0, 0.6, 0.5, 0.4];
@@ -193,7 +193,7 @@ export default class ChunkGeometry {
 
       // out of the chunk edges, use the surface height as an heuristic check
       if (!occludingBlock) {
-        const nearbySurfaceHeight = terrainMap.getSurfaceHeight(
+        const nearbySurfaceHeight = worldMap.getSurfaceHeight(
           Math.floor(x + dx),
           Math.floor(z + dz)
         );

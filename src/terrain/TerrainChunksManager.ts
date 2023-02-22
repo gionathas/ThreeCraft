@@ -1,7 +1,7 @@
 import { Pool, spawn } from "threads";
 import * as THREE from "three";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import TerrainMap from "../noise/TerrainMap";
+import WorldMap from "../noise/WorldMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import {
   BufferGeometryData,
@@ -19,8 +19,9 @@ import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
 const MAX_SOLID_MESH_POOL_SIZE = 200;
 const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 
+//TODO rename into terrain
 export default class TerrainChunksManager implements ChunkModel {
-  private terrainMap: TerrainMap;
+  private worldMap: WorldMap;
 
   private chunks: Map<ChunkID, Chunk>;
   private solidMesh: Map<ChunkID, THREE.Mesh>;
@@ -31,8 +32,8 @@ export default class TerrainChunksManager implements ChunkModel {
   private processingChunks: Set<ChunkID>;
   private generatorsPool;
 
-  constructor(terrainMap: TerrainMap) {
-    this.terrainMap = terrainMap;
+  constructor(worldMap: WorldMap) {
+    this.worldMap = worldMap;
     this.chunks = new Map();
     this.solidMesh = new Map();
     this.transparentMesh = new Map();
@@ -70,7 +71,7 @@ export default class TerrainChunksManager implements ChunkModel {
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunks) => {
       const { solidGeometry, transparentGeometry, blocksBuffer, time } =
-        await generateChunks(chunkId, this.terrainMap.getSeed());
+        await generateChunks(chunkId, this.worldMap.getSeed());
 
       // console.log(time);
 
@@ -147,7 +148,7 @@ export default class TerrainChunksManager implements ChunkModel {
             this,
             CHUNK_WIDTH,
             CHUNK_HEIGHT,
-            this.terrainMap
+            this.worldMap
           );
 
           const hasSolidMesh = !isEmptyGeometry(chunkSolidGeometry);

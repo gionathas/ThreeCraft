@@ -1,6 +1,6 @@
 import { expose, Transfer } from "threads/worker";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import TerrainMap from "../noise/TerrainMap";
+import WorldMap from "../noise/WorldMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import Chunk, { ChunkID } from "./Chunk";
 import ChunkGeometry from "./ChunkGeometry";
@@ -8,8 +8,8 @@ import TerrainChunkDecorator from "./TerrainChunkDecorator";
 
 function generateTerrainChunk(chunkId: ChunkID, seed: string) {
   const start = performance.now();
-  const terrainMap = new TerrainMap(seed);
-  const chunkDecorator = new TerrainChunkDecorator(terrainMap);
+  const worldMap = new WorldMap(seed);
+  const chunkDecorator = new TerrainChunkDecorator(worldMap);
 
   const chunkOrigin = ChunkUtils.computeChunkAbsolutePosition(
     chunkId,
@@ -29,7 +29,7 @@ function generateTerrainChunk(chunkId: ChunkID, seed: string) {
     chunk,
     CHUNK_WIDTH,
     CHUNK_HEIGHT,
-    terrainMap
+    worldMap
   );
 
   const end = performance.now();

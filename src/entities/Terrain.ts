@@ -9,7 +9,7 @@ import {
 } from "../config/constants";
 import Engine from "../core/Engine";
 
-import TerrainMap from "../noise/TerrainMap";
+import WorldMap from "../noise/WorldMap";
 import { BlockType, BlockUtils } from "../terrain/Block";
 import TerrainChunksManager from "../terrain/TerrainChunksManager";
 import ChunkUtils from "../utils/ChunkUtils";
@@ -33,15 +33,15 @@ export default class Terrain {
 
   private seed: string;
   private chunksManager: TerrainChunksManager;
-  private terrainMap: TerrainMap;
+  private worldMap: WorldMap;
   private previousCenterPosition: THREE.Vector3;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
     this.previousCenterPosition = centerPosition;
     this.seed = "seed"; //FIXME
-    this.terrainMap = new TerrainMap(this.seed);
-    this.chunksManager = new TerrainChunksManager(this.terrainMap);
+    this.worldMap = new WorldMap(this.seed);
+    this.chunksManager = new TerrainChunksManager(this.worldMap);
   }
 
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
@@ -213,7 +213,7 @@ export default class Terrain {
   }
 
   getSurfaceHeight(x: number, z: number) {
-    return this.terrainMap.getSurfaceHeight(x, z);
+    return this.worldMap.getSurfaceHeight(x, z);
   }
 
   /**
@@ -222,15 +222,15 @@ export default class Terrain {
    * use it only in debug mode
    */
   _getContinentalness(x: number, z: number) {
-    return this.terrainMap.getContinentalness(x, z);
+    return this.worldMap.getContinentalness(x, z);
   }
 
   _getErosion(x: number, z: number) {
-    return this.terrainMap.getErosion(x, z);
+    return this.worldMap.getErosion(x, z);
   }
 
   _getPV(x: number, z: number) {
     const erosion = this._getErosion(x, z);
-    return this.terrainMap.getPV(x, z, erosion);
+    return this.worldMap.getPV(x, z, erosion);
   }
 }
