@@ -16,6 +16,7 @@ export enum BlockType {
   WATER,
   SAND,
   GLASS,
+  OAK_LOG,
 }
 
 enum BlockFaceEnum {
@@ -120,6 +121,23 @@ export const Blocks: Record<BlockType, BlockInfo> = {
       side: {
         row: 0,
         col: 2,
+      },
+    },
+  },
+  [BlockType.OAK_LOG]: {
+    isTransparent: false,
+    texture: {
+      top: {
+        row: 1,
+        col: 2,
+      },
+      bottom: {
+        row: 1,
+        col: 2,
+      },
+      side: {
+        row: 1,
+        col: 3,
       },
     },
   },

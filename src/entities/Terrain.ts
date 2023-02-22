@@ -8,8 +8,8 @@ import {
   TERRAIN_GENERATION_ENABLED,
 } from "../config/constants";
 import Engine from "../core/Engine";
-import TerrainMap from "../noise/TerrainMap";
 
+import TerrainMap from "../noise/TerrainMap";
 import { BlockType, BlockUtils } from "../terrain/Block";
 import TerrainChunksManager from "../terrain/TerrainChunksManager";
 import ChunkUtils from "../utils/ChunkUtils";
@@ -27,6 +27,7 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
+//TODO rename into world
 export default class Terrain {
   private scene: THREE.Scene;
 

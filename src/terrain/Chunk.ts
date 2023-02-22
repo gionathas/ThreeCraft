@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
-import { BlockInfo, Blocks, BlockType } from "./Block";
+import { BlockInfo, Blocks, BlockType, BlockUtils } from "./Block";
 
 export type ChunkID = string;
 
@@ -52,6 +52,10 @@ export default class Chunk implements ChunkModel {
 
     const blockIndex = this.computeBlockIndex(coord);
     this.blocks[blockIndex] = block;
+  }
+
+  isFilled(coord: Coordinate) {
+    return BlockUtils.isVisibleBlock(this.getBlock(coord)?.type);
   }
 
   isBlockInChunk(blockCoord: Coordinate) {
