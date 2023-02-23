@@ -23,7 +23,7 @@ export default class WorldMap extends AbstractMap {
       this.erosionMap,
       this.pvMap
     );
-    this.treeMap = new TreeMap(seed);
+    this.treeMap = new TreeMap(seed, this.heightMap);
   }
 
   getSurfaceHeight(x: number, z: number) {

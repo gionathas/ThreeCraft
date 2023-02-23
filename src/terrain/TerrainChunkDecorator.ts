@@ -66,15 +66,9 @@ export default class TerrainChunkDecorator {
     chunk: Chunk,
     blockCoord: Coordinate,
     surfaceY: number
-    // boundaries: ChunkBoundaries
   ) {
     if (blockCoord.y < surfaceY) {
-      this.generateBlockBelowSurface(
-        chunk,
-        blockCoord,
-        surfaceY
-        // boundaries
-      );
+      this.generateBlockBelowSurface(chunk, blockCoord, surfaceY);
     } else {
       this.generateBlockAboveSurface(
         chunk,
@@ -89,7 +83,6 @@ export default class TerrainChunkDecorator {
     chunk: Chunk,
     blockCoord: Coordinate,
     surfaceY: number
-    // boundaries: ChunkBoundaries
   ) {
     const { x, y, z } = blockCoord;
     const distFromSurface = Math.abs(y - surfaceY);
@@ -127,7 +120,6 @@ export default class TerrainChunkDecorator {
     chunk: Chunk,
     blockCoord: Coordinate,
     surfaceY: number
-    // boundaries: ChunkBoundaries
   ) {
     const { x, y, z } = blockCoord;
 
@@ -141,6 +133,10 @@ export default class TerrainChunkDecorator {
       if (treeMap.isTreeTrunk(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LOG;
       }
+
+      // else if (treeMap.isTreeLeaves(x, y, z, surfaceY)) {
+      //   blockType = BlockType.OAK_LEAVES;
+      // }
     }
 
     // add the block inside the chunk
