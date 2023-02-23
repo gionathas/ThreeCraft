@@ -73,21 +73,18 @@ export default class TerrainChunksManager implements ChunkModel {
       const { solidGeometry, transparentGeometry, blocksBuffer, time } =
         await generateChunks(chunkId, this.worldMap.getSeed());
 
-      // console.log(time);
+      // @ts-ignore retrieve the chunk blocks
+      const blocks = new Uint8Array(...blocksBuffer.transferables);
+      this.loadChunk(chunkId, blocks);
 
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);
-
-      // @ts-ignore retrieve the chunk blocks
-      const blocks = new Uint8Array(...blocksBuffer.transferables);
 
       const hasSolidMesh = !isEmptyGeometry(solidGeometry);
       const hasTransparentMesh = !isEmptyGeometry(transparentGeometry);
 
       let solidMesh = null;
       let transparentMesh = null;
-
-      this.createChunk(chunkId, blocks);
 
       if (hasSolidMesh) {
         solidMesh = this.generateSolidMesh(chunkId, solidGeometry);
@@ -194,18 +191,12 @@ export default class TerrainChunksManager implements ChunkModel {
   }
 
   removeChunk(chunkId: ChunkID) {
-    // find the chunk and the relative mesh
-    const chunk = this.chunks.get(chunkId);
-
-    // remove the chunk from the map
-    if (chunk) {
-      this.chunks.delete(chunkId);
-    }
+    this.unloadChunk(chunkId);
 
     const solidMesh = this.removeChunkSolidMesh(chunkId);
     const transparentMesh = this.removeChunkTransparentMesh(chunkId);
 
-    return { chunk, solidMesh, transparentMesh };
+    return { solidMesh, transparentMesh };
   }
 
   private removeChunkSolidMesh(chunkId: ChunkID) {
@@ -381,11 +372,21 @@ export default class TerrainChunksManager implements ChunkModel {
   /**
    * Create a new chunk with the specifed chunkId and add it inside chunks map
    */
-  createChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
+  loadChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
     const chunk = new Chunk(chunkID, CHUNK_WIDTH, CHUNK_HEIGHT, blocks);
     this.chunks.set(chunkID, chunk);
 
     return chunk;
+  }
+
+  unloadChunk(chunkId: ChunkID) {
+    // find the chunk and the relative mesh
+    const chunk = this.chunks.get(chunkId);
+
+    // remove the chunk from the map
+    if (chunk) {
+      this.chunks.delete(chunkId);
+    }
   }
 
   getBlock(blockCoord: Coordinate) {

@@ -145,7 +145,7 @@ export default class Terrain {
 
     // add a new chunk if we are trying to set a block in a chunk that does't exist yet
     if (!chunk) {
-      chunk = this.chunksManager.createChunk(chunkId);
+      chunk = this.chunksManager.loadChunk(chunkId);
     }
 
     // add/remove the block inside the chunk
