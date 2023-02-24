@@ -1,5 +1,6 @@
 import { SEA_LEVEL } from "../config/constants";
-import WorldMap from "../noise/WorldMap";
+import TerrainShapeMap from "../noise/TerrainShapeMap";
+import TreeMap from "../noise/TreeMap";
 import { Coordinate } from "../utils/helpers";
 import { BlockType } from "./Block";
 import Chunk from "./Chunk";
@@ -26,10 +27,12 @@ type ChunkBoundaries = {
  *  workers are calculating (and caching) the heightMap by themself but wasting computation
  */
 export default class TerrainChunkDecorator {
-  private worldMap: WorldMap;
+  private terrainShapeMap: TerrainShapeMap;
+  private treeMap: TreeMap;
 
-  constructor(worldMap: WorldMap) {
-    this.worldMap = worldMap;
+  constructor(terrainShapeMap: TerrainShapeMap, treeMap: TreeMap) {
+    this.terrainShapeMap = terrainShapeMap;
+    this.treeMap = treeMap;
   }
 
   fillChunk(chunk: Chunk, { x: startX, y: startY, z: startZ }: Coordinate) {
@@ -55,7 +58,7 @@ export default class TerrainChunkDecorator {
         for (let x = startX; x < endX; x++) {
           const blockCoord = { x, y, z };
 
-          const surfaceY = this.worldMap.getSurfaceHeight(x, z);
+          const surfaceY = this.terrainShapeMap.getSurfaceHeight(x, z);
           this.generateBlock(chunk, blockCoord, surfaceY);
         }
       }
@@ -86,8 +89,8 @@ export default class TerrainChunkDecorator {
   ) {
     const { x, y, z } = blockCoord;
     const distFromSurface = Math.abs(y - surfaceY);
-    const pv = this.worldMap.getPV(x, z);
-    const erosion = this.worldMap.getErosion(x, z);
+    const pv = this.terrainShapeMap.getPV(x, z);
+    const erosion = this.terrainShapeMap.getErosion(x, z);
 
     const isMountain = pv >= 0.5;
 
@@ -128,15 +131,11 @@ export default class TerrainChunkDecorator {
     if (y < SEA_LEVEL) {
       blockType = BlockType.WATER;
     } else {
-      const treeMap = this.worldMap.getTreeMap();
-
-      if (treeMap.isTreeTrunk(x, y, z, surfaceY)) {
+      if (this.treeMap.isTree2(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LOG;
+      } else if (this.treeMap.isTreeLeaves(x, y, z, surfaceY)) {
+        blockType = BlockType.OAK_LEAVES;
       }
-
-      // else if (treeMap.isTreeLeaves(x, y, z, surfaceY)) {
-      //   blockType = BlockType.OAK_LEAVES;
-      // }
     }
 
     // add the block inside the chunk

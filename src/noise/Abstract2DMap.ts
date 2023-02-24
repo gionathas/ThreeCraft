@@ -1,24 +1,35 @@
 import AbstractMap from "./AbstractMap";
 
+export type MapData = Record<string, number>;
+
 export default abstract class Abstract2DMap extends AbstractMap {
-  private cache: Map<string, number>;
+  protected data: MapData;
 
   constructor(seed: string) {
     super(seed);
-    this.cache = new Map();
+    this.data = {};
   }
 
-  protected getCacheValue(x: number, z: number) {
-    const key = this.getCacheKey(x, z);
-    return this.cache.get(key);
+  getData() {
+    return this.data;
   }
 
-  protected setCacheValue(x: number, z: number, val: number) {
-    const key = this.getCacheKey(x, z);
-    this.cache.set(key, val);
+  setData(data: MapData) {
+    this.data = data;
   }
 
-  protected getCacheKey(x: number, z: number) {
+  protected getPointData(x: number, z: number): number | undefined {
+    const key = Abstract2DMap.computeKey(x, z);
+    return this.data[key];
+  }
+
+  protected setPointData(x: number, z: number, val: number) {
+    const key = Abstract2DMap.computeKey(x, z);
+    this.data[key] = val;
+    return val;
+  }
+
+  protected static computeKey(x: number, z: number) {
     return `${Math.floor(x)},${Math.floor(z)}`;
   }
 }

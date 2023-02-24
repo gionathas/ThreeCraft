@@ -18,7 +18,7 @@ export default class ContinentalMap extends Noise2DMap {
       return TESTING_MAP_CONTINENTALNESS;
     }
 
-    const cachedValue = this.getCacheValue(x, z);
+    const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
       return cachedValue;
@@ -29,7 +29,7 @@ export default class ContinentalMap extends Noise2DMap {
       z / CONTINENTALNESS_NOISE_SCALE
     );
 
-    this.setCacheValue(x, z, continentalness);
+    this.setPointData(x, z, continentalness);
     return continentalness;
   }
 }

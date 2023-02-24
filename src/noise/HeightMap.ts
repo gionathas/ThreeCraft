@@ -28,7 +28,7 @@ export default class HeightMap extends Abstract2DMap {
   }
 
   getSurfaceHeight(x: number, z: number) {
-    const cachedValue = this.getCacheValue(x, z);
+    const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
       return cachedValue;
@@ -45,7 +45,7 @@ export default class HeightMap extends Abstract2DMap {
 
     const height = baseHeight + pvHeight;
 
-    this.setCacheValue(x, z, height);
+    this.setPointData(x, z, height);
     return height;
   }
 

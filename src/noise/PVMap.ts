@@ -15,7 +15,7 @@ export default class PVMap extends Noise2DMap {
       return TESTING_MAP_PV;
     }
 
-    const cachedValue = this.getCacheValue(x, z);
+    const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
       return cachedValue;
@@ -39,7 +39,7 @@ export default class PVMap extends Noise2DMap {
 
     pv /= maxAmplitude;
 
-    this.setCacheValue(x, z, pv);
+    this.setPointData(x, z, pv);
     return pv;
   }
 

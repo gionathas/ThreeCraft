@@ -1,7 +1,6 @@
 import alea from "alea";
 
 type PRNG = ReturnType<typeof alea>;
-
 export default abstract class AbstractMap {
   protected seed: string;
   protected prng: PRNG;

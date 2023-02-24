@@ -8,8 +8,9 @@ import {
   TERRAIN_GENERATION_ENABLED,
 } from "../config/constants";
 import Engine from "../core/Engine";
+import SharedTreeMap from "../noise/SharedTreeMap";
 
-import WorldMap from "../noise/WorldMap";
+import TerrainShapeMap from "../noise/TerrainShapeMap";
 import { BlockType, BlockUtils } from "../terrain/Block";
 import TerrainChunksManager from "../terrain/TerrainChunksManager";
 import ChunkUtils from "../utils/ChunkUtils";
@@ -33,15 +34,26 @@ export default class Terrain {
 
   private seed: string;
   private chunksManager: TerrainChunksManager;
-  private worldMap: WorldMap;
   private previousCenterPosition: THREE.Vector3;
+
+  private terrainShapeMap: TerrainShapeMap;
+  private treeMap: SharedTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
     this.previousCenterPosition = centerPosition;
+
     this.seed = "seed"; //FIXME
-    this.worldMap = new WorldMap(this.seed);
-    this.chunksManager = new TerrainChunksManager(this.worldMap);
+    this.terrainShapeMap = new TerrainShapeMap(this.seed);
+    this.treeMap = new SharedTreeMap(
+      this.seed,
+      this.terrainShapeMap.getHeightMap()
+    );
+
+    this.chunksManager = new TerrainChunksManager(
+      this.terrainShapeMap,
+      this.treeMap
+    );
   }
 
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
@@ -93,7 +105,7 @@ export default class Terrain {
     const loadedChunks = this.chunksManager.loadedChunks;
 
     for (const chunk of loadedChunks) {
-      const chunkOriginPosition = ChunkUtils.computeChunkAbsolutePosition(
+      const chunkOriginPosition = ChunkUtils.computeChunkWorldOriginPosition(
         chunk.id,
         CHUNK_WIDTH,
         CHUNK_HEIGHT
@@ -213,7 +225,7 @@ export default class Terrain {
   }
 
   getSurfaceHeight(x: number, z: number) {
-    return this.worldMap.getSurfaceHeight(x, z);
+    return this.terrainShapeMap.getSurfaceHeight(x, z);
   }
 
   /**
@@ -222,15 +234,15 @@ export default class Terrain {
    * use it only in debug mode
    */
   _getContinentalness(x: number, z: number) {
-    return this.worldMap.getContinentalness(x, z);
+    return this.terrainShapeMap.getContinentalness(x, z);
   }
 
   _getErosion(x: number, z: number) {
-    return this.worldMap.getErosion(x, z);
+    return this.terrainShapeMap.getErosion(x, z);
   }
 
   _getPV(x: number, z: number) {
     const erosion = this._getErosion(x, z);
-    return this.worldMap.getPV(x, z, erosion);
+    return this.terrainShapeMap.getPV(x, z, erosion);
   }
 }

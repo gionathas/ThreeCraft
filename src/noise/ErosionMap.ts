@@ -15,7 +15,7 @@ export default class ErosionMap extends Noise2DMap {
       return TESTING_MAP_EROSION;
     }
 
-    const cachedValue = this.getCacheValue(x, z);
+    const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
       return cachedValue;
@@ -26,7 +26,7 @@ export default class ErosionMap extends Noise2DMap {
       z / EROSION_NOISE_SCALE
     );
 
-    this.setCacheValue(x, z, erosion);
+    this.setPointData(x, z, erosion);
     return erosion;
   }
 }
