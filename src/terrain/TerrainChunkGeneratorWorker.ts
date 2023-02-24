@@ -1,36 +1,34 @@
 import { TransferDescriptor } from "threads";
 import { expose, Transfer } from "threads/worker";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import SharedTreeMap from "../maps/SharedTreeMap";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
-import TreeMap from "../maps/TreeMap";
+import TreeMapBuilder from "../maps/tree/TreeMapBuilder";
 import ChunkUtils from "../utils/ChunkUtils";
 import Chunk, { ChunkID } from "./Chunk";
 import ChunkGeometry from "./ChunkGeometry";
 import TerrainChunkDecorator from "./TerrainChunkDecorator";
 
-function generateTerrainChunk(
+function generateChunk(
   chunkId: ChunkID,
   seed: string,
-  treeMapDataBuffer: TransferDescriptor<any>
+  treeMapDataBuffer: TransferDescriptor<number>
 ) {
   const start = performance.now();
   const terrainShapeMap = new TerrainShapeMap(seed);
+
+  const treeMap = TreeMapBuilder.generateChunkTreeMapFromBuffer(
+    chunkId,
+    //@ts-ignore
+    new Uint8Array(treeMapDataBuffer),
+    seed,
+    terrainShapeMap.getHeightMap()
+  );
 
   const chunkOrigin = ChunkUtils.computeChunkWorldOriginPosition(
     chunkId,
     CHUNK_WIDTH,
     CHUNK_HEIGHT
   );
-
-  //TODO extract loader class
-  const treeMap = new TreeMap(seed, terrainShapeMap.getHeightMap());
-  const treeMapData = SharedTreeMap.convertChunkBufferDataToMapData(
-    chunkId,
-    //@ts-ignore
-    new Uint8Array(treeMapDataBuffer)
-  );
-  treeMap.setData(treeMapData);
 
   const chunkDecorator = new TerrainChunkDecorator(terrainShapeMap, treeMap);
 
@@ -60,6 +58,6 @@ function generateTerrainChunk(
   };
 }
 
-export type TerrainGeneratorType = typeof generateTerrainChunk;
+export type TerrainGeneratorType = typeof generateChunk;
 
-expose(generateTerrainChunk);
+expose(generateChunk);

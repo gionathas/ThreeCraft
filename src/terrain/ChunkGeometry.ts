@@ -10,7 +10,7 @@ export default class ChunkGeometry {
     chunk: ChunkModel,
     chunkWidth: number,
     chunkHeight: number,
-    worldMap: TerrainShapeMap
+    terrainShapeMap: TerrainShapeMap
   ) {
     const soldidPositions: number[] = [];
     const solidNormals: number[] = [];
@@ -77,7 +77,7 @@ export default class ChunkGeometry {
                 z: neighbourZ,
               });
 
-              const neighbourSurfaceHeight = worldMap.getSurfaceHeight(
+              const neighbourSurfaceHeight = terrainShapeMap.getSurfaceHeightAt(
                 neighbourX,
                 neighbourZ
               );
@@ -131,7 +131,7 @@ export default class ChunkGeometry {
                     },
                     aoSides,
                     chunk,
-                    worldMap
+                    terrainShapeMap
                   );
 
                   aos.push(...vertexAO);
@@ -193,7 +193,7 @@ export default class ChunkGeometry {
 
       // out of the chunk edges, use the surface height as an heuristic check
       if (!occludingBlock) {
-        const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeight(
+        const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeightAt(
           Math.floor(x + dx),
           Math.floor(z + dz)
         );

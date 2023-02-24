@@ -13,7 +13,7 @@ export default class ContinentalMap extends Noise2DMap {
     super(seed);
   }
 
-  getContinentalness(x: number, z: number) {
+  getContinentalnessAt(x: number, z: number) {
     if (TESTING_MAP_ENABLED && TESTING_MAP_CONTINENTALNESS != null) {
       return TESTING_MAP_CONTINENTALNESS;
     }

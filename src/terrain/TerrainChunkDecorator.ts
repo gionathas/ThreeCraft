@@ -1,30 +1,12 @@
 import { SEA_LEVEL } from "../config/constants";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
-import TreeMap from "../maps/TreeMap";
+import TreeMap from "../maps/tree/TreeMap";
 import { Coordinate } from "../utils/helpers";
 import { BlockType } from "./Block";
 import Chunk from "./Chunk";
 
-type ChunkBoundaries = {
-  upper: number;
-  bottom: number;
-  right: number;
-  left: number;
-  front: number;
-  back: number;
-};
-
 /**
- * //TODO optimization: instead of creating an heightmap for each chunk worker,
- * we can share an unique heightmap between all workers.
- *
- * In this way we calculate the heightMap for the entire terrain only one time.
- * The heightMap will be shared by all workers, such that they will not need to compute
- * the heightMap at first pass.
- *
- * Possible downside is that the heightMap should be calculated by the main thread
- *  (nested loop that iterate over the x and z plane), whereas with the current implementation
- *  workers are calculating (and caching) the heightMap by themself but wasting computation
+ * //TODO implement factory pattern
  */
 export default class TerrainChunkDecorator {
   private terrainShapeMap: TerrainShapeMap;
@@ -43,22 +25,13 @@ export default class TerrainChunkDecorator {
     const endZ = startZ + chunkWidth;
     const endY = startY + chunkHeight;
 
-    // const boundaries = {
-    //   bottom: startY,
-    //   upper: startY + chunkHeight,
-    //   front: startZ,
-    //   back: startZ + chunkWidth,
-    //   left: startX,
-    //   right: startX + chunkWidth,
-    // };
-
     // filling the chunk with blocks from bottom to top
     for (let y = startY; y < endY; y++) {
       for (let z = startZ; z < endZ; z++) {
         for (let x = startX; x < endX; x++) {
           const blockCoord = { x, y, z };
 
-          const surfaceY = this.terrainShapeMap.getSurfaceHeight(x, z);
+          const surfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
           this.generateBlock(chunk, blockCoord, surfaceY);
         }
       }
@@ -73,12 +46,7 @@ export default class TerrainChunkDecorator {
     if (blockCoord.y < surfaceY) {
       this.generateBlockBelowSurface(chunk, blockCoord, surfaceY);
     } else {
-      this.generateBlockAboveSurface(
-        chunk,
-        blockCoord,
-        surfaceY
-        // boundaries
-      );
+      this.generateBlockAboveSurface(chunk, blockCoord, surfaceY);
     }
   }
 
@@ -89,8 +57,8 @@ export default class TerrainChunkDecorator {
   ) {
     const { x, y, z } = blockCoord;
     const distFromSurface = Math.abs(y - surfaceY);
-    const pv = this.terrainShapeMap.getPV(x, z);
-    const erosion = this.terrainShapeMap.getErosion(x, z);
+    const pv = this.terrainShapeMap.getPVAt(x, z);
+    const erosion = this.terrainShapeMap.getErosionAt(x, z);
 
     const isMountain = pv >= 0.5;
 
@@ -131,9 +99,9 @@ export default class TerrainChunkDecorator {
     if (y < SEA_LEVEL) {
       blockType = BlockType.WATER;
     } else {
-      if (this.treeMap.isTree2(x, y, z, surfaceY)) {
+      if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LOG;
-      } else if (this.treeMap.isTreeLeaves(x, y, z, surfaceY)) {
+      } else if (this.treeMap.shouldSpawnTreeLeavesAt(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LEAVES;
       }
     }

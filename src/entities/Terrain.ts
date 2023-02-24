@@ -8,7 +8,7 @@ import {
   TERRAIN_GENERATION_ENABLED,
 } from "../config/constants";
 import Engine from "../core/Engine";
-import SharedTreeMap from "../maps/SharedTreeMap";
+import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { BlockType, BlockUtils } from "../terrain/Block";
@@ -37,7 +37,7 @@ export default class Terrain {
   private previousCenterPosition: THREE.Vector3;
 
   private terrainShapeMap: TerrainShapeMap;
-  private treeMap: SharedTreeMap;
+  private treeMap: GlobalTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
@@ -45,7 +45,7 @@ export default class Terrain {
 
     this.seed = "seed"; //FIXME
     this.terrainShapeMap = new TerrainShapeMap(this.seed);
-    this.treeMap = new SharedTreeMap(
+    this.treeMap = new GlobalTreeMap(
       this.seed,
       this.terrainShapeMap.getHeightMap()
     );
@@ -225,7 +225,7 @@ export default class Terrain {
   }
 
   getSurfaceHeight(x: number, z: number) {
-    return this.terrainShapeMap.getSurfaceHeight(x, z);
+    return this.terrainShapeMap.getSurfaceHeightAt(x, z);
   }
 
   /**
@@ -234,15 +234,15 @@ export default class Terrain {
    * use it only in debug mode
    */
   _getContinentalness(x: number, z: number) {
-    return this.terrainShapeMap.getContinentalness(x, z);
+    return this.terrainShapeMap.getContinentalnessAt(x, z);
   }
 
   _getErosion(x: number, z: number) {
-    return this.terrainShapeMap.getErosion(x, z);
+    return this.terrainShapeMap.getErosionAt(x, z);
   }
 
   _getPV(x: number, z: number) {
     const erosion = this._getErosion(x, z);
-    return this.terrainShapeMap.getPV(x, z, erosion);
+    return this.terrainShapeMap.getPVAt(x, z, erosion);
   }
 }

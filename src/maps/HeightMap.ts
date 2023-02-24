@@ -27,7 +27,7 @@ export default class HeightMap extends Abstract2DMap {
     this.pvMap = pvMap;
   }
 
-  getSurfaceHeight(x: number, z: number) {
+  getSurfaceHeightAt(x: number, z: number) {
     const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
@@ -136,14 +136,14 @@ export default class HeightMap extends Abstract2DMap {
   }
 
   private getContinentalness(x: number, z: number): number {
-    return this.continentalMap.getContinentalness(x, z);
+    return this.continentalMap.getContinentalnessAt(x, z);
   }
 
   private getErosion(x: number, z: number): number {
-    return this.erosionMap.getErosion(x, z);
+    return this.erosionMap.getErosionAt(x, z);
   }
 
   private getPV(x: number, z: number, erosion?: number): number {
-    return this.pvMap.getPV(x, z, erosion);
+    return this.pvMap.getPVAt(x, z, erosion);
   }
 }

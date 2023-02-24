@@ -1,8 +1,8 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import SharedTreeMap from "../maps/SharedTreeMap";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
+import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import {
   BufferGeometryData,
@@ -23,7 +23,7 @@ const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 //TODO rename into terrain
 export default class TerrainChunksManager implements ChunkModel {
   private terrainShapeMap: TerrainShapeMap;
-  private terrainTreeMap: SharedTreeMap;
+  private terrainTreeMap: GlobalTreeMap;
 
   private chunks: Map<ChunkID, Chunk>;
   private solidMesh: Map<ChunkID, THREE.Mesh>;
@@ -34,7 +34,7 @@ export default class TerrainChunksManager implements ChunkModel {
   private processingChunks: Set<ChunkID>;
   private generatorsPool;
 
-  constructor(terrainShapeMap: TerrainShapeMap, terrainTreeMap: SharedTreeMap) {
+  constructor(terrainShapeMap: TerrainShapeMap, terrainTreeMap: GlobalTreeMap) {
     this.terrainShapeMap = terrainShapeMap;
     this.terrainTreeMap = terrainTreeMap;
 
@@ -71,9 +71,6 @@ export default class TerrainChunksManager implements ChunkModel {
 
     // add this chunk to the list of processed chunks
     this.processingChunks.add(chunkId);
-
-    // NOTE testing
-    // const chunkTreeMap = this.terrainTreeMap.loadChunkTreeMap(chunkId);
 
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunk) => {

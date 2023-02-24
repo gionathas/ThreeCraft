@@ -4,7 +4,6 @@ import ErosionMap from "./ErosionMap";
 import HeightMap from "./HeightMap";
 import PVMap from "./PVMap";
 
-//TODO Refactoring
 export default class TerrainShapeMap extends AbstractMap {
   private continentalMap: ContinentalMap;
   private erosionMap: ErosionMap;
@@ -24,20 +23,20 @@ export default class TerrainShapeMap extends AbstractMap {
     );
   }
 
-  getSurfaceHeight(x: number, z: number) {
-    return this.heightMap.getSurfaceHeight(x, z);
+  getSurfaceHeightAt(x: number, z: number) {
+    return this.heightMap.getSurfaceHeightAt(x, z);
   }
 
-  getContinentalness(x: number, z: number): number {
-    return this.continentalMap.getContinentalness(x, z);
+  getContinentalnessAt(x: number, z: number): number {
+    return this.continentalMap.getContinentalnessAt(x, z);
   }
 
-  getErosion(x: number, z: number): number {
-    return this.erosionMap.getErosion(x, z);
+  getErosionAt(x: number, z: number): number {
+    return this.erosionMap.getErosionAt(x, z);
   }
 
-  getPV(x: number, z: number, erosion?: number): number {
-    return this.pvMap.getPV(x, z, erosion);
+  getPVAt(x: number, z: number, erosion?: number): number {
+    return this.pvMap.getPVAt(x, z, erosion);
   }
 
   getHeightMap() {

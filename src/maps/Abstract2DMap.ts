@@ -29,7 +29,7 @@ export default abstract class Abstract2DMap extends AbstractMap {
     return val;
   }
 
-  protected static computeKey(x: number, z: number) {
+  static computeKey(x: number, z: number) {
     return `${Math.floor(x)},${Math.floor(z)}`;
   }
 }

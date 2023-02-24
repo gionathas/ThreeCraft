@@ -10,7 +10,7 @@ export default class PVMap extends Noise2DMap {
     super(seed);
   }
 
-  getPV(x: number, z: number, erosion: number = 0) {
+  getPVAt(x: number, z: number, erosion: number = 0) {
     if (TESTING_MAP_ENABLED && TESTING_MAP_PV != null) {
       return TESTING_MAP_PV;
     }

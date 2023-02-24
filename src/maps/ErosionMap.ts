@@ -10,7 +10,7 @@ export default class ErosionMap extends Noise2DMap {
     super(seed);
   }
 
-  getErosion(x: number, z: number) {
+  getErosionAt(x: number, z: number) {
     if (TESTING_MAP_ENABLED && TESTING_MAP_EROSION != null) {
       return TESTING_MAP_EROSION;
     }
