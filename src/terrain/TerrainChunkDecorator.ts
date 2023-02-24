@@ -1,6 +1,6 @@
 import { SEA_LEVEL } from "../config/constants";
-import TerrainShapeMap from "../noise/TerrainShapeMap";
-import TreeMap from "../noise/TreeMap";
+import TerrainShapeMap from "../maps/TerrainShapeMap";
+import TreeMap from "../maps/TreeMap";
 import { Coordinate } from "../utils/helpers";
 import { BlockType } from "./Block";
 import Chunk from "./Chunk";

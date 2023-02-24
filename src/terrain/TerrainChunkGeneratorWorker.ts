@@ -1,9 +1,9 @@
 import { TransferDescriptor } from "threads";
 import { expose, Transfer } from "threads/worker";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import SharedTreeMap from "../noise/SharedTreeMap";
-import TerrainShapeMap from "../noise/TerrainShapeMap";
-import TreeMap from "../noise/TreeMap";
+import SharedTreeMap from "../maps/SharedTreeMap";
+import TerrainShapeMap from "../maps/TerrainShapeMap";
+import TreeMap from "../maps/TreeMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import Chunk, { ChunkID } from "./Chunk";
 import ChunkGeometry from "./ChunkGeometry";

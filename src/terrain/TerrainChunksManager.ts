@@ -1,8 +1,8 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import SharedTreeMap from "../noise/SharedTreeMap";
-import TerrainShapeMap from "../noise/TerrainShapeMap";
+import SharedTreeMap from "../maps/SharedTreeMap";
+import TerrainShapeMap from "../maps/TerrainShapeMap";
 import ChunkUtils from "../utils/ChunkUtils";
 import {
   BufferGeometryData,

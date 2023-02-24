@@ -1,5 +1,5 @@
 import { SEA_LEVEL, TERRAIN_OPTIMIZATION_ENABLED } from "../config/constants";
-import TerrainShapeMap from "../noise/TerrainShapeMap";
+import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { Coordinate } from "../utils/helpers";
 import { BlockFaceAO, BlockType, BlockUtils } from "./Block";
 import { ChunkModel } from "./Chunk";
