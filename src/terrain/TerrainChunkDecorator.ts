@@ -62,14 +62,14 @@ export default class TerrainChunkDecorator {
 
     const isMountain = pv >= 0.5;
 
-    let blockType: BlockType = BlockType.COBBLESTONE;
+    let blockType: BlockType = BlockType.STONE;
 
     // first layer (0 - 1)
     if (distFromSurface <= 1) {
       if (y < SEA_LEVEL + 2) {
         blockType = BlockType.SAND;
       } else if (isMountain) {
-        blockType = BlockType.COBBLESTONE;
+        blockType = BlockType.STONE;
       } else {
         blockType = BlockType.GRASS;
       }
@@ -77,7 +77,7 @@ export default class TerrainChunkDecorator {
     // second layer (2 , 5)
     else if (distFromSurface <= 5) {
       if (erosion <= -0.3 && pv >= 0) {
-        blockType = BlockType.COBBLESTONE;
+        blockType = BlockType.STONE;
       } else {
         blockType = BlockType.DIRT;
       }

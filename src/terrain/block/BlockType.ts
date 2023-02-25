@@ -2,6 +2,7 @@ import { BlockInfo } from "./Block";
 
 export enum BlockType {
   AIR = 0,
+  STONE,
   COBBLESTONE,
   DIRT,
   GRASS,
@@ -27,6 +28,23 @@ const Blocks: Record<BlockType, BlockInfo> = {
       side: {
         row: -1,
         col: -1,
+      },
+    },
+  },
+  [BlockType.STONE]: {
+    isTransparent: false,
+    texture: {
+      top: {
+        row: 0,
+        col: 5,
+      },
+      bottom: {
+        row: 0,
+        col: 5,
+      },
+      side: {
+        row: 0,
+        col: 5,
       },
     },
   },
