@@ -1,6 +1,6 @@
 /** Debug Controls */
 export const TOGGLE_DEBUG_UI_KEY = "F3";
-export const TOGGLE_PLAYER_MODE = "KeyP";
+export const SWITCH_PLAYER_MODE = "KeyP";
 
 /** Player Controls */
 export const MOVE_FORWARD_KEY = "KeyW";

@@ -12,7 +12,7 @@ import {
   MOVE_LEFT_KEY,
   MOVE_RIGHT_KEY,
   SPRINT_KEY,
-  TOGGLE_PLAYER_MODE,
+  SWITCH_PLAYER_MODE,
 } from "../config/keyBindings";
 import Engine from "../core/Engine";
 import { PlayerMode } from "../entities/Player";
@@ -1391,7 +1391,7 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private hasSwitchedMode() {
-    return this.inputController.hasJustPressedKey(TOGGLE_PLAYER_MODE);
+    return this.inputController.hasJustPressedKey(SWITCH_PLAYER_MODE);
   }
 
   private getControlsForwardDirection() {

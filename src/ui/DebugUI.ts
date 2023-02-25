@@ -24,7 +24,6 @@ export default class DebugUI {
   }
 
   init() {
-    this.isVisible = SHOW_DEBUG_UI;
     this.debugUI = document.getElementById("debugUI")!;
 
     this.fps = Stats();
@@ -36,6 +35,8 @@ export default class DebugUI {
     this.mem.showPanel(2);
     this.mem.dom.style.cssText = "position:absolute;top:50px;left:0px;"; // set position
     document.body.appendChild(this.mem.dom);
+
+    this.toggleVisibility(SHOW_DEBUG_UI);
   }
 
   update(dt: number) {
@@ -90,17 +91,29 @@ export default class DebugUI {
     const { isVisible } = this;
 
     if (this.inputController.hasJustPressedKey(TOGGLE_DEBUG_UI_KEY)) {
-      if (!isVisible) {
-        this.isVisible = true;
-        this.debugUI.style.visibility = "visible";
-        this.fps.dom.style.visibility = "visible";
-        this.mem.dom.style.visibility = "visible";
-      } else {
-        this.isVisible = false;
-        this.debugUI.style.visibility = "hidden";
-        this.fps.dom.style.visibility = "hidden";
-        this.mem.dom.style.visibility = "hidden";
-      }
+      this.toggleVisibility(!isVisible);
     }
+  }
+
+  private toggleVisibility(isVisible: boolean) {
+    if (isVisible) {
+      this.showDebugUI();
+    } else {
+      this.hideDebugUI();
+    }
+  }
+
+  private showDebugUI() {
+    this.isVisible = true;
+    this.debugUI.style.visibility = "visible";
+    this.fps.dom.style.visibility = "visible";
+    this.mem.dom.style.visibility = "visible";
+  }
+
+  private hideDebugUI() {
+    this.isVisible = false;
+    this.debugUI.style.visibility = "hidden";
+    this.fps.dom.style.visibility = "hidden";
+    this.mem.dom.style.visibility = "hidden";
   }
 }
