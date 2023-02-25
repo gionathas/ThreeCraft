@@ -44,12 +44,12 @@ export default class TreeMap extends Abstract2DMap {
     const yRange = y - trunkEndY;
 
     if (type === TreeMapType.TRUNK) {
-      // leaf tip on top of the trunk has low probability to spawn
+      // leaf tip on top of the trunk
       if (yRange === 2) {
-        return probability(0.3);
+        return probability(0.5);
       }
 
-      // a leaf on top of the trunk will alway spawn
+      // leaf above the end of the trunk
       if (yRange === 1) {
         return true;
       }
@@ -57,26 +57,13 @@ export default class TreeMap extends Abstract2DMap {
 
     // leaf on the side of the trunk
     if (type === TreeMapType.LEAF) {
-      // leaf 1 level above the trunk and 2 blocks away from the trunk
-      // has low probability to spawn
-      if (trunkDistance === 2 && yRange === 1) {
-        return probability(0.1);
-      }
-
-      // leaf 1 level above the trunk and 1 blocks away from the trunk
-      // has mid probability to spawn
-      if (trunkDistance === 1 && yRange === 1) {
-        return probability(0.5);
-      }
-
-      // leaf 2 levels above the trunk and 2 blocks away from the trunk
+      // leaf 2 level above the trunk and 2 block away
       if (trunkDistance === 2 && isInRange(yRange, -1, 0)) {
-        return probability(0.9);
+        return true;
       }
 
-      // leaf 1 level above the trunk and 1 block away from the trunk
-      // will alway spawn
-      if (trunkDistance === 1 && isInRange(yRange, -1, 0)) {
+      // leaf 1 level above the trunk and 1 block away
+      if (trunkDistance === 1 && isInRange(yRange, -1, 1)) {
         return true;
       }
     }

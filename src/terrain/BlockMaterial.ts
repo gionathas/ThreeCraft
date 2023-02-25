@@ -16,14 +16,17 @@ export default class BlockMaterial {
       vertexColors: true,
     });
 
+    /**
+     * //NOTE might now work well with water since is only front sided
+     * so if you look up under water you won't see anything
+     *
+     * A potential solution could be using a custom shader or a specific material for water
+     */
     this.blockTransparentMaterial = new THREE.MeshStandardMaterial({
       map: texture,
-      side: THREE.DoubleSide,
+      side: THREE.FrontSide,
       alphaTest: 0.1,
       transparent: true,
-      polygonOffset: true,
-      polygonOffsetUnits: 1,
-      polygonOffsetFactor: 1,
     });
   }
 
