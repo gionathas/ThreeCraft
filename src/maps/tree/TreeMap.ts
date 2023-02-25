@@ -1,5 +1,6 @@
 import { CHUNK_WIDTH } from "../../config/constants";
 import Tree from "../../terrain/Tree";
+import { isInRange, probability } from "../../utils/helpers";
 import Abstract2DMap from "../Abstract2DMap";
 import HeightMap from "../HeightMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
@@ -13,7 +14,7 @@ export enum TreeMapType {
 export type TreeMapValue = {
   type: TreeMapType;
   trunkHeight: number;
-  trunkSurfaceHeight: number;
+  trunkSurfaceY: number;
   trunkDistance: number;
 };
 export default class TreeMap extends Abstract2DMap {
@@ -30,19 +31,57 @@ export default class TreeMap extends Abstract2DMap {
   }
 
   shouldSpawnTreeLeafAt(x: number, y: number, z: number, surfaceY: number) {
-    const type = this.getTreeMapTypeAt(x, z);
+    const value = this.getTreeMapValueAt(x, z);
 
-    if (
-      y < surfaceY + Tree.LEAVES_START_Y ||
-      y > surfaceY + Tree.LEAVES_END_Y ||
-      type == null
-    ) {
+    if (value == null) {
       return false;
     }
 
-    const isTreeLeaf = type === TreeMapType.LEAF;
+    const { type, trunkDistance, trunkHeight, trunkSurfaceY } =
+      TreeMapValueEncoder.decode(value);
 
-    return isTreeLeaf;
+    const trunkEndY = trunkSurfaceY + trunkHeight;
+    const yRange = y - trunkEndY;
+
+    if (type === TreeMapType.TRUNK) {
+      // leaf tip on top of the trunk has low probability to spawn
+      if (yRange === 2) {
+        return probability(0.3);
+      }
+
+      // a leaf on top of the trunk will alway spawn
+      if (yRange === 1) {
+        return true;
+      }
+    }
+
+    // leaf on the side of the trunk
+    if (type === TreeMapType.LEAF) {
+      // leaf 1 level above the trunk and 2 blocks away from the trunk
+      // has low probability to spawn
+      if (trunkDistance === 2 && yRange === 1) {
+        return probability(0.1);
+      }
+
+      // leaf 1 level above the trunk and 1 blocks away from the trunk
+      // has mid probability to spawn
+      if (trunkDistance === 1 && yRange === 1) {
+        return probability(0.5);
+      }
+
+      // leaf 2 levels above the trunk and 2 blocks away from the trunk
+      if (trunkDistance === 2 && isInRange(yRange, -1, 0)) {
+        return probability(0.9);
+      }
+
+      // leaf 1 level above the trunk and 1 block away from the trunk
+      // will alway spawn
+      if (trunkDistance === 1 && isInRange(yRange, -1, 0)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   shouldSpawnTreeTrunkAt(x: number, y: number, z: number, surfaceY: number) {

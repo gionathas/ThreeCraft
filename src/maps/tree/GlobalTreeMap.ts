@@ -13,9 +13,7 @@ const treesDensityFactor = 0.98;
  * //WARN This class store the data of all the chunks loaded,
  *  without garbage collecting the data associated to unloaded chunks
  *
- * //NOTE do we really need to extends TreeMap ?
- *
- * //NOTE implement a TreeGenerator class ?
+ * //NOTE extract a TreeGenerator class ?
  */
 export default class GlobalTreeMap extends TreeMap {
   private loadedMaps: Map<string, Array<TreeMapType>>;
@@ -26,7 +24,7 @@ export default class GlobalTreeMap extends TreeMap {
   }
 
   /**
-   * //WARN This method create a new Uint8Array each time it is called
+   * //WARN This method create a new Array each time it is called
    */
   loadChunkTreeMap(chunkId: ChunkID): Uint16Array {
     const { x: originX, z: originZ } =
@@ -58,7 +56,7 @@ export default class GlobalTreeMap extends TreeMap {
       }
     }
 
-    // load the tree map inside a buffer
+    // load the tree map data into a buffer
     for (let x = startX; x < endX; x++) {
       for (let z = startZ; z < endZ; z++) {
         const value = this.getTreeMapValueAt(x, z)!;
@@ -137,10 +135,10 @@ export default class GlobalTreeMap extends TreeMap {
   }
 
   private setTreeTrunkAt(x: number, z: number, surfaceY: number) {
-    const trunkData = {
+    const trunkData: TreeMapValue = {
       type: TreeMapType.TRUNK,
       trunkHeight: Tree.TRUNK_HEIGHT,
-      trunkSurfaceHeight: surfaceY,
+      trunkSurfaceY: surfaceY,
       trunkDistance: 0,
     };
 
@@ -163,7 +161,7 @@ export default class GlobalTreeMap extends TreeMap {
     const leafValue = TreeMapValueEncoder.encode({
       type: TreeMapType.LEAF,
       trunkHeight: trunkData.trunkHeight,
-      trunkSurfaceHeight: trunkData.trunkSurfaceHeight,
+      trunkSurfaceY: trunkData.trunkSurfaceY,
       trunkDistance: leafDistance,
     });
 
@@ -174,7 +172,7 @@ export default class GlobalTreeMap extends TreeMap {
     const emptyData = TreeMapValueEncoder.encode({
       type: TreeMapType.EMPTY,
       trunkHeight: 0,
-      trunkSurfaceHeight: 0,
+      trunkSurfaceY: 0,
       trunkDistance: 0,
     });
 

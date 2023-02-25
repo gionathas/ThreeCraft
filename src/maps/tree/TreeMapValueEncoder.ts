@@ -24,10 +24,7 @@ export default class TreeMapValueEncoder {
     let encodedValue = 0;
     encodedValue = this.setType(encodedValue, value.type);
     encodedValue = this.setTrunkHeight(encodedValue, value.trunkHeight);
-    encodedValue = this.setTrunkSurfaceHeight(
-      encodedValue,
-      value.trunkSurfaceHeight
-    );
+    encodedValue = this.setTrunkSurfaceY(encodedValue, value.trunkSurfaceY);
     encodedValue = this.setTrunkDistance(encodedValue, value.trunkDistance);
     return encodedValue;
   }
@@ -36,7 +33,7 @@ export default class TreeMapValueEncoder {
     return {
       type: this.getType(value),
       trunkHeight: this.getTrunkHeight(value),
-      trunkSurfaceHeight: this.getTrunkSurfaceHeight(value),
+      trunkSurfaceY: this.getTrunkSurfaceY(value),
       trunkDistance: this.getTrunkDistance(value),
     };
   }
@@ -57,11 +54,11 @@ export default class TreeMapValueEncoder {
     return (value |= (height << 10) & this.TRUNK_HEIGHT_MASK);
   }
 
-  static getTrunkSurfaceHeight(value: number): number {
+  static getTrunkSurfaceY(value: number): number {
     return (value & this.TRUNK_SURFACE_HEIGHT_MASK) >> 2;
   }
 
-  static setTrunkSurfaceHeight(value: number, height: number): number {
+  static setTrunkSurfaceY(value: number, height: number): number {
     return (value |= (height << 2) & this.TRUNK_SURFACE_HEIGHT_MASK);
   }
 
