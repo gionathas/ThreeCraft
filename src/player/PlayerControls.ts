@@ -18,7 +18,7 @@ import Engine from "../core/Engine";
 import { PlayerMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import { BLOCK_SIZE } from "../terrain/Block";
+import Block from "../terrain/block/Block";
 import { determineAngleQuadrant } from "../utils/helpers";
 
 export interface PlayerControlsProperties {
@@ -219,7 +219,7 @@ export default class PlayerControls extends PointerLockControls {
         this.state = "onGround";
         // move slightly below the surface to keep the collision with the ground
         const groundY =
-          Math.floor(this.position.y - height) + BLOCK_SIZE - 0.01;
+          Math.floor(this.position.y - height) + Block.SIZE - 0.01;
         this.position.y = groundY + height;
         this.velocity.y = 0;
       }

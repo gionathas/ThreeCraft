@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { BlockUtils, BLOCK_SIZE } from "../terrain/Block";
+import Block from "../terrain/block/Block";
 
 export default class BlockMarker extends THREE.LineSegments {
   private edgesMaterial!: THREE.LineBasicMaterial;
@@ -19,7 +19,7 @@ export default class BlockMarker extends THREE.LineSegments {
 
   private initGeometries() {
     const { edgesMaterial } = this;
-    const markerPlaneGeom = new THREE.PlaneGeometry(BLOCK_SIZE, BLOCK_SIZE);
+    const markerPlaneGeom = new THREE.PlaneGeometry(Block.SIZE, Block.SIZE);
     const markerEdgesGeom = new THREE.EdgesGeometry(markerPlaneGeom);
     this.geometry = markerEdgesGeom;
     this.material = edgesMaterial;
@@ -29,14 +29,11 @@ export default class BlockMarker extends THREE.LineSegments {
     const [x, y, z] = blockPosition.toArray();
     const offsetFromBlock = 0.01;
 
-    const toBlockCenterCoord = (val: number) =>
-      Math.floor(val / BLOCK_SIZE) * BLOCK_SIZE + BLOCK_SIZE / 2;
+    const planeX = Block.toBlockCenterCoord(x);
+    const planeY = Block.toBlockCenterCoord(y);
+    const planeZ = Block.toBlockCenterCoord(z);
 
-    const planeX = toBlockCenterCoord(x);
-    const planeY = toBlockCenterCoord(y);
-    const planeZ = toBlockCenterCoord(z);
-
-    const face = BlockUtils.getBlockFaceFromNormal(blockNormal);
+    const face = Block.getBlockFaceFromNormal(blockNormal);
 
     switch (face) {
       case "top": {

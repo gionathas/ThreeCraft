@@ -8,9 +8,11 @@ import {
   TERRAIN_GENERATION_ENABLED,
 } from "../config/constants";
 import Engine from "../core/Engine";
-import TerrainMap from "../noise/TerrainMap";
+import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 
-import { BlockType, BlockUtils } from "../terrain/Block";
+import TerrainShapeMap from "../maps/TerrainShapeMap";
+import Block from "../terrain/block/Block";
+import { BlockType } from "../terrain/block/BlockType";
 import TerrainChunksManager from "../terrain/TerrainChunksManager";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
@@ -27,22 +29,36 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
+//TODO rename into Chunk Loader
 export default class Terrain {
   private scene: THREE.Scene;
 
   private seed: string;
   private chunksManager: TerrainChunksManager;
-  private terrainMap: TerrainMap;
   private previousCenterPosition: THREE.Vector3;
+
+  private terrainShapeMap: TerrainShapeMap;
+  private treeMap: GlobalTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
     this.previousCenterPosition = centerPosition;
+
     this.seed = "seed"; //FIXME
-    this.terrainMap = new TerrainMap(this.seed);
-    this.chunksManager = new TerrainChunksManager(this.terrainMap);
+    this.terrainShapeMap = new TerrainShapeMap(this.seed);
+    this.treeMap = new GlobalTreeMap(
+      this.seed,
+      this.terrainShapeMap.getHeightMap()
+    );
+
+    this.chunksManager = new TerrainChunksManager(
+      this.terrainShapeMap,
+      this.treeMap
+    );
   }
 
+  // TODO optimization: trigger a terrain update only when the player
+  // moves across a chunk boundary
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
     const isGenerationEnabled = TERRAIN_GENERATION_ENABLED;
 
@@ -89,10 +105,10 @@ export default class Terrain {
 
   private unloadTerrain(boundaries: TerrainBoundaries) {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    const loadedChunks = this.chunksManager.loadedChunks;
+    const loadedChunks = this.chunksManager.getLoadedChunks();
 
     for (const chunk of loadedChunks) {
-      const chunkOriginPosition = ChunkUtils.computeChunkAbsolutePosition(
+      const chunkOriginPosition = ChunkUtils.computeChunkWorldOriginPosition(
         chunk.id,
         CHUNK_WIDTH,
         CHUNK_HEIGHT
@@ -144,7 +160,7 @@ export default class Terrain {
 
     // add a new chunk if we are trying to set a block in a chunk that does't exist yet
     if (!chunk) {
-      chunk = this.chunksManager.createChunk(chunkId);
+      chunk = this.chunksManager.loadChunk(chunkId);
     }
 
     // add/remove the block inside the chunk
@@ -172,7 +188,7 @@ export default class Terrain {
   isVisibleBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
-    return BlockUtils.isVisibleBlock(block?.type);
+    return Block.isVisibleBlock(block?.type);
   }
 
   getBlock(blockCoord: Coordinate) {
@@ -185,10 +201,6 @@ export default class Terrain {
 
   private roundToNearestVerticalChunk(val: number) {
     return Math.round(val / CHUNK_HEIGHT) * CHUNK_HEIGHT;
-  }
-
-  get loadedChunks() {
-    return this.chunksManager.loadedChunks;
   }
 
   get totalChunks() {
@@ -212,7 +224,7 @@ export default class Terrain {
   }
 
   getSurfaceHeight(x: number, z: number) {
-    return this.terrainMap.getSurfaceHeight(x, z);
+    return this.terrainShapeMap.getSurfaceHeightAt(x, z);
   }
 
   /**
@@ -221,15 +233,15 @@ export default class Terrain {
    * use it only in debug mode
    */
   _getContinentalness(x: number, z: number) {
-    return this.terrainMap.getContinentalness(x, z);
+    return this.terrainShapeMap.getContinentalnessAt(x, z);
   }
 
   _getErosion(x: number, z: number) {
-    return this.terrainMap.getErosion(x, z);
+    return this.terrainShapeMap.getErosionAt(x, z);
   }
 
   _getPV(x: number, z: number) {
     const erosion = this._getErosion(x, z);
-    return this.terrainMap.getPV(x, z, erosion);
+    return this.terrainShapeMap.getPVAt(x, z, erosion);
   }
 }

@@ -50,7 +50,7 @@ export default class ChunkUtils {
    * e.g. if we ask for the chunkId (1,0,0) with a chunkWidth and chunkHeight of 32,
    * we will get back the chunkId (32,0,0)
    */
-  static computeChunkAbsolutePosition(
+  static computeChunkWorldOriginPosition(
     chunkID: ChunkID,
     chunkWidth: number,
     chunkHeight: number

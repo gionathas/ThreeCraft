@@ -3,31 +3,32 @@ import {
   CONTINENTALNESS_MIN_HEIGHT,
   MAX_EROSION,
   MIN_EROSION,
-  TESTING_MAP_CONTINENTALNESS,
-  TESTING_MAP_ENABLED,
-  TESTING_MAP_EROSION,
-  TESTING_MAP_PV,
 } from "../config/constants";
 import { lerp } from "../utils/helpers";
+import Abstract2DMap from "./Abstract2DMap";
 import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
-import { NoiseMap } from "./NoiseMap";
 import PVMap from "./PVMap";
 
-export default class TerrainMap extends NoiseMap {
+export default class HeightMap extends Abstract2DMap {
   private continentalMap: ContinentalMap;
   private erosionMap: ErosionMap;
   private pvMap: PVMap;
 
-  constructor(seed: string) {
+  constructor(
+    seed: string,
+    continentalMap: ContinentalMap,
+    erosionMap: ErosionMap,
+    pvMap: PVMap
+  ) {
     super(seed);
-    this.continentalMap = new ContinentalMap(seed + "-continental");
-    this.erosionMap = new ErosionMap(seed + "-erosion");
-    this.pvMap = new PVMap(seed + "-pv");
+    this.continentalMap = continentalMap;
+    this.erosionMap = erosionMap;
+    this.pvMap = pvMap;
   }
 
-  getSurfaceHeight(x: number, z: number) {
-    const cachedValue = this.getCacheValue(x, z);
+  getSurfaceHeightAt(x: number, z: number) {
+    const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
       return cachedValue;
@@ -44,7 +45,7 @@ export default class TerrainMap extends NoiseMap {
 
     const height = baseHeight + pvHeight;
 
-    this.setCacheValue(x, z, height);
+    this.setPointData(x, z, height);
     return height;
   }
 
@@ -134,26 +135,15 @@ export default class TerrainMap extends NoiseMap {
     }
   }
 
-  getContinentalness(x: number, z: number): number {
-    if (TESTING_MAP_ENABLED && TESTING_MAP_CONTINENTALNESS != null) {
-      return TESTING_MAP_CONTINENTALNESS;
-    }
-
-    return this.continentalMap.getContinentalness(x, z);
+  private getContinentalness(x: number, z: number): number {
+    return this.continentalMap.getContinentalnessAt(x, z);
   }
 
-  getErosion(x: number, z: number): number {
-    if (TESTING_MAP_ENABLED && TESTING_MAP_EROSION != null) {
-      return TESTING_MAP_EROSION;
-    }
-    return this.erosionMap.getErosion(x, z);
+  private getErosion(x: number, z: number): number {
+    return this.erosionMap.getErosionAt(x, z);
   }
 
-  getPV(x: number, z: number, erosion?: number): number {
-    if (TESTING_MAP_ENABLED && TESTING_MAP_PV != null) {
-      return TESTING_MAP_PV;
-    }
-
-    return this.pvMap.getPV(x, z, erosion);
+  private getPV(x: number, z: number, erosion?: number): number {
+    return this.pvMap.getPVAt(x, z, erosion);
   }
 }

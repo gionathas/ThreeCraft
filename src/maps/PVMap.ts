@@ -1,13 +1,21 @@
-import { PV_BASE_SCALE } from "../config/constants";
-import { NoiseMap } from "./NoiseMap";
+import {
+  PV_BASE_SCALE,
+  TESTING_MAP_ENABLED,
+  TESTING_MAP_PV,
+} from "../config/constants";
+import { Noise2DMap } from "./Noise2DMap";
 
-export default class PVMap extends NoiseMap {
+export default class PVMap extends Noise2DMap {
   constructor(seed: string) {
     super(seed);
   }
 
-  getPV(x: number, z: number, erosion: number = 0) {
-    const cachedValue = this.getCacheValue(x, z);
+  getPVAt(x: number, z: number, erosion: number = 0) {
+    if (TESTING_MAP_ENABLED && TESTING_MAP_PV != null) {
+      return TESTING_MAP_PV;
+    }
+
+    const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
       return cachedValue;
@@ -25,13 +33,13 @@ export default class PVMap extends NoiseMap {
       const amplitude = Math.pow(persistence, i);
       maxAmplitude += amplitude;
       pv +=
-        this.noise((x / scale) * frequency, (z / scale) * frequency) *
+        this.noise2D((x / scale) * frequency, (z / scale) * frequency) *
         amplitude;
     }
 
     pv /= maxAmplitude;
 
-    this.setCacheValue(x, z, pv);
+    this.setPointData(x, z, pv);
     return pv;
   }
 

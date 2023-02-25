@@ -1,26 +1,20 @@
 import { SEA_LEVEL } from "../config/constants";
-import TerrainMap from "../noise/TerrainMap";
+import TerrainShapeMap from "../maps/TerrainShapeMap";
+import TreeMap from "../maps/tree/TreeMap";
 import { Coordinate } from "../utils/helpers";
-import { BlockType } from "./Block";
+import { BlockType } from "./block/BlockType";
 import Chunk from "./Chunk";
 
 /**
- * //TODO optimization: instead of creating an heightmap for each chunk worker,
- * we can share an unique heightmap between all workers.
- *
- * In this way we calculate the heightMap for the entire terrain only one time.
- * The heightMap will be shared by all workers, such that they will not need to compute
- * the heightMap at first pass.
- *
- * Possible downside is that the heightMap should be calculated by the main thread
- *  (nested loop that iterate over the x and z plane), whereas with the current implementation
- *  workers are calculating (and caching) the heightMap by themself but wasting computation
+ * //TODO implement factory pattern
  */
 export default class TerrainChunkDecorator {
-  private terrainMap: TerrainMap;
+  private terrainShapeMap: TerrainShapeMap;
+  private treeMap: TreeMap;
 
-  constructor(terrainMap: TerrainMap) {
-    this.terrainMap = terrainMap;
+  constructor(terrainShapeMap: TerrainShapeMap, treeMap: TreeMap) {
+    this.terrainShapeMap = terrainShapeMap;
+    this.treeMap = treeMap;
   }
 
   fillChunk(chunk: Chunk, { x: startX, y: startY, z: startZ }: Coordinate) {
@@ -35,8 +29,10 @@ export default class TerrainChunkDecorator {
     for (let y = startY; y < endY; y++) {
       for (let z = startZ; z < endZ; z++) {
         for (let x = startX; x < endX; x++) {
-          const surfaceHeight = this.terrainMap.getSurfaceHeight(x, z);
-          this.generateBlock(chunk, { x, y, z }, surfaceHeight);
+          const blockCoord = { x, y, z };
+
+          const surfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
+          this.generateBlock(chunk, blockCoord, surfaceY);
         }
       }
     }
@@ -44,86 +40,73 @@ export default class TerrainChunkDecorator {
 
   private generateBlock(
     chunk: Chunk,
-    { x, y, z }: Coordinate,
-    surfaceHeight: number
+    blockCoord: Coordinate,
+    surfaceY: number
   ) {
-    let blockType: BlockType;
-    if (y < surfaceHeight) {
-      blockType = this.generateBlockBelowSurface(x, y, z, surfaceHeight);
+    if (blockCoord.y < surfaceY) {
+      this.generateBlockBelowSurface(chunk, blockCoord, surfaceY);
     } else {
-      blockType = this.generateBlockAboveSurface(y, surfaceHeight);
+      this.generateBlockAboveSurface(chunk, blockCoord, surfaceY);
     }
-
-    // add the block inside the chunk
-    chunk.setBlock({ x, y, z }, blockType);
   }
 
-  // private generateBlockBelowSurface(y: number, surfaceHeight: number) {
-  //   return BlockType.COBBLESTONE;
-  // }
-
   private generateBlockBelowSurface(
-    x: number,
-    y: number,
-    z: number,
-    surfaceHeight: number
+    chunk: Chunk,
+    blockCoord: Coordinate,
+    surfaceY: number
   ) {
-    const distFromSurface = Math.abs(y - surfaceHeight);
-    const pv = this.terrainMap.getPV(x, z);
-    const erosion = this.terrainMap.getErosion(x, z);
+    const { x, y, z } = blockCoord;
+    const distFromSurface = Math.abs(y - surfaceY);
+    const pv = this.terrainShapeMap.getPVAt(x, z);
+    const erosion = this.terrainShapeMap.getErosionAt(x, z);
 
     const isMountain = pv >= 0.5;
 
+    let blockType: BlockType = BlockType.COBBLESTONE;
+
     // first layer (0 - 1)
-    if (distFromSurface <= 2) {
+    if (distFromSurface <= 1) {
       if (y < SEA_LEVEL + 2) {
-        return BlockType.SAND;
+        blockType = BlockType.SAND;
       } else if (isMountain) {
-        return BlockType.COBBLESTONE;
+        blockType = BlockType.COBBLESTONE;
       } else {
-        return BlockType.GRASS;
+        blockType = BlockType.GRASS;
       }
     }
-    // second layer (3 , 5)
+    // second layer (2 , 5)
     else if (distFromSurface <= 5) {
       if (erosion <= -0.3 && pv >= 0) {
-        return BlockType.COBBLESTONE;
+        blockType = BlockType.COBBLESTONE;
       } else {
-        return BlockType.DIRT;
+        blockType = BlockType.DIRT;
       }
     }
 
-    return BlockType.COBBLESTONE;
+    // add the block inside the chunk
+    chunk.setBlock(blockCoord, blockType);
   }
 
-  // private generateBlockBelowSurface(
-  //   x: number,
-  //   y: number,
-  //   z: number,
-  //   surfaceHeight: number
-  // ) {
-  //   const pv = this.terrainMap.getPV(x, z);
+  private generateBlockAboveSurface(
+    chunk: Chunk,
+    blockCoord: Coordinate,
+    surfaceY: number
+  ) {
+    const { x, y, z } = blockCoord;
 
-  //   if (pv <= -0.6 || pv >= 0.5) {
-  //     return BlockType.COBBLESTONE;
-  //   }
+    let blockType: BlockType = BlockType.AIR;
 
-  //   if (Math.abs(y - surfaceHeight) < 1) {
-  //     if (y < SEA_LEVEL + 2) {
-  //       return BlockType.SAND;
-  //     } else {
-  //       return BlockType.GRASS;
-  //     }
-  //   }
-
-  //   return BlockType.GRASS;
-  // }
-
-  private generateBlockAboveSurface(y: number, surfaceHeight: number) {
     if (y < SEA_LEVEL) {
-      return BlockType.WATER;
+      blockType = BlockType.WATER;
+    } else {
+      if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
+        blockType = BlockType.OAK_LOG;
+      } else if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
+        blockType = BlockType.OAK_LEAVES;
+      }
     }
 
-    return BlockType.AIR;
+    // add the block inside the chunk
+    chunk.setBlock(blockCoord, blockType);
   }
 }

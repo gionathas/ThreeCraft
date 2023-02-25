@@ -24,6 +24,14 @@ export function lerp(start: number, end: number, amount: number) {
   return Math.round(start + (end - start) * amount);
 }
 
+export function probability(percent: number) {
+  return Math.random() <= percent;
+}
+
+export function isInRange(val: number, min: number, max: number) {
+  return val >= min && val <= max;
+}
+
 export function isEmptyGeometry(geometry: BufferGeometryData) {
   return geometry.positions.length === 0;
 }
