@@ -58,27 +58,31 @@ export const TESTING_MAP_PV = getOptionalNumber(
   import.meta.env.VITE_TESTING_MAP_PV
 );
 
-/** Terrain Noise */
+//TODO move into terrain class
+/**
+ * Terrain Generation
+ */
 export const CONTINENTALNESS_NOISE_SCALE = 10000;
 export const EROSION_NOISE_SCALE = 1024;
 export const PV_BASE_SCALE = 180;
 
-export const CONTINENTALNESS_MAX_HEIGHT = 30;
-export const CONTINENTALNESS_MIN_HEIGHT = -30;
-
-export const MIN_EROSION = 0;
-export const MAX_EROSION = 50;
-
-/**
- * Terrain Decoration
- */
 export const MAX_WORLD_HEIGHT = TOP_RENDER_DISTANCE_IN_CHUNKS * CHUNK_HEIGHT;
 export const MIN_WORLD_HEIGHT =
   BOTTOM_RENDER_DISTANCE_IN_CHUNKS * -CHUNK_HEIGHT;
-export const MAX_TERRAIN_HEIGHT = CONTINENTALNESS_MAX_HEIGHT + MAX_EROSION;
-export const MIN_TERRAIN_HEIGHT = CONTINENTALNESS_MIN_HEIGHT - MAX_EROSION;
-export const SEA_LEVEL = CONTINENTALNESS_MIN_HEIGHT + 15;
-export const CLOUD_LEVEL = MAX_TERRAIN_HEIGHT - 10;
+
+export const MIN_EROSION = 0;
+export const MAX_EROSION = 45;
+
+export const CONTINENTALNESS_MIN_HEIGHT = 0;
+export const CONTINENTALNESS_MAX_HEIGHT = CONTINENTALNESS_MIN_HEIGHT + 50;
+
+// WARN must be less than MAX_WORLD_HEIGHT
+export const MAX_SURFACE_HEIGHT = CONTINENTALNESS_MAX_HEIGHT + MAX_EROSION;
+// WARN must be greater than MIN_WORLD_HEIGHT
+export const MIN_SURFACE_HEIGHT = CONTINENTALNESS_MIN_HEIGHT - MAX_EROSION;
+
+export const SEA_LEVEL = CONTINENTALNESS_MIN_HEIGHT + 10;
+export const CLOUD_LEVEL = MAX_SURFACE_HEIGHT - 10;
 
 /**
  * Physics
