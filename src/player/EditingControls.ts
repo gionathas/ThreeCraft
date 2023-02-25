@@ -4,7 +4,8 @@ import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import { BlockType, BlockUtils } from "../terrain/Block";
+import Block from "../terrain/block/Block";
+import { BlockType } from "../terrain/block/BlockType";
 import BlockMarker from "./BlockMarker";
 
 export default class EditingControls {
@@ -105,6 +106,6 @@ export default class EditingControls {
     rayLength.multiplyScalar(EDITING_DISTANCE);
     rayEnd.copy(rayStart).add(rayLength);
 
-    return BlockUtils.raycast(rayStart, rayEnd, terrain);
+    return Block.raycast(rayStart, rayEnd, terrain);
   }
 }

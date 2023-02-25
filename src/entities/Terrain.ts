@@ -11,7 +11,8 @@ import Engine from "../core/Engine";
 import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 
 import TerrainShapeMap from "../maps/TerrainShapeMap";
-import { BlockType, BlockUtils } from "../terrain/Block";
+import Block from "../terrain/block/Block";
+import { BlockType } from "../terrain/block/BlockType";
 import TerrainChunksManager from "../terrain/TerrainChunksManager";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
@@ -187,7 +188,7 @@ export default class Terrain {
   isVisibleBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
-    return BlockUtils.isVisibleBlock(block?.type);
+    return Block.isVisibleBlock(block?.type);
   }
 
   getBlock(blockCoord: Coordinate) {

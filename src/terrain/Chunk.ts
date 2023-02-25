@@ -1,16 +1,13 @@
 import * as THREE from "three";
 import ChunkUtils from "../utils/ChunkUtils";
 import { Coordinate } from "../utils/helpers";
-import { BlockInfo, Blocks, BlockType, BlockUtils } from "./Block";
+import Block, { BlockData } from "./block/Block";
+import Blocks, { BlockType } from "./block/BlockType";
 
 export type ChunkID = string;
 
-export type Block = {
-  type: BlockType;
-} & BlockInfo;
-
 export interface ChunkModel {
-  getBlock: (blockCoord: Coordinate) => Block | null;
+  getBlock: (blockCoord: Coordinate) => BlockData | null;
 }
 export default class Chunk implements ChunkModel {
   private _chunkId: ChunkID;
@@ -31,7 +28,7 @@ export default class Chunk implements ChunkModel {
       blocks ?? new Uint8Array(chunkHeight * chunkWidth * chunkWidth);
   }
 
-  getBlock(coord: Coordinate): Block | null {
+  getBlock(coord: Coordinate): BlockData | null {
     if (!this.isBlockInChunk(coord)) {
       return null;
     }
@@ -55,7 +52,7 @@ export default class Chunk implements ChunkModel {
   }
 
   isFilled(coord: Coordinate) {
-    return BlockUtils.isVisibleBlock(this.getBlock(coord)?.type);
+    return Block.isVisibleBlock(this.getBlock(coord)?.type);
   }
 
   isBlockInChunk(blockCoord: Coordinate) {

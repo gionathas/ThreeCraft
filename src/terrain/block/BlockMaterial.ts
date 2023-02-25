@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import TextureAtlas from "../core/TextureAtlas";
+import TextureAtlas from "../../core/TextureAtlas";
 
 export default class BlockMaterial {
   private static instance: BlockMaterial;

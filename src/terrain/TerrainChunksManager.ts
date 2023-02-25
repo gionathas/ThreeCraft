@@ -9,8 +9,8 @@ import {
   Coordinate,
   isEmptyGeometry,
 } from "../utils/helpers";
-import { NeighbourBlockOffsets } from "./Block";
-import BlockMaterial from "./BlockMaterial";
+import { NeighbourBlockOffsets } from "./block/Block";
+import BlockMaterial from "./block/BlockMaterial";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import ChunkGeometry from "./ChunkGeometry";
 import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";

@@ -1,7 +1,9 @@
 import { SEA_LEVEL, TERRAIN_OPTIMIZATION_ENABLED } from "../config/constants";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { Coordinate } from "../utils/helpers";
-import { BlockFaceAO, BlockType, BlockUtils } from "./Block";
+import Block from "./block/Block";
+import { BlockFaceAO } from "./block/BlockGeometry";
+import { BlockType } from "./block/BlockType";
 import { ChunkModel } from "./Chunk";
 
 export default class ChunkGeometry {
@@ -33,7 +35,7 @@ export default class ChunkGeometry {
           const blockX = startX + x;
 
           const block = chunk.getBlock({ x: blockX, y: blockY, z: blockZ });
-          const isVisibleBlock = BlockUtils.isVisibleBlock(block?.type);
+          const isVisibleBlock = Block.isVisibleBlock(block?.type);
 
           if (block && isVisibleBlock) {
             const isTransparentBlock = block.isTransparent;
@@ -57,14 +59,14 @@ export default class ChunkGeometry {
             const aos = isTransparentBlock ? transparentAOs : solidAOs;
 
             // iterate over each face of this block
-            for (const blockFace of BlockUtils.getBlockFaces()) {
+            for (const blockFace of Block.getBlockFaces()) {
               // hack
               if (isWater && blockFace !== "top") {
                 continue;
               }
 
               const { normal: dir, vertices } =
-                BlockUtils.getBlockFaceGeometry(blockFace);
+                Block.getBlockFaceGeometry(blockFace);
 
               // let's check the block neighbour to this face of the block
               const neighbourX = blockX + dir[0];
@@ -115,7 +117,7 @@ export default class ChunkGeometry {
                   // add normal for this corner
                   normals.push(...dir);
 
-                  const textureCoords = BlockUtils.getBlockUVCoordinates(
+                  const textureCoords = Block.getBlockUVCoordinates(
                     block.type,
                     blockFace,
                     [uv[0], uv[1]]
