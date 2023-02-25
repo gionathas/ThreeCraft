@@ -1,7 +1,8 @@
 export default class Tree {
-  static RADIUS = 2;
-  static TRUNK_HEIGHT = 4;
+  static readonly RADIUS = 2;
+  static readonly TRUNK_HEIGHT = 4;
+  static readonly MAX_HEIGHT = Tree.TRUNK_HEIGHT + 2;
 
-  static LEAVES_START_Y = 3;
-  static LEAVES_END_Y = 5;
+  static readonly LEAVES_START_Y = 3;
+  static readonly LEAVES_END_Y = 5;
 }

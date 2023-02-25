@@ -101,7 +101,7 @@ export default class TerrainChunkDecorator {
     } else {
       if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LOG;
-      } else if (this.treeMap.shouldSpawnTreeLeavesAt(x, y, z, surfaceY)) {
+      } else if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
         blockType = BlockType.OAK_LEAVES;
       }
     }

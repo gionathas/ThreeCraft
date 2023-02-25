@@ -28,7 +28,7 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
-//TODO rename into world
+//TODO rename into Chunk Loader
 export default class Terrain {
   private scene: THREE.Scene;
 
@@ -56,6 +56,8 @@ export default class Terrain {
     );
   }
 
+  // TODO optimization: trigger a terrain update only when the player
+  // moves across a chunk boundary
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
     const isGenerationEnabled = TERRAIN_GENERATION_ENABLED;
 
@@ -102,7 +104,7 @@ export default class Terrain {
 
   private unloadTerrain(boundaries: TerrainBoundaries) {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    const loadedChunks = this.chunksManager.loadedChunks;
+    const loadedChunks = this.chunksManager.getLoadedChunks();
 
     for (const chunk of loadedChunks) {
       const chunkOriginPosition = ChunkUtils.computeChunkWorldOriginPosition(
@@ -198,10 +200,6 @@ export default class Terrain {
 
   private roundToNearestVerticalChunk(val: number) {
     return Math.round(val / CHUNK_HEIGHT) * CHUNK_HEIGHT;
-  }
-
-  get loadedChunks() {
-    return this.chunksManager.loadedChunks;
   }
 
   get totalChunks() {

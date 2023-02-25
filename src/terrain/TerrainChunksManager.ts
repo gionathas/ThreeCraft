@@ -25,7 +25,7 @@ export default class TerrainChunksManager implements ChunkModel {
   private terrainShapeMap: TerrainShapeMap;
   private terrainTreeMap: GlobalTreeMap;
 
-  private chunks: Map<ChunkID, Chunk>;
+  private loadedChunks: Map<ChunkID, Chunk>;
   private solidMesh: Map<ChunkID, THREE.Mesh>;
   private transparentMesh: Map<ChunkID, THREE.Mesh>;
   private solidMeshPool: Array<THREE.Mesh>;
@@ -38,7 +38,7 @@ export default class TerrainChunksManager implements ChunkModel {
     this.terrainShapeMap = terrainShapeMap;
     this.terrainTreeMap = terrainTreeMap;
 
-    this.chunks = new Map();
+    this.loadedChunks = new Map();
     this.solidMesh = new Map();
     this.transparentMesh = new Map();
     this.solidMeshPool = [];
@@ -62,10 +62,11 @@ export default class TerrainChunksManager implements ChunkModel {
       CHUNK_HEIGHT
     );
 
-    const existChunk = this.chunks.has(chunkId);
+    const isChunkLoaded = this.loadedChunks.has(chunkId);
+    const isChunkBeingProcessed = this.processingChunks.has(chunkId);
 
     // if the current chunk already exist or is already being processed by another worker, skip
-    if (existChunk || this.processingChunks.has(chunkId)) {
+    if (isChunkLoaded || isChunkBeingProcessed) {
       return;
     }
 
@@ -75,8 +76,6 @@ export default class TerrainChunksManager implements ChunkModel {
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunk) => {
       const chunkTreeMap = this.terrainTreeMap.loadChunkTreeMap(chunkId);
-
-      console.log("Transfering: ", chunkTreeMap.length);
 
       const { solidGeometry, transparentGeometry, blocksBuffer, time } =
         await generateChunk(
@@ -99,11 +98,11 @@ export default class TerrainChunksManager implements ChunkModel {
       let transparentMesh = null;
 
       if (hasSolidMesh) {
-        solidMesh = this.generateSolidMesh(chunkId, solidGeometry);
+        solidMesh = this.generateChunkSolidMesh(chunkId, solidGeometry);
       }
 
       if (hasTransparentMesh) {
-        transparentMesh = this.generateTransparentMesh(
+        transparentMesh = this.generateChunkTransparentMesh(
           chunkId,
           transparentGeometry
         );
@@ -138,7 +137,7 @@ export default class TerrainChunksManager implements ChunkModel {
         // mark the current chunk as visited
         visitedChunks[chunkId] = true;
 
-        const chunkToUpdate = this.chunks.get(chunkId);
+        const chunkToUpdate = this.loadedChunks.get(chunkId);
 
         if (chunkToUpdate) {
           // get the chunk origin position
@@ -165,7 +164,7 @@ export default class TerrainChunksManager implements ChunkModel {
 
           // update the chunk solid mesh
           if (hasSolidMesh) {
-            const updatedSolidMesh = this.generateSolidMesh(
+            const updatedSolidMesh = this.generateChunkSolidMesh(
               chunkId,
               chunkSolidGeometry
             );
@@ -182,7 +181,7 @@ export default class TerrainChunksManager implements ChunkModel {
 
           // update the chunk transparent mesh
           if (hasTransparentMesh) {
-            const updatedTransparentMesh = this.generateTransparentMesh(
+            const updatedTransparentMesh = this.generateChunkTransparentMesh(
               chunkId,
               chunkTransparentGeometry
             );
@@ -251,10 +250,7 @@ export default class TerrainChunksManager implements ChunkModel {
     return transparentMesh;
   }
 
-  /**
-   * Generate the chunk mesh for the specified chunkId and add it to the chunks mesh map
-   */
-  private generateSolidMesh(
+  private generateChunkSolidMesh(
     chunkId: ChunkID,
     { positions, normals, uvs, indices, aos }: BufferGeometryData
   ) {
@@ -297,7 +293,7 @@ export default class TerrainChunksManager implements ChunkModel {
     return chunkMesh;
   }
 
-  private generateTransparentMesh(
+  private generateChunkTransparentMesh(
     chunkId: ChunkID,
     { positions, normals, uvs, indices }: BufferGeometryData
   ) {
@@ -386,13 +382,13 @@ export default class TerrainChunksManager implements ChunkModel {
    */
   loadChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
     const chunk = new Chunk(chunkID, CHUNK_WIDTH, CHUNK_HEIGHT, blocks);
-    this.chunks.set(chunkID, chunk);
+    this.loadedChunks.set(chunkID, chunk);
 
     return chunk;
   }
 
   unloadChunk(chunkId: ChunkID) {
-    this.chunks.delete(chunkId);
+    this.loadedChunks.delete(chunkId);
     this.terrainTreeMap.unloadChunkTreeMap(chunkId);
   }
 
@@ -407,12 +403,12 @@ export default class TerrainChunksManager implements ChunkModel {
     return chunk.getBlock(blockCoord);
   }
 
-  hasChunk(chunkId: ChunkID) {
-    return this.chunks.has(chunkId);
+  isChunkLoaded(chunkId: ChunkID) {
+    return this.loadedChunks.has(chunkId);
   }
 
   getChunk(chunkId: ChunkID) {
-    return this.chunks.get(chunkId);
+    return this.loadedChunks.get(chunkId);
   }
 
   getSolidChunkMesh(chunkId: ChunkID) {
@@ -435,12 +431,12 @@ export default class TerrainChunksManager implements ChunkModel {
     return chunkId.concat("-transparent");
   }
 
-  get loadedChunks() {
-    return this.chunks.values();
+  getLoadedChunks() {
+    return this.loadedChunks.values();
   }
 
   get totalChunks() {
-    return this.chunks.size;
+    return this.loadedChunks.size;
   }
 
   get totalSolidChunksMesh() {

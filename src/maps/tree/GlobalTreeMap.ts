@@ -4,7 +4,7 @@ import { ChunkID } from "../../terrain/Chunk";
 import Tree from "../../terrain/Tree";
 import ChunkUtils from "../../utils/ChunkUtils";
 import HeightMap from "../HeightMap";
-import TreeMap from "./TreeMap";
+import TreeMap, { TreeMapValue } from "./TreeMap";
 
 const treesDensityFactor = 0.98;
 
@@ -12,10 +12,12 @@ const treesDensityFactor = 0.98;
  * //WARN This class store the data of all the chunks loaded,
  *  without garbage collecting the data associated to unloaded chunks
  *
- * //TODO do we really need to extends TreeMap ?
+ * //NOTE do we really need to extends TreeMap ?
+ *
+ * //NOTE implement a TreeGenerator class ?
  */
 export default class GlobalTreeMap extends TreeMap {
-  private loadedMaps: Map<string, Array<number>>;
+  private loadedMaps: Map<string, Array<TreeMapValue>>;
 
   constructor(seed: string, heightMap: HeightMap) {
     super(seed, heightMap);
@@ -48,10 +50,18 @@ export default class GlobalTreeMap extends TreeMap {
 
     const chunkTreeMapData = [];
 
+    // generate the tree map data for the chunk
     for (let x = startX; x < endX; x++) {
       for (let z = startZ; z < endZ; z++) {
-        const isTreeSpawned = this.computeTreeSpawnAt(x, z);
-        chunkTreeMapData.push(isTreeSpawned);
+        this.generateTreeMapValueAt(x, z);
+      }
+    }
+
+    // load the tree map inside a buffer
+    for (let x = startX; x < endX; x++) {
+      for (let z = startZ; z < endZ; z++) {
+        const value = this.getTreeMapValueAt(x, z)!;
+        chunkTreeMapData.push(value);
       }
     }
 
@@ -71,50 +81,52 @@ export default class GlobalTreeMap extends TreeMap {
     this.loadedMaps.delete(chunkRegionKey);
   }
 
-  private computeTreeSpawnAt(x: number, z: number) {
-    const hasTreeSpawned = this.getPointData(x, z);
+  private generateTreeMapValueAt(x: number, z: number): TreeMapValue {
+    const prevValue = this.getTreeMapValueAt(x, z);
 
     // position already processed
-    if (hasTreeSpawned != null) {
-      return hasTreeSpawned;
+    if (prevValue != null) {
+      return prevValue;
     }
 
-    // no chance to spawn here
-    if (!this.hasTreeChanceToSpawnAt(x, z)) {
-      return this.setTreeSpawnAt(x, z, false);
+    // no chance to spawn a trunk here
+    if (!this.hasTrunkChanceToSpawnAt(x, z)) {
+      return this.setTreeMapValueAt(x, z, TreeMapValue.EMPTY);
     }
 
-    const visitedBlocks: [number, number][] = [];
+    const nearbyBlocks: [number, number][] = [];
 
-    // A tree can potentially spawn BUT we need to check
-    // if there are already trees within a certain radius
+    // A tree can potentially spawn here BUT we need to check
+    // if there are any trunk already placed within a certain radius
     for (let dx = -Tree.RADIUS; dx <= Tree.RADIUS; dx++) {
       for (let dz = -Tree.RADIUS; dz <= Tree.RADIUS; dz++) {
         if (dx === 0 && dz === 0) continue; // skip the current position
 
         const nearbyX = x + dx;
         const nearbyZ = z + dz;
-        visitedBlocks.push([nearbyX, nearbyZ]);
+        nearbyBlocks.push([nearbyX, nearbyZ]);
 
-        const hasNearbyTree = this.hasTreeSpawnedAt(nearbyX, nearbyZ);
+        const hasNearbyTrunk =
+          this.getTreeMapValueAt(nearbyX, nearbyZ) === TreeMapValue.TRUNK;
 
-        // found a nearby tree too close, can't spawn
-        if (hasNearbyTree) {
-          return this.setTreeSpawnAt(x, z, false);
+        // found a nearby trunk too close, can't spawn
+        if (hasNearbyTrunk) {
+          return this.setTreeMapValueAt(x, z, TreeMapValue.EMPTY);
         }
       }
     }
 
-    // mark all the neighbours blocks as not suitable for tree spawning
-    for (const [nearX, nearZ] of visitedBlocks) {
-      this.setTreeSpawnAt(nearX, nearZ, false);
+    // mark all the nearby blocks as tree leafs
+    for (const [nearX, nearZ] of nearbyBlocks) {
+      this.setTreeMapValueAt(nearX, nearZ, TreeMapValue.LEAF);
     }
 
-    // no nearby trees, we can spawn the tree
-    return this.setTreeSpawnAt(x, z, true);
+    // and mark the current block as a tree trunk
+    return this.setTreeMapValueAt(x, z, TreeMapValue.TRUNK);
   }
 
-  private hasTreeChanceToSpawnAt(x: number, z: number) {
+  //TODO to improve
+  private hasTrunkChanceToSpawnAt(x: number, z: number) {
     const treeSeed = this.seed + "_" + TreeMap.computeKey(x, z);
     const prng = alea(treeSeed);
     const treeTrunkSpawnProbability = prng();
@@ -122,7 +134,7 @@ export default class GlobalTreeMap extends TreeMap {
     return treeTrunkSpawnProbability > treesDensityFactor;
   }
 
-  private setTreeSpawnAt(x: number, z: number, spawn: boolean) {
-    return this.setPointData(x, z, spawn ? 1 : 0);
+  private setTreeMapValueAt(x: number, z: number, value: TreeMapValue) {
+    return this.setPointData(x, z, value);
   }
 }

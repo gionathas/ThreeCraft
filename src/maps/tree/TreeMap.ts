@@ -1,10 +1,13 @@
-import * as THREE from "three";
 import { CHUNK_WIDTH } from "../../config/constants";
 import Tree from "../../terrain/Tree";
-import { isInRange } from "../../utils/helpers";
 import Abstract2DMap from "../Abstract2DMap";
 import HeightMap from "../HeightMap";
 
+export enum TreeMapValue {
+  EMPTY = 0,
+  TRUNK = 1,
+  LEAF = 2,
+}
 export default class TreeMap extends Abstract2DMap {
   /**
    * The size of the tree map is the size of the chunk + the radius of the tree
@@ -19,67 +22,83 @@ export default class TreeMap extends Abstract2DMap {
     this.heightMap = heightMap;
   }
 
-  shouldSpawnTreeLeavesAt(x: number, y: number, z: number, surfaceY: number) {
-    if (y < surfaceY) {
+  shouldSpawnTreeLeafAt(x: number, y: number, z: number, surfaceY: number) {
+    if (
+      y < surfaceY + Tree.LEAVES_START_Y ||
+      y > surfaceY + Tree.LEAVES_END_Y ||
+      this.getTreeMapValueAt(x, z) !== TreeMapValue.LEAF
+    ) {
       return false;
     }
 
-    const leaveTreeTrunk = this.findTreeTrunkForLeaveBlockAt(x, y, z);
+    return true;
 
-    if (leaveTreeTrunk) {
-      const [trunkX, trunkZ] = leaveTreeTrunk;
-      const trunkStartY = this.heightMap.getSurfaceHeightAt(trunkX, trunkZ);
-      const trunkEndY = trunkStartY + Tree.TRUNK_HEIGHT;
+    // if (tree) {
+    //   return true;
+    // const trunkStartY = this.heightMap.getSurfaceHeightAt(trunkX, trunkZ);
+    // const trunkEndY = trunkStartY + Tree.TRUNK_HEIGHT;
 
-      const isTreeLeaves = isInRange(y, trunkEndY - 1, trunkEndY + 1);
+    // const isTreeLeaves = isInRange(y, trunkEndY - 1, trunkEndY + 1);
 
-      if (isTreeLeaves) {
-        const trunkPosition = new THREE.Vector3(trunkX, trunkEndY, trunkZ);
-        const leavePosition = new THREE.Vector3(x, y, z);
+    // if (isTreeLeaves) {
+    //   const trunkPosition = new THREE.Vector3(trunkX, trunkEndY, trunkZ);
+    //   const leavePosition = new THREE.Vector3(x, y, z);
 
-        const dist = leavePosition.distanceToSquared(trunkPosition);
+    //   const dist = leavePosition.distanceToSquared(trunkPosition);
 
-        return true;
+    //   return true;
 
-        // return dist > 1 ? Math.random() > 0.4 : true;
-      }
-    }
+    //   // return dist > 1 ? Math.random() > 0.4 : true;
+    // }
+    // }
 
-    return false;
+    // return false;
   }
 
-  //TODO to improve (we need to take into account the y level between the tree and the block)
-  private findTreeTrunkForLeaveBlockAt(x: number, y: number, z: number) {
-    const treeRadius = Tree.RADIUS;
+  /**
+   * If the leaf is near a tree, it return the y level of the leave compared to the trunk end
+   */
+  // private findTreeTrunkForLeafAt(x: number, y: number, z: number) {
+  //   const treeRadius = Tree.RADIUS;
 
-    for (let dx = -treeRadius; dx <= treeRadius; dx++) {
-      for (let dz = -treeRadius; dz <= treeRadius; dz++) {
-        const nearbyX = x + dx;
-        const nearbyZ = z + dz;
+  //   for (let dx = -treeRadius; dx <= treeRadius; dx++) {
+  //     for (let dz = -treeRadius; dz <= treeRadius; dz++) {
+  //       const nearbyX = x + dx;
+  //       const nearbyZ = z + dz;
 
-        const isTreeTrunkSpawned = this.hasTreeSpawnedAt(nearbyX, nearbyZ);
+  //       const isTreeTrunk =
+  //         this.getTreeMapValueAt(nearbyX, nearbyZ) === TreeMapValue.TRUNK;
 
-        if (isTreeTrunkSpawned != null && isTreeTrunkSpawned) {
-          return [nearbyX, nearbyZ];
-        }
-      }
-    }
+  //       if (isTreeTrunk) {
+  //         const trunkStartY = this.heightMap.getSurfaceHeightAt(
+  //           nearbyX,
+  //           nearbyZ
+  //         );
+  //         const trunkEndY = trunkStartY + Tree.TRUNK_HEIGHT;
 
-    return null;
-  }
+  //         // detect in which y level the leave is
+  //         const leaveYLevel = Math.abs(y - trunkEndY);
+
+  //         // if the leave is in an acceptable y distance from the trunkEnd
+  //         if (leaveYLevel < 3) {
+  //           return leaveYLevel;
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   return null;
+  // }
 
   shouldSpawnTreeTrunkAt(x: number, y: number, z: number, surfaceY: number) {
-    const distFromSurface = Math.abs(y - surfaceY) + 1;
-
-    if (y < surfaceY || distFromSurface > Tree.TRUNK_HEIGHT) {
+    if (y < surfaceY || y > surfaceY + Tree.TRUNK_HEIGHT) {
       return false;
     }
 
-    return this.hasTreeSpawnedAt(x, z) ? true : false;
+    return this.getTreeMapValueAt(x, z) === TreeMapValue.TRUNK;
   }
 
-  protected hasTreeSpawnedAt(x: number, z: number) {
-    const treeTrunkSpawn = this.getPointData(x, z);
-    return treeTrunkSpawn != null ? Boolean(treeTrunkSpawn) : null;
+  protected getTreeMapValueAt(x: number, z: number): TreeMapValue | undefined {
+    return this.getPointData(x, z);
   }
 }
