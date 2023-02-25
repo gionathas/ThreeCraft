@@ -4,7 +4,8 @@ import { ChunkID } from "../../terrain/Chunk";
 import Tree from "../../terrain/Tree";
 import ChunkUtils from "../../utils/ChunkUtils";
 import HeightMap from "../HeightMap";
-import TreeMap, { TreeMapValue } from "./TreeMap";
+import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
+import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
 const treesDensityFactor = 0.98;
 
@@ -17,7 +18,7 @@ const treesDensityFactor = 0.98;
  * //NOTE implement a TreeGenerator class ?
  */
 export default class GlobalTreeMap extends TreeMap {
-  private loadedMaps: Map<string, Array<TreeMapValue>>;
+  private loadedMaps: Map<string, Array<TreeMapType>>;
 
   constructor(seed: string, heightMap: HeightMap) {
     super(seed, heightMap);
@@ -27,7 +28,7 @@ export default class GlobalTreeMap extends TreeMap {
   /**
    * //WARN This method create a new Uint8Array each time it is called
    */
-  loadChunkTreeMap(chunkId: ChunkID): Uint8Array {
+  loadChunkTreeMap(chunkId: ChunkID): Uint16Array {
     const { x: originX, z: originZ } =
       ChunkUtils.computeChunkWorldOriginPosition(
         chunkId,
@@ -39,7 +40,7 @@ export default class GlobalTreeMap extends TreeMap {
 
     if (this.loadedMaps.has(chunkRegionKey)) {
       const chunkTreeMapData = this.loadedMaps.get(chunkRegionKey)!;
-      return Uint8Array.from(chunkTreeMapData);
+      return Uint16Array.from(chunkTreeMapData);
     }
 
     const startX = originX - Tree.RADIUS;
@@ -66,7 +67,7 @@ export default class GlobalTreeMap extends TreeMap {
     }
 
     this.loadedMaps.set(chunkRegionKey, chunkTreeMapData);
-    return Uint8Array.from(chunkTreeMapData);
+    return Uint16Array.from(chunkTreeMapData);
   }
 
   unloadChunkTreeMap(chunkId: ChunkID) {
@@ -81,7 +82,7 @@ export default class GlobalTreeMap extends TreeMap {
     this.loadedMaps.delete(chunkRegionKey);
   }
 
-  private generateTreeMapValueAt(x: number, z: number): TreeMapValue {
+  private generateTreeMapValueAt(x: number, z: number) {
     const prevValue = this.getTreeMapValueAt(x, z);
 
     // position already processed
@@ -91,7 +92,7 @@ export default class GlobalTreeMap extends TreeMap {
 
     // no chance to spawn a trunk here
     if (!this.hasTrunkChanceToSpawnAt(x, z)) {
-      return this.setTreeMapValueAt(x, z, TreeMapValue.EMPTY);
+      return this.setTreeMapEmptyAt(x, z);
     }
 
     const nearbyBlocks: [number, number][] = [];
@@ -107,22 +108,23 @@ export default class GlobalTreeMap extends TreeMap {
         nearbyBlocks.push([nearbyX, nearbyZ]);
 
         const hasNearbyTrunk =
-          this.getTreeMapValueAt(nearbyX, nearbyZ) === TreeMapValue.TRUNK;
+          this.getTreeMapTypeAt(nearbyX, nearbyZ) === TreeMapType.TRUNK;
 
         // found a nearby trunk too close, can't spawn
         if (hasNearbyTrunk) {
-          return this.setTreeMapValueAt(x, z, TreeMapValue.EMPTY);
+          return this.setTreeMapEmptyAt(x, z);
         }
       }
     }
 
+    // mark the current block as a tree trunk
+    const trunkSurfaceHeight = this.heightMap.getSurfaceHeightAt(x, z);
+    const trunkData = this.setTreeTrunkAt(x, z, trunkSurfaceHeight);
+
     // mark all the nearby blocks as tree leafs
     for (const [nearX, nearZ] of nearbyBlocks) {
-      this.setTreeMapValueAt(nearX, nearZ, TreeMapValue.LEAF);
+      this.setTreeLeafAt(nearX, nearZ, x, z, trunkData);
     }
-
-    // and mark the current block as a tree trunk
-    return this.setTreeMapValueAt(x, z, TreeMapValue.TRUNK);
   }
 
   //TODO to improve
@@ -134,7 +136,48 @@ export default class GlobalTreeMap extends TreeMap {
     return treeTrunkSpawnProbability > treesDensityFactor;
   }
 
-  private setTreeMapValueAt(x: number, z: number, value: TreeMapValue) {
-    return this.setPointData(x, z, value);
+  private setTreeTrunkAt(x: number, z: number, surfaceY: number) {
+    const trunkData = {
+      type: TreeMapType.TRUNK,
+      trunkHeight: Tree.TRUNK_HEIGHT,
+      trunkSurfaceHeight: surfaceY,
+      trunkDistance: 0,
+    };
+
+    const trunkValue = TreeMapValueEncoder.encode(trunkData);
+    this.setPointData(x, z, trunkValue);
+    return trunkData;
+  }
+
+  private setTreeLeafAt(
+    leafX: number,
+    leafZ: number,
+    trunkX: number,
+    trunkZ: number,
+    trunkData: TreeMapValue
+  ) {
+    const leafDistance = Math.sqrt(
+      Math.pow(trunkX - leafX, 2) + Math.pow(trunkZ - leafZ, 2)
+    );
+
+    const leafValue = TreeMapValueEncoder.encode({
+      type: TreeMapType.LEAF,
+      trunkHeight: trunkData.trunkHeight,
+      trunkSurfaceHeight: trunkData.trunkSurfaceHeight,
+      trunkDistance: leafDistance,
+    });
+
+    this.setPointData(leafX, leafZ, leafValue);
+  }
+
+  private setTreeMapEmptyAt(x: number, z: number) {
+    const emptyData = TreeMapValueEncoder.encode({
+      type: TreeMapType.EMPTY,
+      trunkHeight: 0,
+      trunkSurfaceHeight: 0,
+      trunkDistance: 0,
+    });
+
+    this.setPointData(x, z, emptyData);
   }
 }

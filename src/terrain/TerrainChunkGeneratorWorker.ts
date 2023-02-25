@@ -19,7 +19,7 @@ function generateChunk(
   const treeMap = TreeMapBuilder.generateChunkTreeMapFromBuffer(
     chunkId,
     //@ts-ignore
-    new Uint8Array(treeMapDataBuffer),
+    new Uint16Array(treeMapDataBuffer),
     seed,
     terrainShapeMap.getHeightMap()
   );

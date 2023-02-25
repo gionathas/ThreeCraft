@@ -9,7 +9,7 @@ import TreeMap from "./TreeMap";
 export default class TreeMapBuilder {
   static generateChunkTreeMapFromBuffer(
     chunkId: ChunkID,
-    buffer: Uint8Array,
+    buffer: Uint16Array,
     seed: string,
     heightMap: HeightMap
   ): TreeMap {
