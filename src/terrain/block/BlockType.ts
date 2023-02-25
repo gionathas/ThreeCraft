@@ -16,6 +16,7 @@ export enum BlockType {
 const Blocks: Record<BlockType, BlockInfo> = {
   [BlockType.AIR]: {
     isTransparent: true,
+    isSolid: false,
     texture: {
       top: {
         row: -1,
@@ -33,6 +34,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.STONE]: {
     isTransparent: false,
+    isSolid: true,
     texture: {
       top: {
         row: 0,
@@ -50,6 +52,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.COBBLESTONE]: {
     isTransparent: false,
+    isSolid: true,
     texture: {
       top: {
         row: 0,
@@ -67,6 +70,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.GRASS]: {
     isTransparent: false,
+    isSolid: true,
     texture: {
       top: {
         row: 0,
@@ -84,6 +88,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.DIRT]: {
     isTransparent: false,
+    isSolid: true,
     texture: {
       top: {
         row: 0,
@@ -101,6 +106,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.OAK_LOG]: {
     isTransparent: false,
+    isSolid: true,
     texture: {
       top: {
         row: 1,
@@ -118,6 +124,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.OAK_LEAVES]: {
     isTransparent: true,
+    isSolid: true,
     texture: {
       top: {
         row: 1,
@@ -135,6 +142,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.SAND]: {
     isTransparent: false,
+    isSolid: true,
     texture: {
       top: {
         row: 1,
@@ -152,6 +160,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.WATER]: {
     isTransparent: true,
+    isSolid: false,
     texture: {
       side: {
         row: 1,
@@ -169,6 +178,7 @@ const Blocks: Record<BlockType, BlockInfo> = {
   },
   [BlockType.GLASS]: {
     isTransparent: true,
+    isSolid: true,
     texture: {
       side: {
         row: 2,

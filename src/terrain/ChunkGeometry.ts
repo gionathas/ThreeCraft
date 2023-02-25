@@ -179,7 +179,7 @@ export default class ChunkGeometry {
     chunk: ChunkModel,
     terrainShapeMap: TerrainShapeMap
   ) {
-    const aoIntensity = [1.0, 0.9, 0.8, 0.7];
+    const aoIntensity = [1.0, 0.8, 0.7, 0.6];
     // const aoIntensity = [1.0, 0.6, 0.5, 0.4];
 
     function isOccluded(dx: number, dy: number, dz: number) {
@@ -189,7 +189,7 @@ export default class ChunkGeometry {
         z: z + dz,
       });
 
-      if (occludingBlock && !occludingBlock.isTransparent) {
+      if (occludingBlock && occludingBlock.isSolid) {
         return true;
       }
 

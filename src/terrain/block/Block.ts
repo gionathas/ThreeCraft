@@ -16,6 +16,7 @@ export type BlockTextureFace = "top" | "bottom" | "side";
 
 export type BlockInfo = {
   isTransparent: boolean;
+  isSolid: boolean;
   texture: {
     [key in BlockTextureFace]: {
       row: number;
