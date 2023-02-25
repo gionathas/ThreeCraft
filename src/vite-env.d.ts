@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_EDITING_ENABLED: string;
   readonly VITE_TERRAIN_GENERATION_ENABLED: string;
   readonly VITE_TERRAIN_OPTIMIZATION_ENABLED: string;
+  readonly VITE_TREE_GENERATION_ENABLED: string;
+
   readonly VITE_TERRAIN_CHUNK_WIDTH: number;
   readonly VITE_TERRAIN_CHUNK_HEIGHT: number;
 

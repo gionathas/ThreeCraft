@@ -30,6 +30,9 @@ export const TERRAIN_GENERATION_ENABLED = getBoolean(
 export const TERRAIN_OPTIMIZATION_ENABLED = getBoolean(
   import.meta.env.VITE_TERRAIN_OPTIMIZATION_ENABLED
 );
+export const TREE_GENERATION_ENABLED = getBoolean(
+  import.meta.env.VITE_TREE_GENERATION_ENABLED
+);
 
 /**
  * Rendering Distance
@@ -60,7 +63,7 @@ export const TESTING_MAP_PV = getOptionalNumber(
 
 //TODO move into terrain class
 /**
- * Terrain Generation
+ * Terrain Properties
  */
 export const CONTINENTALNESS_NOISE_SCALE = 10000;
 export const EROSION_NOISE_SCALE = 1024;

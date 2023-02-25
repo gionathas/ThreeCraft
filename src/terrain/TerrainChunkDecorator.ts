@@ -1,4 +1,4 @@
-import { SEA_LEVEL } from "../config/constants";
+import { SEA_LEVEL, TREE_GENERATION_ENABLED } from "../config/constants";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import TreeMap from "../maps/tree/TreeMap";
 import { Coordinate } from "../utils/helpers";
@@ -99,10 +99,12 @@ export default class TerrainChunkDecorator {
     if (y < SEA_LEVEL) {
       blockType = BlockType.WATER;
     } else {
-      if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
-        blockType = BlockType.OAK_LOG;
-      } else if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
-        blockType = BlockType.OAK_LEAVES;
+      if (TREE_GENERATION_ENABLED) {
+        if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
+          blockType = BlockType.OAK_LOG;
+        } else if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
+          blockType = BlockType.OAK_LEAVES;
+        }
       }
     }
 
