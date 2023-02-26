@@ -1,7 +1,5 @@
-import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../../config/constants";
-import { ChunkID } from "../../terrain/Chunk";
+import Chunk, { ChunkID } from "../../terrain/Chunk";
 import Tree from "../../terrain/Tree";
-import ChunkUtils from "../../utils/ChunkUtils";
 import { MapData } from "../Abstract2DMap";
 import HeightMap from "../HeightMap";
 import TreeMap from "./TreeMap";
@@ -14,11 +12,7 @@ export default class TreeMapBuilder {
     heightMap: HeightMap
   ): TreeMap {
     const { x: originX, z: originZ } =
-      ChunkUtils.computeChunkWorldOriginPosition(
-        chunkId,
-        CHUNK_WIDTH,
-        CHUNK_HEIGHT
-      );
+      Chunk.computeWorldOriginPosition(chunkId);
 
     const treeMap = new TreeMap(seed, heightMap);
     const treeMapData: MapData = {};

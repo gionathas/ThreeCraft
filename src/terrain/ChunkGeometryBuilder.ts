@@ -4,16 +4,16 @@ import { Coordinate } from "../utils/helpers";
 import Block from "./block/Block";
 import { BlockFaceAO } from "./block/BlockGeometry";
 import { BlockType } from "./block/BlockType";
-import { ChunkModel } from "./Chunk";
+import Chunk, { ChunkModel } from "./Chunk";
 
-export default class ChunkGeometry {
-  static computeChunkGeometry(
-    { x: startX, y: startY, z: startZ }: Coordinate,
+export default class ChunkGeometryBuilder {
+  static buildChunkGeometry(
     chunk: ChunkModel,
-    chunkWidth: number,
-    chunkHeight: number,
+    chunkOrigin: Coordinate,
     terrainShapeMap: TerrainShapeMap
   ) {
+    const { x: startX, y: startY, z: startZ } = chunkOrigin;
+
     const soldidPositions: number[] = [];
     const solidNormals: number[] = [];
     const solidIndices: number[] = [];
@@ -27,11 +27,11 @@ export default class ChunkGeometry {
     const transparentAOs: number[] = [];
 
     // iterate over each block
-    for (let y = 0; y < chunkHeight; ++y) {
+    for (let y = 0; y < Chunk.HEIGHT; ++y) {
       const blockY = startY + y;
-      for (let z = 0; z < chunkWidth; ++z) {
+      for (let z = 0; z < Chunk.WIDTH; ++z) {
         const blockZ = startZ + z;
-        for (let x = 0; x < chunkWidth; ++x) {
+        for (let x = 0; x < Chunk.WIDTH; ++x) {
           const blockX = startX + x;
 
           const block = chunk.getBlock({ x: blockX, y: blockY, z: blockZ });

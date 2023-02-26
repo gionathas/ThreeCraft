@@ -1,9 +1,7 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
-import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
-import ChunkUtils from "../utils/ChunkUtils";
 import {
   BufferGeometryData,
   Coordinate,
@@ -12,16 +10,16 @@ import {
 import { NeighbourBlockOffsets } from "./block/Block";
 import BlockMaterial from "./block/BlockMaterial";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
-import ChunkGeometry from "./ChunkGeometry";
-import { TerrainGeneratorType } from "./TerrainChunkGeneratorWorker";
-import TerrainGeneratorWorker from "./TerrainChunkGeneratorWorker?worker";
+import { TerrainGeneratorType } from "./ChunkGeneratorWorker";
+import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";
+import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
 
 // WARN this value seems to affect the memory usage, keep it as low as possible
 const MAX_SOLID_MESH_POOL_SIZE = 200;
 const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 
 //TODO rename into terrain
-export default class TerrainChunksManager implements ChunkModel {
+export default class ChunkManager implements ChunkModel {
   private terrainShapeMap: TerrainShapeMap;
   private terrainTreeMap: GlobalTreeMap;
 
@@ -45,7 +43,7 @@ export default class TerrainChunksManager implements ChunkModel {
     this.transparentMeshPool = [];
     this.processingChunks = new Set();
     this.generatorsPool = Pool(() =>
-      spawn<TerrainGeneratorType>(new TerrainGeneratorWorker())
+      spawn<TerrainGeneratorType>(new ChunkGeneratorWorker())
     );
   }
 
@@ -56,11 +54,7 @@ export default class TerrainChunksManager implements ChunkModel {
       transparentMesh: THREE.Mesh | null
     ) => void
   ) {
-    const chunkId = ChunkUtils.computeChunkIdFromPosition(
-      chunkCoord,
-      CHUNK_WIDTH,
-      CHUNK_HEIGHT
-    );
+    const chunkId = Chunk.getChunkIdFromPosition(chunkCoord);
 
     const isChunkLoaded = this.loadedChunks.has(chunkId);
     const isChunkBeingProcessed = this.processingChunks.has(chunkId);
@@ -126,12 +120,12 @@ export default class TerrainChunksManager implements ChunkModel {
     // to keep track of the chunks already updated
     const visitedChunks: Record<ChunkID, boolean | undefined> = {};
 
-    for (const offset of NeighbourBlockOffsets) {
-      const ox = x + offset[0];
-      const oy = y + offset[1];
-      const oz = z + offset[2];
+    for (const neighbourBlock of NeighbourBlockOffsets) {
+      const ox = x + neighbourBlock[0];
+      const oy = y + neighbourBlock[1];
+      const oz = z + neighbourBlock[2];
 
-      const chunkId = this.computeChunkIdFromPosition({ x: ox, y: oy, z: oz });
+      const chunkId = Chunk.getChunkIdFromPosition({ x: ox, y: oy, z: oz });
 
       if (!visitedChunks[chunkId]) {
         // mark the current chunk as visited
@@ -141,21 +135,15 @@ export default class TerrainChunksManager implements ChunkModel {
 
         if (chunkToUpdate) {
           // get the chunk origin position
-          const chunkOrigin = ChunkUtils.computeChunkWorldOriginPosition(
-            chunkId,
-            CHUNK_WIDTH,
-            CHUNK_HEIGHT
-          );
+          const chunkWorldOrigin = Chunk.computeWorldOriginPosition(chunkId);
 
           // update the chunk geometry
           const {
             solid: chunkSolidGeometry,
             transparent: chunkTransparentGeometry,
-          } = ChunkGeometry.computeChunkGeometry(
-            chunkOrigin,
+          } = ChunkGeometryBuilder.buildChunkGeometry(
             this,
-            CHUNK_WIDTH,
-            CHUNK_HEIGHT,
+            chunkWorldOrigin,
             this.terrainShapeMap
           );
 
@@ -381,7 +369,7 @@ export default class TerrainChunksManager implements ChunkModel {
    * Create a new chunk with the specifed chunkId and add it inside chunks map
    */
   loadChunk(chunkID: ChunkID, blocks?: Uint8Array): Chunk {
-    const chunk = new Chunk(chunkID, CHUNK_WIDTH, CHUNK_HEIGHT, blocks);
+    const chunk = new Chunk(chunkID, blocks);
     this.loadedChunks.set(chunkID, chunk);
 
     return chunk;
@@ -393,7 +381,7 @@ export default class TerrainChunksManager implements ChunkModel {
   }
 
   getBlock(blockCoord: Coordinate) {
-    const chunkId = this.computeChunkIdFromPosition(blockCoord);
+    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
     const chunk = this.getChunk(chunkId);
 
     if (!chunk) {
@@ -413,14 +401,6 @@ export default class TerrainChunksManager implements ChunkModel {
 
   getSolidChunkMesh(chunkId: ChunkID) {
     return this.solidMesh.get(chunkId);
-  }
-
-  computeChunkIdFromPosition(coord: Coordinate): ChunkID {
-    return ChunkUtils.computeChunkIdFromPosition(
-      coord,
-      CHUNK_WIDTH,
-      CHUNK_HEIGHT
-    );
   }
 
   private getChunkSolidMeshId(chunkId: ChunkID) {

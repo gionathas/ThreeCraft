@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import ChunkUtils from "../utils/ChunkUtils";
+import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
 import { Coordinate } from "../utils/helpers";
-import Block, { BlockData } from "./block/Block";
+import { BlockData } from "./block/Block";
 import Blocks, { BlockType } from "./block/BlockType";
 
 export type ChunkID = string;
@@ -10,22 +10,18 @@ export interface ChunkModel {
   getBlock: (blockCoord: Coordinate) => BlockData | null;
 }
 export default class Chunk implements ChunkModel {
-  private _chunkId: ChunkID;
-  private chunkWidth: number;
-  private chunkHeight: number;
+  static readonly WIDTH = CHUNK_WIDTH;
+  static readonly HEIGHT = CHUNK_HEIGHT;
+
+  private chunkId: ChunkID;
+  private worldOriginPosition: Coordinate;
   private blocks: Uint8Array;
 
-  constructor(
-    chunkId: ChunkID,
-    chunkWidth: number,
-    chunkHeight: number,
-    blocks?: Uint8Array
-  ) {
-    this._chunkId = chunkId;
-    this.chunkWidth = chunkWidth;
-    this.chunkHeight = chunkHeight;
+  constructor(chunkId: ChunkID, blocks?: Uint8Array) {
+    this.chunkId = chunkId;
+    this.worldOriginPosition = Chunk.computeWorldOriginPosition(chunkId);
     this.blocks =
-      blocks ?? new Uint8Array(chunkHeight * chunkWidth * chunkWidth);
+      blocks ?? new Uint8Array(Chunk.HEIGHT * Chunk.WIDTH * Chunk.WIDTH);
   }
 
   getBlock(coord: Coordinate): BlockData | null {
@@ -51,52 +47,83 @@ export default class Chunk implements ChunkModel {
     this.blocks[blockIndex] = block;
   }
 
-  isFilled(coord: Coordinate) {
-    return Block.isVisibleBlock(this.getBlock(coord)?.type);
-  }
-
   isBlockInChunk(blockCoord: Coordinate) {
-    const { chunkWidth, chunkHeight } = this;
-    const actualChunkId = ChunkUtils.computeChunkIdFromPosition(
-      blockCoord,
-      chunkWidth,
-      chunkHeight
-    );
-    return actualChunkId === this._chunkId;
+    const actualChunkId = Chunk.getChunkIdFromPosition(blockCoord);
+
+    return actualChunkId === this.chunkId;
   }
 
   private computeBlockIndex({ x, y, z }: Coordinate) {
-    const { chunkWidth } = this;
+    const [blockX, blockY, blockZ] = this.getBlockLocalCoordinates(x, y, z);
 
-    const [blockX, blockY, blockZ] = this.getBlockChunkCoordinates(x, y, z);
-
-    return blockY * chunkWidth * chunkWidth + blockZ * chunkWidth + blockX;
+    return blockY * Chunk.WIDTH * Chunk.WIDTH + blockZ * Chunk.WIDTH + blockX;
   }
 
-  private getBlockChunkCoordinates(x: number, y: number, z: number) {
-    const { chunkWidth, chunkHeight } = this;
-
-    const blockX = THREE.MathUtils.euclideanModulo(x, chunkWidth) | 0;
-    const blockY = THREE.MathUtils.euclideanModulo(y, chunkHeight) | 0;
-    const blockZ = THREE.MathUtils.euclideanModulo(z, chunkWidth) | 0;
+  private getBlockLocalCoordinates(x: number, y: number, z: number) {
+    const blockX = THREE.MathUtils.euclideanModulo(x, Chunk.WIDTH) | 0;
+    const blockY = THREE.MathUtils.euclideanModulo(y, Chunk.HEIGHT) | 0;
+    const blockZ = THREE.MathUtils.euclideanModulo(z, Chunk.WIDTH) | 0;
 
     return [blockX, blockY, blockZ];
   }
 
+  /**
+   * Compute the chunk origin position from the its chunk id
+   *
+   * e.g. if we ask for the chunkId (1,0,0) with a chunkWidth and chunkHeight of 32,
+   * we will get back the chunkId (32,0,0)
+   */
+  static computeWorldOriginPosition(chunkID: ChunkID): Coordinate {
+    const {
+      x: chunkX,
+      y: chunkY,
+      z: chunkZ,
+    } = Chunk.chunkIdAsCoordinate(chunkID);
+
+    const offsetStartX = chunkX * Chunk.WIDTH;
+    const offsetStartY = chunkY * Chunk.HEIGHT;
+    const offsetStartZ = chunkZ * Chunk.WIDTH;
+
+    return { x: offsetStartX, y: offsetStartY, z: offsetStartZ };
+  }
+
+  /**
+   * Return the chunkID of the chunk that is supposed to contain the specified position
+   *
+   * e.g. if we ask for the coordinates (35,0,0) which is located in the chunk with id (1,0,0)
+   * its corresponding chunk id will be "1,0,0".
+   */
+  static getChunkIdFromPosition({ x, y, z }: Coordinate): ChunkID {
+    const chunkX = Math.floor(x / Chunk.WIDTH);
+    const chunkY = Math.floor(y / Chunk.HEIGHT);
+    const chunkZ = Math.floor(z / Chunk.WIDTH);
+
+    return Chunk.coordinatesAsChunkId({
+      x: chunkX,
+      y: chunkY,
+      z: chunkZ,
+    });
+  }
+
+  static coordinatesAsChunkId({ x, y, z }: Coordinate): ChunkID {
+    return `${x},${y},${z}`;
+  }
+
+  static chunkIdAsCoordinate(chunkID: ChunkID): Coordinate {
+    const [x, y, z] = chunkID.split(",").map((val) => Number(val));
+    return { x, y, z };
+  }
+
+  getId() {
+    return this.chunkId;
+  }
+
+  getWorldOriginPosition() {
+    return this.worldOriginPosition;
+  }
+
   getBlocks() {
     return this.blocks;
-  }
-
-  get id() {
-    return this._chunkId;
-  }
-
-  get width() {
-    return this.chunkWidth;
-  }
-
-  get height() {
-    return this.chunkHeight;
   }
 
   _debug() {

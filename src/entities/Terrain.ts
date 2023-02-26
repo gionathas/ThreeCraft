@@ -12,8 +12,8 @@ import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { BlockType } from "../terrain/block/BlockType";
-import TerrainChunksManager from "../terrain/TerrainChunksManager";
-import ChunkUtils from "../utils/ChunkUtils";
+import Chunk from "../terrain/Chunk";
+import ChunkManager from "../terrain/ChunkManager";
 import { Coordinate } from "../utils/helpers";
 
 const horizontalRenderDistance =
@@ -33,7 +33,7 @@ export default class Terrain {
   private scene: THREE.Scene;
 
   private seed: string;
-  private chunksManager: TerrainChunksManager;
+  private chunksManager: ChunkManager;
   private previousCenterPosition: THREE.Vector3;
 
   private terrainShapeMap: TerrainShapeMap;
@@ -50,10 +50,7 @@ export default class Terrain {
       this.terrainShapeMap.getHeightMap()
     );
 
-    this.chunksManager = new TerrainChunksManager(
-      this.terrainShapeMap,
-      this.treeMap
-    );
+    this.chunksManager = new ChunkManager(this.terrainShapeMap, this.treeMap);
   }
 
   // TODO optimization: trigger a terrain update only when the player
@@ -107,22 +104,18 @@ export default class Terrain {
     const loadedChunks = this.chunksManager.getLoadedChunks();
 
     for (const chunk of loadedChunks) {
-      const chunkOriginPosition = ChunkUtils.computeChunkWorldOriginPosition(
-        chunk.id,
-        CHUNK_WIDTH,
-        CHUNK_HEIGHT
-      );
+      const chunkWorldOriginPosition = chunk.getWorldOriginPosition();
 
       if (
-        chunkOriginPosition.x < lowerX ||
-        chunkOriginPosition.x > upperX ||
-        chunkOriginPosition.y < lowerY ||
-        chunkOriginPosition.y > upperY ||
-        chunkOriginPosition.z < lowerZ ||
-        chunkOriginPosition.z > upperZ
+        chunkWorldOriginPosition.x < lowerX ||
+        chunkWorldOriginPosition.x > upperX ||
+        chunkWorldOriginPosition.y < lowerY ||
+        chunkWorldOriginPosition.y > upperY ||
+        chunkWorldOriginPosition.z < lowerZ ||
+        chunkWorldOriginPosition.z > upperZ
       ) {
         const { solidMesh, transparentMesh } = this.chunksManager.removeChunk(
-          chunk.id
+          chunk.getId()
         );
 
         if (solidMesh) {
@@ -153,11 +146,11 @@ export default class Terrain {
   }
 
   setBlock(blockCoord: Coordinate, block: BlockType) {
-    const chunkId = this.chunksManager.computeChunkIdFromPosition(blockCoord);
+    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
 
     let chunk = this.chunksManager.getChunk(chunkId);
 
-    // add a new chunk if we are trying to set a block in a chunk that does't exist yet
+    // laod a new chunk if we are trying to set a block in a chunk that does't exist yet
     if (!chunk) {
       chunk = this.chunksManager.loadChunk(chunkId);
     }

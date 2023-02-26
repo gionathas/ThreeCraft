@@ -58,7 +58,7 @@ export default class DebugUI {
     const orientation = this.player.getOrientation();
 
     // const targetBlock = this.player.getTargetBlock();
-    const currentChunkId = this.player._currentChunkCoordinates;
+    const currentChunkId = this.player._currentChunkId;
     const totalChunks = this.terrain.totalChunks;
     const totalMesh = this.terrain._totalMesh;
 

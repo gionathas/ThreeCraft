@@ -8,7 +8,7 @@ import Chunk from "./Chunk";
 /**
  * //TODO implement factory pattern
  */
-export default class TerrainChunkDecorator {
+export default class ChunkDecorator {
   private terrainShapeMap: TerrainShapeMap;
   private treeMap: TreeMap;
 
@@ -17,13 +17,11 @@ export default class TerrainChunkDecorator {
     this.treeMap = treeMap;
   }
 
-  fillChunk(chunk: Chunk, { x: startX, y: startY, z: startZ }: Coordinate) {
-    const chunkWidth = chunk.width;
-    const chunkHeight = chunk.height;
-
-    const endX = startX + chunkWidth;
-    const endZ = startZ + chunkWidth;
-    const endY = startY + chunkHeight;
+  decorateChunk(chunk: Chunk) {
+    const { x: startX, y: startY, z: startZ } = chunk.getWorldOriginPosition();
+    const endX = startX + Chunk.WIDTH;
+    const endY = startY + Chunk.HEIGHT;
+    const endZ = startZ + Chunk.WIDTH;
 
     // filling the chunk with blocks from bottom to top
     for (let y = startY; y < endY; y++) {
