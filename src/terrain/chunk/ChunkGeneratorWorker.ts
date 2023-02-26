@@ -1,7 +1,7 @@
 import { TransferDescriptor } from "threads";
 import { expose, Transfer } from "threads/worker";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
-import TreeMapBuilder from "../../maps/tree/TreeMapBuilder";
+import { TreeMapBuilder } from "../../maps/tree";
 import Chunk, { ChunkID } from "./Chunk";
 import ChunkDecorator from "./ChunkDecorator";
 import ChunkGeometryBuilder from "./ChunkGeometryBuilder";

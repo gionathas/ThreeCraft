@@ -1,7 +1,7 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
-import GlobalTreeMap from "../../maps/tree/GlobalTreeMap";
+import { GlobalTreeMap } from "../../maps/tree";
 import {
   BufferGeometryData,
   Coordinate,

@@ -6,9 +6,8 @@ import {
   TERRAIN_GENERATION_ENABLED,
 } from "../config/constants";
 import Engine from "../core/Engine";
-import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
-
 import TerrainShapeMap from "../maps/TerrainShapeMap";
+import { GlobalTreeMap } from "../maps/tree";
 import { BlockType } from "../terrain/block";
 import { Chunk, ChunkManager } from "../terrain/chunk";
 import { Coordinate } from "../utils/helpers";
