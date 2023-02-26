@@ -7,8 +7,7 @@ import {
   Coordinate,
   isEmptyGeometry,
 } from "../../utils/helpers";
-import { NeighbourBlockOffsets } from "../block/Block";
-import BlockMaterial from "../block/BlockMaterial";
+import { Block, BlockMaterial } from "../block";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { TerrainGeneratorType } from "./ChunkGeneratorWorker";
 import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";
@@ -120,10 +119,10 @@ export default class ChunkManager implements ChunkModel {
     // to keep track of the chunks already updated
     const visitedChunks: Record<ChunkID, boolean | undefined> = {};
 
-    for (const neighbourBlock of NeighbourBlockOffsets) {
-      const ox = x + neighbourBlock[0];
-      const oy = y + neighbourBlock[1];
-      const oz = z + neighbourBlock[2];
+    for (const blockOffset of Block.getNeighbourBlockOffsets()) {
+      const ox = x + blockOffset[0];
+      const oy = y + blockOffset[1];
+      const oz = z + blockOffset[2];
 
       const chunkId = Chunk.getChunkIdFromPosition({ x: ox, y: oy, z: oz });
 

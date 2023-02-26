@@ -10,11 +10,11 @@ import {
   BlockFaceNormal,
   BlockFacesGeometry,
 } from "./BlockGeometry";
-import Blocks, { BlockType } from "./BlockType";
+import { BlockRegistry, BlockType } from "./BlockType";
 
 export type BlockTextureFace = "top" | "bottom" | "side";
 
-export type BlockInfo = {
+export type BlockMetadata = {
   isTransparent: boolean;
   isSolid: boolean;
   texture: {
@@ -27,7 +27,7 @@ export type BlockInfo = {
 
 export type BlockData = {
   type: BlockType;
-} & BlockInfo;
+} & BlockMetadata;
 
 const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
   top: "top",
@@ -38,7 +38,7 @@ const blockFaceToTextureFace: { [face in BlockFace]: BlockTextureFace } = {
   back: "side",
 };
 
-export const NeighbourBlockOffsets = [
+const NeighbourBlockOffsets = [
   [0, 0, 0], // self
   [0, 1, 0], // up
   [0, -1, 0], // down
@@ -87,13 +87,17 @@ export default class Block {
     return BlockFacesGeometry[face];
   }
 
+  static getNeighbourBlockOffsets() {
+    return NeighbourBlockOffsets;
+  }
+
   static getBlockUVCoordinates(
     block: BlockType,
     face: BlockFace,
     [uOff, vOff]: [number, number]
   ) {
     const textureFace = blockFaceToTextureFace[face];
-    const { row, col } = Blocks[block].texture[textureFace];
+    const { row, col } = BlockRegistry[block].texture[textureFace];
 
     return {
       u: ((col + uOff) * TILE_SIZE) / TILE_TEXTURES_WIDTH,

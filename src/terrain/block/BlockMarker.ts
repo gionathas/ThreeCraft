@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Block from "../terrain/block/Block";
+import { Block } from ".";
 
 export default class BlockMarker extends THREE.LineSegments {
   private edgesMaterial!: THREE.LineBasicMaterial;

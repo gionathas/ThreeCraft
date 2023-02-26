@@ -9,7 +9,7 @@ import Engine from "../core/Engine";
 import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 
 import TerrainShapeMap from "../maps/TerrainShapeMap";
-import { BlockType } from "../terrain/block/BlockType";
+import { BlockType } from "../terrain/block";
 import { Chunk, ChunkManager } from "../terrain/chunk";
 import { Coordinate } from "../utils/helpers";
 

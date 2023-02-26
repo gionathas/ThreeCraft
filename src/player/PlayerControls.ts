@@ -18,7 +18,7 @@ import Engine from "../core/Engine";
 import { PlayerMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import Block from "../terrain/block/Block";
+import { Block } from "../terrain/block";
 import { determineAngleQuadrant } from "../utils/helpers";
 
 export interface PlayerControlsProperties {

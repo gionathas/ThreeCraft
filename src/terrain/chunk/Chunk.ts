@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../../config/constants";
 import { Coordinate } from "../../utils/helpers";
-import { BlockData } from "../block/Block";
-import Blocks, { BlockType } from "../block/BlockType";
+import { BlockData, BlockRegistry, BlockType } from "../block";
 
 export type ChunkID = string;
 
@@ -34,7 +33,7 @@ export default class Chunk implements ChunkModel {
 
     return {
       type: blockType,
-      ...Blocks[blockType],
+      ...BlockRegistry[blockType],
     };
   }
 

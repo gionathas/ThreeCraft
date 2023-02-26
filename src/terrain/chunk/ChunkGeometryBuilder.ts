@@ -4,9 +4,7 @@ import {
 } from "../../config/constants";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
 import { Coordinate } from "../../utils/helpers";
-import Block from "../block/Block";
-import { BlockFaceAO } from "../block/BlockGeometry";
-import { BlockType } from "../block/BlockType";
+import { Block, BlockFaceAO, BlockType } from "../block";
 import Chunk, { ChunkModel } from "./Chunk";
 
 export default class ChunkGeometryBuilder {

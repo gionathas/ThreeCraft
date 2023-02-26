@@ -1,4 +1,4 @@
-import { BlockInfo } from "./Block";
+import { BlockMetadata } from "./Block";
 
 export enum BlockType {
   AIR = 0,
@@ -13,7 +13,7 @@ export enum BlockType {
   OAK_LEAVES,
 }
 
-const Blocks: Record<BlockType, BlockInfo> = {
+export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.AIR]: {
     isTransparent: true,
     isSolid: false,
@@ -195,5 +195,3 @@ const Blocks: Record<BlockType, BlockInfo> = {
     },
   },
 };
-
-export default Blocks;

@@ -4,9 +4,7 @@ import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import Block from "../terrain/block/Block";
-import { BlockType } from "../terrain/block/BlockType";
-import BlockMarker from "./BlockMarker";
+import { Block, BlockMarker, BlockType } from "../terrain/block";
 
 export default class EditingControls {
   private scene: THREE.Scene;
