@@ -48,10 +48,7 @@ export default class ChunkManager implements ChunkModel {
 
   generateChunk(
     chunkCoord: Coordinate,
-    onComplete: (
-      solidMesh: THREE.Mesh | null,
-      transparentMesh: THREE.Mesh | null
-    ) => void
+    onComplete: (chunkMesh: THREE.Mesh[]) => void
   ) {
     const chunkId = Chunk.getChunkIdFromPosition(chunkCoord);
 
@@ -84,24 +81,24 @@ export default class ChunkManager implements ChunkModel {
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);
 
+      const chunkMeshes = [];
       const hasSolidMesh = !isEmptyGeometry(solidGeometry);
       const hasTransparentMesh = !isEmptyGeometry(transparentGeometry);
 
-      let solidMesh = null;
-      let transparentMesh = null;
-
       if (hasSolidMesh) {
-        solidMesh = this.generateChunkSolidMesh(chunkId, solidGeometry);
+        const solidMesh = this.generateChunkSolidMesh(chunkId, solidGeometry);
+        chunkMeshes.push(solidMesh);
       }
 
       if (hasTransparentMesh) {
-        transparentMesh = this.generateChunkTransparentMesh(
+        const transparentMesh = this.generateChunkTransparentMesh(
           chunkId,
           transparentGeometry
         );
+        chunkMeshes.push(transparentMesh);
       }
 
-      onComplete(solidMesh, transparentMesh);
+      onComplete(chunkMeshes);
     });
   }
 
@@ -194,7 +191,7 @@ export default class ChunkManager implements ChunkModel {
     const solidMesh = this.removeChunkSolidMesh(chunkId);
     const transparentMesh = this.removeChunkTransparentMesh(chunkId);
 
-    return { solidMesh, transparentMesh };
+    return [solidMesh, transparentMesh];
   }
 
   private removeChunkSolidMesh(chunkId: ChunkID) {

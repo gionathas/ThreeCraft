@@ -1358,7 +1358,7 @@ export default class PlayerControls extends PointerLockControls {
     }
 
     // 2 is the sliding friction
-    return Math.abs(horizontalSpeed * Math.cos(angle) * dt) * 4.5;
+    return Math.abs(horizontalSpeed * Math.cos(angle) * dt) * 5;
   }
 
   private applyVelocityDamping(dt: number) {

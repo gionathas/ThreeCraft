@@ -77,4 +77,8 @@ export default class Engine {
   getScene(): THREE.Scene {
     return this.scene;
   }
+
+  getTotalMeshes(): number {
+    return this.scene.children.length;
+  }
 }

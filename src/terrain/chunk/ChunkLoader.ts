@@ -60,18 +60,11 @@ export default class ChunkLoader {
     for (let x = lowerX; x < upperX; x += Chunk.WIDTH) {
       for (let z = lowerZ; z < upperZ; z += Chunk.WIDTH) {
         for (let y = upperY; y > lowerY; y -= Chunk.HEIGHT) {
-          this.chunksManager.generateChunk(
-            { x, y, z },
-            (solidMesh, transparentMesh) => {
-              if (solidMesh) {
-                this.scene.add(solidMesh);
-              }
-
-              if (transparentMesh) {
-                this.scene.add(transparentMesh);
-              }
+          this.chunksManager.generateChunk({ x, y, z }, (chunkMesh) => {
+            for (const mesh of chunkMesh) {
+              this.scene.add(mesh);
             }
-          );
+          });
         }
       }
     }
@@ -92,16 +85,13 @@ export default class ChunkLoader {
         chunkWorldOriginPosition.z < lowerZ ||
         chunkWorldOriginPosition.z > upperZ
       ) {
-        const { solidMesh, transparentMesh } = this.chunksManager.removeChunk(
-          chunk.getId()
-        );
+        const removedMeshes = this.chunksManager.removeChunk(chunk.getId());
 
-        if (solidMesh) {
-          this.scene.remove(solidMesh);
-        }
-
-        if (transparentMesh) {
-          this.scene.remove(transparentMesh);
+        // remove the chunk meshes from the scene
+        for (const mesh of removedMeshes) {
+          if (mesh) {
+            this.scene.remove(mesh);
+          }
         }
       }
     }

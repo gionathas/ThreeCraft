@@ -1,6 +1,7 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import { SHOW_DEBUG_UI } from "../config/constants";
 import { TOGGLE_DEBUG_UI_KEY } from "../config/keyBindings";
+import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -59,8 +60,8 @@ export default class DebugUI {
 
     // const targetBlock = this.player.getTargetBlock();
     const currentChunkId = this.player._currentChunkId;
-    const totalChunks = this.terrain.totalChunks;
-    const totalMesh = this.terrain._totalMesh;
+    const totalChunks = this.terrain._totalChunks;
+    const totalMesh = Engine.getInstance().getTotalMeshes();
 
     const continentalness = this.terrain._getContinentalness(px, pz);
     const erosion = this.terrain._getErosion(px, pz);

@@ -10,7 +10,7 @@ export default class Terrain {
   private scene: THREE.Scene;
 
   private chunksManager: ChunkManager;
-  private chunkLoader: ChunkLoader;
+  private chunksLoader: ChunkLoader;
 
   private seed: string;
   private terrainShapeMap: TerrainShapeMap;
@@ -27,13 +27,11 @@ export default class Terrain {
     );
 
     this.chunksManager = new ChunkManager(this.terrainShapeMap, this.treeMap);
-    this.chunkLoader = new ChunkLoader(centerPosition, this.chunksManager);
+    this.chunksLoader = new ChunkLoader(centerPosition, this.chunksManager);
   }
 
-  // TODO optimization: trigger a terrain update only when the player
-  // moves across a chunk boundary
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    this.chunkLoader.update(newCenterPosition, isFirstUpdate);
+    this.chunksLoader.update(newCenterPosition, isFirstUpdate);
   }
 
   setBlock(blockCoord: Coordinate, block: BlockType) {
@@ -78,26 +76,6 @@ export default class Terrain {
     return this.chunksManager.getBlock(blockCoord);
   }
 
-  get totalChunks() {
-    return this.chunksManager.totalChunks;
-  }
-
-  get _totalMesh() {
-    return this._totalSolidMesh + this._totalTransparentMesh;
-  }
-
-  get _totalSolidMesh() {
-    return this.chunksManager.totalSolidChunksMesh;
-  }
-
-  get _totalTransparentMesh() {
-    return this.chunksManager.totalTransparentChunksMesh;
-  }
-
-  get _poolSolidMeshSize() {
-    return this.chunksManager._poolSolidMeshSize;
-  }
-
   getSurfaceHeight(x: number, z: number) {
     return this.terrainShapeMap.getSurfaceHeightAt(x, z);
   }
@@ -118,5 +96,25 @@ export default class Terrain {
   _getPV(x: number, z: number) {
     const erosion = this._getErosion(x, z);
     return this.terrainShapeMap.getPVAt(x, z, erosion);
+  }
+
+  get _totalChunks() {
+    return this.chunksManager.totalChunks;
+  }
+
+  get _totalSolidMesh() {
+    return this.chunksManager.totalSolidChunksMesh;
+  }
+
+  get _totalTransparentMesh() {
+    return this.chunksManager.totalTransparentChunksMesh;
+  }
+
+  get _poolSolidMeshSize() {
+    return this.chunksManager._poolSolidMeshSize;
+  }
+
+  get _poolTransparentMeshSize() {
+    return this.chunksManager._poolTransparentMeshSize;
   }
 }
