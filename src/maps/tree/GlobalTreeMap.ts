@@ -1,5 +1,4 @@
 import alea from "alea";
-import { CHUNK_WIDTH } from "../../config/constants";
 import Chunk, { ChunkID } from "../../terrain/Chunk";
 import Tree from "../../terrain/Tree";
 import HeightMap from "../HeightMap";
@@ -39,8 +38,8 @@ export default class GlobalTreeMap extends TreeMap {
     const startX = originX - Tree.RADIUS;
     const startZ = originZ - Tree.RADIUS;
 
-    const endX = originX + CHUNK_WIDTH + Tree.RADIUS;
-    const endZ = originZ + CHUNK_WIDTH + Tree.RADIUS;
+    const endX = originX + Chunk.WIDTH + Tree.RADIUS;
+    const endZ = originZ + Chunk.WIDTH + Tree.RADIUS;
 
     const chunkTreeMapData = [];
 

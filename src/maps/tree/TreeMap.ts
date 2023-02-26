@@ -1,4 +1,4 @@
-import { CHUNK_WIDTH } from "../../config/constants";
+import Chunk from "../../terrain/Chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
 import Abstract2DMap from "../Abstract2DMap";
@@ -22,7 +22,7 @@ export default class TreeMap extends Abstract2DMap {
    * The size of the tree map is the size of the chunk + the radius of the tree
    * because a tree can spawn on the edge of the chunk
    */
-  static readonly MAP_SIZE = CHUNK_WIDTH + Tree.RADIUS * 2;
+  static readonly MAP_SIZE = Chunk.WIDTH + Tree.RADIUS * 2;
   protected heightMap: HeightMap;
 
   constructor(seed: string, heightMap: HeightMap) {

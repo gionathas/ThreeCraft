@@ -1,7 +1,5 @@
 import * as THREE from "three";
 import {
-  CHUNK_HEIGHT,
-  CHUNK_WIDTH,
   DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
   MAX_WORLD_HEIGHT,
   MIN_WORLD_HEIGHT,
@@ -17,7 +15,7 @@ import ChunkManager from "../terrain/ChunkManager";
 import { Coordinate } from "../utils/helpers";
 
 const horizontalRenderDistance =
-  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_WIDTH;
+  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
 
 type TerrainBoundaries = {
   lowerX: number;
@@ -79,9 +77,9 @@ export default class Terrain {
   // to find the chunk that needs to be loaded
   private loadTerrain(boundaries: TerrainBoundaries) {
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
-      for (let z = lowerZ; z < upperZ; z += CHUNK_WIDTH) {
-        for (let y = upperY; y > lowerY; y -= CHUNK_HEIGHT) {
+    for (let x = lowerX; x < upperX; x += Chunk.WIDTH) {
+      for (let z = lowerZ; z < upperZ; z += Chunk.WIDTH) {
+        for (let y = upperY; y > lowerY; y -= Chunk.HEIGHT) {
           this.chunksManager.generateChunk(
             { x, y, z },
             (solidMesh, transparentMesh) => {
@@ -188,11 +186,11 @@ export default class Terrain {
   }
 
   private roundToNearestHorizontalChunk(val: number) {
-    return Math.round(val / CHUNK_WIDTH) * CHUNK_WIDTH;
+    return Math.round(val / Chunk.WIDTH) * Chunk.WIDTH;
   }
 
   private roundToNearestVerticalChunk(val: number) {
-    return Math.round(val / CHUNK_HEIGHT) * CHUNK_HEIGHT;
+    return Math.round(val / Chunk.HEIGHT) * Chunk.HEIGHT;
   }
 
   get totalChunks() {
