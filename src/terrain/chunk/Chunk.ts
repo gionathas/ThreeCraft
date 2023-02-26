@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../config/constants";
-import { Coordinate } from "../utils/helpers";
-import { BlockData } from "./block/Block";
-import Blocks, { BlockType } from "./block/BlockType";
+import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../../config/constants";
+import { Coordinate } from "../../utils/helpers";
+import { BlockData } from "../block/Block";
+import Blocks, { BlockType } from "../block/BlockType";
 
 export type ChunkID = string;
 

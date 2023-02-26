@@ -1,4 +1,4 @@
-import Chunk, { ChunkID } from "../../terrain/Chunk";
+import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import { MapData } from "../Abstract2DMap";
 import HeightMap from "../HeightMap";

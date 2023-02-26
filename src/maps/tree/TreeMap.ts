@@ -1,4 +1,4 @@
-import Chunk from "../../terrain/Chunk";
+import { Chunk } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
 import Abstract2DMap from "../Abstract2DMap";

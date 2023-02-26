@@ -1,5 +1,5 @@
 import alea from "alea";
-import Chunk, { ChunkID } from "../../terrain/Chunk";
+import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import HeightMap from "../HeightMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";

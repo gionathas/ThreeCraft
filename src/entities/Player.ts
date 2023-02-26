@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import EditingControls from "../player/EditingControls";
 import PlayerControls from "../player/PlayerControls";
-import Chunk from "../terrain/Chunk";
+import { Chunk } from "../terrain/chunk";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 

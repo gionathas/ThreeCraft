@@ -1,14 +1,14 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
-import TerrainShapeMap from "../maps/TerrainShapeMap";
-import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
+import TerrainShapeMap from "../../maps/TerrainShapeMap";
+import GlobalTreeMap from "../../maps/tree/GlobalTreeMap";
 import {
   BufferGeometryData,
   Coordinate,
   isEmptyGeometry,
-} from "../utils/helpers";
-import { NeighbourBlockOffsets } from "./block/Block";
-import BlockMaterial from "./block/BlockMaterial";
+} from "../../utils/helpers";
+import { NeighbourBlockOffsets } from "../block/Block";
+import BlockMaterial from "../block/BlockMaterial";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { TerrainGeneratorType } from "./ChunkGeneratorWorker";
 import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";

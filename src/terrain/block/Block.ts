@@ -4,7 +4,7 @@ import {
   TILE_TEXTURES_WIDTH,
   TILE_TEXTURE_HEIGHT,
 } from "../../core/TextureAtlas";
-import { ChunkModel } from "../Chunk";
+import { ChunkModel } from "../chunk";
 import {
   BlockFace,
   BlockFaceNormal,

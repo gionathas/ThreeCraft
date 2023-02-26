@@ -10,8 +10,7 @@ import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { BlockType } from "../terrain/block/BlockType";
-import Chunk from "../terrain/Chunk";
-import ChunkManager from "../terrain/ChunkManager";
+import { Chunk, ChunkManager } from "../terrain/chunk";
 import { Coordinate } from "../utils/helpers";
 
 const horizontalRenderDistance =
