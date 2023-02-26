@@ -1,43 +1,23 @@
 import * as THREE from "three";
-import {
-  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
-  MAX_WORLD_HEIGHT,
-  MIN_WORLD_HEIGHT,
-  TERRAIN_GENERATION_ENABLED,
-} from "../config/constants";
 import Engine from "../core/Engine";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { GlobalTreeMap } from "../maps/tree";
 import { BlockType } from "../terrain/block";
-import { Chunk, ChunkManager } from "../terrain/chunk";
+import { Chunk, ChunkLoader, ChunkManager } from "../terrain/chunk";
 import { Coordinate } from "../utils/helpers";
 
-const horizontalRenderDistance =
-  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
-
-type TerrainBoundaries = {
-  lowerX: number;
-  upperX: number;
-  lowerY: number;
-  upperY: number;
-  lowerZ: number;
-  upperZ: number;
-};
-
-//TODO rename into Chunk Loader
 export default class Terrain {
   private scene: THREE.Scene;
 
-  private seed: string;
   private chunksManager: ChunkManager;
-  private previousCenterPosition: THREE.Vector3;
+  private chunkLoader: ChunkLoader;
 
+  private seed: string;
   private terrainShapeMap: TerrainShapeMap;
   private treeMap: GlobalTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
-    this.previousCenterPosition = centerPosition;
 
     this.seed = "seed"; //FIXME
     this.terrainShapeMap = new TerrainShapeMap(this.seed);
@@ -47,98 +27,13 @@ export default class Terrain {
     );
 
     this.chunksManager = new ChunkManager(this.terrainShapeMap, this.treeMap);
+    this.chunkLoader = new ChunkLoader(centerPosition, this.chunksManager);
   }
 
   // TODO optimization: trigger a terrain update only when the player
   // moves across a chunk boundary
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    const isGenerationEnabled = TERRAIN_GENERATION_ENABLED;
-
-    const isSamePosition =
-      this.previousCenterPosition.equals(newCenterPosition);
-
-    if ((!isSamePosition && isGenerationEnabled) || isFirstUpdate) {
-      const terrainBoundaries =
-        this.getTerrainBoundariesFromPosition(newCenterPosition);
-      this.unloadTerrain(terrainBoundaries);
-      this.loadTerrain(terrainBoundaries);
-      this.previousCenterPosition.copy(newCenterPosition);
-
-      // console.debug(`solidPool: ${this.chunkFactory._poolSolidMeshSize}`);
-      // console.log(`transPool: ${this.chunkFactory._poolTransparentMeshSize}`);
-    }
-  }
-
-  //TODO optimization: instead of doing a 3 nested loop every frame,
-  // to detect the new chunk to load (except for the initial terrain generation),
-  // we can implement a diff between the previous terrain boundaries and the current boundaries
-  // to find the chunk that needs to be loaded
-  private loadTerrain(boundaries: TerrainBoundaries) {
-    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    for (let x = lowerX; x < upperX; x += Chunk.WIDTH) {
-      for (let z = lowerZ; z < upperZ; z += Chunk.WIDTH) {
-        for (let y = upperY; y > lowerY; y -= Chunk.HEIGHT) {
-          this.chunksManager.generateChunk(
-            { x, y, z },
-            (solidMesh, transparentMesh) => {
-              if (solidMesh) {
-                this.scene.add(solidMesh);
-              }
-
-              if (transparentMesh) {
-                this.scene.add(transparentMesh);
-              }
-            }
-          );
-        }
-      }
-    }
-  }
-
-  private unloadTerrain(boundaries: TerrainBoundaries) {
-    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    const loadedChunks = this.chunksManager.getLoadedChunks();
-
-    for (const chunk of loadedChunks) {
-      const chunkWorldOriginPosition = chunk.getWorldOriginPosition();
-
-      if (
-        chunkWorldOriginPosition.x < lowerX ||
-        chunkWorldOriginPosition.x > upperX ||
-        chunkWorldOriginPosition.y < lowerY ||
-        chunkWorldOriginPosition.y > upperY ||
-        chunkWorldOriginPosition.z < lowerZ ||
-        chunkWorldOriginPosition.z > upperZ
-      ) {
-        const { solidMesh, transparentMesh } = this.chunksManager.removeChunk(
-          chunk.getId()
-        );
-
-        if (solidMesh) {
-          this.scene.remove(solidMesh);
-        }
-
-        if (transparentMesh) {
-          this.scene.remove(transparentMesh);
-        }
-      }
-    }
-  }
-
-  private getTerrainBoundariesFromPosition({ x, y, z }: Coordinate) {
-    const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
-    const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
-
-    const lowerX = centerChunkOriginX - horizontalRenderDistance;
-    const upperX = centerChunkOriginX + horizontalRenderDistance;
-
-    const upperZ = centerChunkOriginZ + horizontalRenderDistance;
-    const lowerZ = centerChunkOriginZ - horizontalRenderDistance;
-
-    const upperY = MAX_WORLD_HEIGHT;
-    const lowerY = MIN_WORLD_HEIGHT;
-
-    return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
+    this.chunkLoader.update(newCenterPosition, isFirstUpdate);
   }
 
   setBlock(blockCoord: Coordinate, block: BlockType) {
@@ -183,16 +78,12 @@ export default class Terrain {
     return this.chunksManager.getBlock(blockCoord);
   }
 
-  private roundToNearestHorizontalChunk(val: number) {
-    return Math.round(val / Chunk.WIDTH) * Chunk.WIDTH;
-  }
-
-  private roundToNearestVerticalChunk(val: number) {
-    return Math.round(val / Chunk.HEIGHT) * Chunk.HEIGHT;
-  }
-
   get totalChunks() {
     return this.chunksManager.totalChunks;
+  }
+
+  get _totalMesh() {
+    return this._totalSolidMesh + this._totalTransparentMesh;
   }
 
   get _totalSolidMesh() {
@@ -201,10 +92,6 @@ export default class Terrain {
 
   get _totalTransparentMesh() {
     return this.chunksManager.totalTransparentChunksMesh;
-  }
-
-  get _totalMesh() {
-    return this._totalSolidMesh + this._totalTransparentMesh;
   }
 
   get _poolSolidMeshSize() {
