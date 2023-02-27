@@ -1,15 +1,7 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import EnvVars from "../config/EnvVars";
-import {
-  JUMP_KEY,
-  MOVE_BACK_KEY,
-  MOVE_FORWARD_KEY,
-  MOVE_LEFT_KEY,
-  MOVE_RIGHT_KEY,
-  SPRINT_KEY,
-  SWITCH_PLAYER_MODE,
-} from "../config/keyBindings";
+import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
 import { PlayerMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -187,8 +179,8 @@ export default class PlayerControls extends PointerLockControls {
         break;
       case "dev":
         const upDirection =
-          (this.inputController.getKey(JUMP_KEY) ? 1 : 0) +
-          (this.inputController.getKey(SPRINT_KEY) ? -1 : 0);
+          (this.inputController.getKey(KeyBindings.JUMP_KEY) ? 1 : 0) +
+          (this.inputController.getKey(KeyBindings.SPRINT_KEY) ? -1 : 0);
 
         this.velocity.y += upDirection * verticalSpeed;
         break;
@@ -1384,24 +1376,26 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private hasJumped() {
-    return this.inputController.hasJustPressedKey(JUMP_KEY);
+    return this.inputController.hasJustPressedKey(KeyBindings.JUMP_KEY);
   }
 
   private hasSwitchedMode() {
-    return this.inputController.hasJustPressedKey(SWITCH_PLAYER_MODE);
+    return this.inputController.hasJustPressedKey(
+      KeyBindings.SWITCH_PLAYER_MODE
+    );
   }
 
   private getControlsForwardDirection() {
     return (
-      (this.inputController.getKey(MOVE_FORWARD_KEY) ? 1 : 0) +
-      (this.inputController.getKey(MOVE_BACK_KEY) ? -1 : 0)
+      (this.inputController.getKey(KeyBindings.MOVE_FORWARD_KEY) ? 1 : 0) +
+      (this.inputController.getKey(KeyBindings.MOVE_BACK_KEY) ? -1 : 0)
     );
   }
 
   private getControlsRightDirection() {
     return (
-      (this.inputController.getKey(MOVE_RIGHT_KEY) ? 1 : 0) +
-      (this.inputController.getKey(MOVE_LEFT_KEY) ? -1 : 0)
+      (this.inputController.getKey(KeyBindings.MOVE_RIGHT_KEY) ? 1 : 0) +
+      (this.inputController.getKey(KeyBindings.MOVE_LEFT_KEY) ? -1 : 0)
     );
   }
 

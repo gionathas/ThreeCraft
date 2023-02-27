@@ -1,6 +1,6 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import EnvVars from "../config/EnvVars";
-import { TOGGLE_DEBUG_UI_KEY } from "../config/keyBindings";
+import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -92,7 +92,9 @@ export default class DebugUI {
   private updateDebugVisibility() {
     const { isVisible } = this;
 
-    if (this.inputController.hasJustPressedKey(TOGGLE_DEBUG_UI_KEY)) {
+    if (
+      this.inputController.hasJustPressedKey(KeyBindings.TOGGLE_DEBUG_UI_KEY)
+    ) {
       this.toggleVisibility(!isVisible);
     }
   }

@@ -1,12 +1,14 @@
-/** Debug Controls */
-export const TOGGLE_DEBUG_UI_KEY = "F3";
-export const SWITCH_PLAYER_MODE = "KeyP";
+export default class KeyBindings {
+  /** Debug Controls */
+  static readonly TOGGLE_DEBUG_UI_KEY = "F3";
+  static readonly SWITCH_PLAYER_MODE = "KeyP";
 
-/** Player Controls */
-export const MOVE_FORWARD_KEY = "KeyW";
-export const MOVE_BACK_KEY = "KeyS";
-export const MOVE_RIGHT_KEY = "KeyD";
-export const MOVE_LEFT_KEY = "KeyA";
+  /** Player Controls */
+  static readonly MOVE_FORWARD_KEY = "KeyW";
+  static readonly MOVE_BACK_KEY = "KeyS";
+  static readonly MOVE_RIGHT_KEY = "KeyD";
+  static readonly MOVE_LEFT_KEY = "KeyA";
 
-export const SPRINT_KEY = "ShiftLeft";
-export const JUMP_KEY = "Space";
+  static readonly SPRINT_KEY = "ShiftLeft";
+  static readonly JUMP_KEY = "Space";
+}
