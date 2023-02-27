@@ -8,6 +8,7 @@ import {
   isEmptyGeometry,
 } from "../../utils/helpers";
 import { Block, BlockMaterial } from "../block";
+import World from "../World";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { TerrainGeneratorType } from "./ChunkGeneratorWorker";
 import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";
@@ -46,11 +47,11 @@ export default class ChunkManager implements ChunkModel {
     );
   }
 
-  generateChunk(
-    chunkCoord: Coordinate,
+  generateChunkAt(
+    position: Coordinate,
     onComplete: (chunkMesh: THREE.Mesh[]) => void
   ) {
-    const chunkId = Chunk.getChunkIdFromPosition(chunkCoord);
+    const chunkId = World.getChunkIdFromPosition(position);
 
     const isChunkLoaded = this.loadedChunks.has(chunkId);
     const isChunkBeingProcessed = this.processingChunks.has(chunkId);
@@ -109,7 +110,7 @@ export default class ChunkManager implements ChunkModel {
    * So if a neighbour block is positioned inside a different chunk rather than the original,
    * it will be updated as well.
    */
-  updateChunk({ x, y, z }: Coordinate) {
+  updateChunkAt({ x, y, z }: Coordinate) {
     const updatedMesh = [];
     const removedMesh = [];
 
@@ -121,7 +122,7 @@ export default class ChunkManager implements ChunkModel {
       const oy = y + blockOffset[1];
       const oz = z + blockOffset[2];
 
-      const chunkId = Chunk.getChunkIdFromPosition({ x: ox, y: oy, z: oz });
+      const chunkId = World.getChunkIdFromPosition({ x: ox, y: oy, z: oz });
 
       if (!visitedChunks[chunkId]) {
         // mark the current chunk as visited
@@ -131,7 +132,7 @@ export default class ChunkManager implements ChunkModel {
 
         if (chunkToUpdate) {
           // get the chunk origin position
-          const chunkWorldOrigin = Chunk.computeWorldOriginPosition(chunkId);
+          const chunkWorldOrigin = chunkToUpdate.getWorldOriginPosition();
 
           // update the chunk geometry
           const {
@@ -377,7 +378,7 @@ export default class ChunkManager implements ChunkModel {
   }
 
   getBlock(blockCoord: Coordinate) {
-    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
+    const chunkId = World.getChunkIdFromPosition(blockCoord);
     const chunk = this.getChunk(chunkId);
 
     if (!chunk) {

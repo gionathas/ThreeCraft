@@ -1,6 +1,7 @@
 import alea from "alea";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
+import World from "../../terrain/World";
 import HeightMap from "../HeightMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
@@ -25,8 +26,7 @@ export default class GlobalTreeMap extends TreeMap {
    * //WARN This method create a new Array each time it is called
    */
   loadChunkTreeMap(chunkId: ChunkID): Uint16Array {
-    const { x: originX, z: originZ } =
-      Chunk.computeWorldOriginPosition(chunkId);
+    const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
     const chunkRegionKey = TreeMap.computeKey(originX, originZ);
 
@@ -63,8 +63,7 @@ export default class GlobalTreeMap extends TreeMap {
   }
 
   unloadChunkTreeMap(chunkId: ChunkID) {
-    const { x: originX, z: originZ } =
-      Chunk.computeWorldOriginPosition(chunkId);
+    const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
     const chunkRegionKey = TreeMap.computeKey(originX, originZ);
     this.loadedMaps.delete(chunkRegionKey);

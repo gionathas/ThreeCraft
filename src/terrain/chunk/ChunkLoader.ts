@@ -2,7 +2,7 @@ import EnvVars from "../../config/EnvVars";
 import Engine from "../../core/Engine";
 import { Coordinate } from "../../utils/helpers";
 import World from "../World";
-import Chunk from "./Chunk";
+import Chunk, { ChunkID } from "./Chunk";
 import ChunkManager from "./ChunkManager";
 
 type TerrainBoundaries = {
@@ -20,28 +20,27 @@ export default class ChunkLoader {
 
   private scene: THREE.Scene;
   private chunksManager: ChunkManager;
-  private previousCenterPosition: THREE.Vector3;
+  private prevCenterChunk: ChunkID;
 
   constructor(centerPosition: THREE.Vector3, chunksManager: ChunkManager) {
     this.scene = Engine.getInstance().getScene();
-    this.previousCenterPosition = centerPosition;
+    this.prevCenterChunk = World.getChunkIdFromPosition(centerPosition);
     this.chunksManager = chunksManager;
   }
 
-  // TODO optimization: trigger a terrain update only when the player
-  // moves across a chunk boundary, not when moving position
-  update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
+  update(centerPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
     const isGenerationEnabled = EnvVars.TERRAIN_GENERATION_ENABLED;
 
-    const isSamePosition =
-      this.previousCenterPosition.equals(newCenterPosition);
+    const currCenterChunk = World.getChunkIdFromPosition(centerPosition);
+    const isSameChunk = this.prevCenterChunk === currCenterChunk;
 
-    if ((!isSamePosition && isGenerationEnabled) || isFirstUpdate) {
+    if ((!isSameChunk && isGenerationEnabled) || isFirstUpdate) {
       const terrainBoundaries =
-        this.getTerrainBoundariesFromPosition(newCenterPosition);
+        this.getTerrainBoundariesFromPosition(centerPosition);
+
       this.unloadTerrain(terrainBoundaries);
       this.loadTerrain(terrainBoundaries);
-      this.previousCenterPosition.copy(newCenterPosition);
+      this.prevCenterChunk = currCenterChunk;
 
       // console.debug(`solidPool: ${this.chunkFactory._poolSolidMeshSize}`);
       // console.log(`transPool: ${this.chunkFactory._poolTransparentMeshSize}`);
@@ -57,7 +56,7 @@ export default class ChunkLoader {
     for (let x = lowerX; x < upperX; x += Chunk.WIDTH) {
       for (let z = lowerZ; z < upperZ; z += Chunk.WIDTH) {
         for (let y = upperY; y > lowerY; y -= Chunk.HEIGHT) {
-          this.chunksManager.generateChunk({ x, y, z }, (chunkMesh) => {
+          this.chunksManager.generateChunkAt({ x, y, z }, (chunkMesh) => {
             for (const mesh of chunkMesh) {
               this.scene.add(mesh);
             }

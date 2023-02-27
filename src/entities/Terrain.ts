@@ -3,7 +3,8 @@ import Engine from "../core/Engine";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { GlobalTreeMap } from "../maps/tree";
 import { BlockType } from "../terrain/block";
-import { Chunk, ChunkLoader, ChunkManager } from "../terrain/chunk";
+import { ChunkLoader, ChunkManager } from "../terrain/chunk";
+import World from "../terrain/World";
 import { Coordinate } from "../utils/helpers";
 
 export default class Terrain {
@@ -35,7 +36,7 @@ export default class Terrain {
   }
 
   setBlock(blockCoord: Coordinate, block: BlockType) {
-    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
+    const chunkId = World.getChunkIdFromPosition(blockCoord);
 
     let chunk = this.chunksManager.getChunk(chunkId);
 
@@ -49,7 +50,7 @@ export default class Terrain {
 
     // update all the affected chunks
     const { updatedMesh: updatedMeshList, removedMesh: removedMeshList } =
-      this.chunksManager.updateChunk(blockCoord);
+      this.chunksManager.updateChunkAt(blockCoord);
 
     for (const updatedMesh of updatedMeshList) {
       // if the chunk mesh was not already in the scene, add it

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import EditingControls from "../player/EditingControls";
 import PlayerControls from "../player/PlayerControls";
-import { Chunk } from "../terrain/chunk";
+import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
@@ -78,7 +78,7 @@ export default class Player {
 
   get _currentChunkId() {
     const currentPosition = this.playerControls.position;
-    const chunkId = Chunk.getChunkIdFromPosition(currentPosition);
+    const chunkId = World.getChunkIdFromPosition(currentPosition);
 
     return chunkId;
   }
