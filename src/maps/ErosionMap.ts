@@ -1,9 +1,6 @@
-import {
-  EROSION_NOISE_SCALE,
-  TESTING_MAP_ENABLED,
-  TESTING_MAP_EROSION,
-} from "../config/constants";
+import World from "../terrain/World";
 import { Noise2DMap } from "./Noise2DMap";
+import TestingMap from "./TestingMap";
 
 export default class ErosionMap extends Noise2DMap {
   constructor(seed: string) {
@@ -11,8 +8,8 @@ export default class ErosionMap extends Noise2DMap {
   }
 
   getErosionAt(x: number, z: number) {
-    if (TESTING_MAP_ENABLED && TESTING_MAP_EROSION != null) {
-      return TESTING_MAP_EROSION;
+    if (TestingMap.ENABLED && TestingMap.EROSION != null) {
+      return TestingMap.EROSION;
     }
 
     const cachedValue = this.getPointData(x, z);
@@ -22,8 +19,8 @@ export default class ErosionMap extends Noise2DMap {
     }
 
     const erosion = this.noise2D(
-      x / EROSION_NOISE_SCALE,
-      z / EROSION_NOISE_SCALE
+      x / World.EROSION_NOISE_SCALE,
+      z / World.EROSION_NOISE_SCALE
     );
 
     this.setPointData(x, z, erosion);

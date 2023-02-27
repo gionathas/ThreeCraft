@@ -1,16 +1,9 @@
-import {
-  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
-  MAX_WORLD_HEIGHT,
-  MIN_WORLD_HEIGHT,
-  TERRAIN_GENERATION_ENABLED,
-} from "../../config/constants";
+import EnvVars from "../../config/EnvVars";
 import Engine from "../../core/Engine";
 import { Coordinate } from "../../utils/helpers";
+import World from "../World";
 import Chunk from "./Chunk";
 import ChunkManager from "./ChunkManager";
-
-const horizontalRenderDistance =
-  DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
 
 type TerrainBoundaries = {
   lowerX: number;
@@ -22,6 +15,9 @@ type TerrainBoundaries = {
 };
 
 export default class ChunkLoader {
+  static readonly HORIZONTAL_RENDER_DISTANCE =
+    EnvVars.DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
+
   private scene: THREE.Scene;
   private chunksManager: ChunkManager;
   private previousCenterPosition: THREE.Vector3;
@@ -35,7 +31,8 @@ export default class ChunkLoader {
   // TODO optimization: trigger a terrain update only when the player
   // moves across a chunk boundary, not when moving position
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    const isGenerationEnabled = TERRAIN_GENERATION_ENABLED;
+    const isGenerationEnabled = EnvVars.TERRAIN_GENERATION_ENABLED;
+
     const isSamePosition =
       this.previousCenterPosition.equals(newCenterPosition);
 
@@ -101,14 +98,14 @@ export default class ChunkLoader {
     const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
     const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
 
-    const lowerX = centerChunkOriginX - horizontalRenderDistance;
-    const upperX = centerChunkOriginX + horizontalRenderDistance;
+    const lowerX = centerChunkOriginX - ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
+    const upperX = centerChunkOriginX + ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
 
-    const upperZ = centerChunkOriginZ + horizontalRenderDistance;
-    const lowerZ = centerChunkOriginZ - horizontalRenderDistance;
+    const upperZ = centerChunkOriginZ + ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
+    const lowerZ = centerChunkOriginZ - ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
 
-    const upperY = MAX_WORLD_HEIGHT;
-    const lowerY = MIN_WORLD_HEIGHT;
+    const upperY = World.MAX_WORLD_HEIGHT;
+    const lowerY = World.MIN_WORLD_HEIGHT;
 
     return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
   }

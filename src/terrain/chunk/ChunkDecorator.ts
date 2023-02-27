@@ -1,8 +1,9 @@
-import { SEA_LEVEL, TREE_GENERATION_ENABLED } from "../../config/constants";
+import EnvVars from "../../config/EnvVars";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
 import { TreeMap } from "../../maps/tree";
 import { Coordinate } from "../../utils/helpers";
 import { BlockType } from "../block";
+import World from "../World";
 import Chunk from "./Chunk";
 
 /**
@@ -64,7 +65,7 @@ export default class ChunkDecorator {
 
     // first layer (0 - 1)
     if (distFromSurface <= 1) {
-      if (y < SEA_LEVEL + 2) {
+      if (y < World.SEA_LEVEL + 2) {
         blockType = BlockType.SAND;
       } else if (isMountain) {
         blockType = BlockType.STONE;
@@ -94,10 +95,10 @@ export default class ChunkDecorator {
 
     let blockType: BlockType = BlockType.AIR;
 
-    if (y < SEA_LEVEL) {
+    if (y < World.SEA_LEVEL) {
       blockType = BlockType.WATER;
     } else {
-      if (TREE_GENERATION_ENABLED) {
+      if (EnvVars.TREE_GENERATION_ENABLED) {
         if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
           blockType = BlockType.OAK_LOG;
         } else if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {

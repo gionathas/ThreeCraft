@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { TARGET_FRAME_RATE } from "../config/constants";
+import EnvVars from "../config/EnvVars";
 
 export default class Engine {
   private static instance: Engine;
@@ -54,8 +54,8 @@ export default class Engine {
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) * 0.001;
 
-      if (dt > TARGET_FRAME_RATE || dt < 0) {
-        dt = TARGET_FRAME_RATE;
+      if (dt > EnvVars.TARGET_FRAME_RATE || dt < 0) {
+        dt = EnvVars.TARGET_FRAME_RATE;
       }
 
       update(dt);

@@ -1,10 +1,8 @@
-import {
-  SEA_LEVEL,
-  TERRAIN_OPTIMIZATION_ENABLED,
-} from "../../config/constants";
+import EnvVars from "../../config/EnvVars";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
 import { Coordinate } from "../../utils/helpers";
 import { Block, BlockFaceAO, BlockType } from "../block";
+import World from "../World";
 import Chunk, { ChunkModel } from "./Chunk";
 
 export default class ChunkGeometryBuilder {
@@ -43,7 +41,7 @@ export default class ChunkGeometryBuilder {
             const isWater = block.type === BlockType.WATER;
 
             // hack to render the water as plane
-            if (isWater && blockY !== SEA_LEVEL - 1) {
+            if (isWater && blockY !== World.SEA_LEVEL - 1) {
               continue;
             }
 
@@ -85,7 +83,7 @@ export default class ChunkGeometryBuilder {
                 neighbourZ
               );
 
-              const terrainOptimization = TERRAIN_OPTIMIZATION_ENABLED;
+              const terrainOptimization = EnvVars.TERRAIN_OPTIMIZATION_ENABLED;
               const isEdgeBlock = !neighbourBlock;
               const isBelowNeighbourSurface =
                 blockY < neighbourSurfaceHeight - (blockFace === "top" ? 1 : 0);

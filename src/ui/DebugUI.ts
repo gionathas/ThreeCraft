@@ -1,5 +1,5 @@
 import Stats from "three/examples/jsm/libs/stats.module";
-import { SHOW_DEBUG_UI } from "../config/constants";
+import EnvVars from "../config/EnvVars";
 import { TOGGLE_DEBUG_UI_KEY } from "../config/keyBindings";
 import Engine from "../core/Engine";
 import Player from "../entities/Player";
@@ -37,7 +37,8 @@ export default class DebugUI {
     this.mem.dom.style.cssText = "position:absolute;top:50px;left:0px;"; // set position
     document.body.appendChild(this.mem.dom);
 
-    this.toggleVisibility(SHOW_DEBUG_UI);
+    const initialVisibility = EnvVars.SHOW_DEBUG_UI;
+    this.toggleVisibility(initialVisibility);
   }
 
   update(dt: number) {

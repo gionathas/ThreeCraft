@@ -1,9 +1,6 @@
-import {
-  PV_BASE_SCALE,
-  TESTING_MAP_ENABLED,
-  TESTING_MAP_PV,
-} from "../config/constants";
+import World from "../terrain/World";
 import { Noise2DMap } from "./Noise2DMap";
+import TestingMap from "./TestingMap";
 
 export default class PVMap extends Noise2DMap {
   constructor(seed: string) {
@@ -11,8 +8,8 @@ export default class PVMap extends Noise2DMap {
   }
 
   getPVAt(x: number, z: number, erosion: number = 0) {
-    if (TESTING_MAP_ENABLED && TESTING_MAP_PV != null) {
-      return TESTING_MAP_PV;
+    if (TestingMap.ENABLED && TestingMap.PV != null) {
+      return TestingMap.PV;
     }
 
     const cachedValue = this.getPointData(x, z);
@@ -23,7 +20,7 @@ export default class PVMap extends Noise2DMap {
 
     const octaves = 4;
     const persistence = 0.5;
-    const scale = this.getNoiseScale(erosion);
+    const scale = World.PV_BASE_SCALE;
 
     let pv = 0;
     let maxAmplitude = 0;
@@ -41,20 +38,5 @@ export default class PVMap extends Noise2DMap {
 
     this.setPointData(x, z, pv);
     return pv;
-  }
-
-  /**
-   * Higher scale means more stretched terrain,
-   * whereas lower scale means more rough terrain
-   */
-  getNoiseScale(erosion: number) {
-    const baseScale = PV_BASE_SCALE;
-    const lowScale = baseScale - 20;
-
-    // if (erosion <= -0.8) {
-    //   return lerp(lowScale, baseScale, (erosion + 1) / 0.2);
-    // }
-
-    return baseScale;
   }
 }

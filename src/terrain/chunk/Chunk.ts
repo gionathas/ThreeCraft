@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CHUNK_HEIGHT, CHUNK_WIDTH } from "../../config/constants";
+import EnvVars from "../../config/EnvVars";
 import { Coordinate } from "../../utils/helpers";
 import { BlockData, BlockRegistry, BlockType } from "../block";
 
@@ -9,8 +9,8 @@ export interface ChunkModel {
   getBlock: (blockCoord: Coordinate) => BlockData | null;
 }
 export default class Chunk implements ChunkModel {
-  static readonly WIDTH = CHUNK_WIDTH;
-  static readonly HEIGHT = CHUNK_HEIGHT;
+  static readonly WIDTH = EnvVars.CHUNK_WIDTH;
+  static readonly HEIGHT = EnvVars.CHUNK_HEIGHT;
 
   private chunkId: ChunkID;
   private worldOriginPosition: Coordinate;

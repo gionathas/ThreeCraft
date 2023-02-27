@@ -1,9 +1,6 @@
-import {
-  CONTINENTALNESS_NOISE_SCALE,
-  TESTING_MAP_CONTINENTALNESS,
-  TESTING_MAP_ENABLED,
-} from "../config/constants";
+import World from "../terrain/World";
 import { Noise2DMap } from "./Noise2DMap";
+import TestingMap from "./TestingMap";
 
 /**
  * This Map is used for generating the terrain base height
@@ -14,8 +11,8 @@ export default class ContinentalMap extends Noise2DMap {
   }
 
   getContinentalnessAt(x: number, z: number) {
-    if (TESTING_MAP_ENABLED && TESTING_MAP_CONTINENTALNESS != null) {
-      return TESTING_MAP_CONTINENTALNESS;
+    if (TestingMap.ENABLED && TestingMap.CONTINENTALNESS != null) {
+      return TestingMap.CONTINENTALNESS;
     }
 
     const cachedValue = this.getPointData(x, z);
@@ -25,8 +22,8 @@ export default class ContinentalMap extends Noise2DMap {
     }
 
     const continentalness = this.noise2D(
-      x / CONTINENTALNESS_NOISE_SCALE,
-      z / CONTINENTALNESS_NOISE_SCALE
+      x / World.CONTINENTALNESS_NOISE_SCALE,
+      z / World.CONTINENTALNESS_NOISE_SCALE
     );
 
     this.setPointData(x, z, continentalness);

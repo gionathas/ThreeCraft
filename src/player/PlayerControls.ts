@@ -1,10 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import {
-  FALLING_GRAVITY,
-  JUMPING_GRAVITY,
-  TARGET_FRAME_RATE,
-} from "../config/constants";
+import EnvVars from "../config/EnvVars";
 import {
   JUMP_KEY,
   MOVE_BACK_KEY,
@@ -20,6 +16,7 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { Block } from "../terrain/block";
 import { determineAngleQuadrant } from "../utils/helpers";
+import Physics from "../utils/Physics";
 
 export interface PlayerControlsProperties {
   width: number;
@@ -125,7 +122,7 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   update(dt: number) {
-    const timeStep = TARGET_FRAME_RATE;
+    const timeStep = EnvVars.TARGET_FRAME_RATE;
     this.updateMode();
 
     this.updateHorizontalVelocity();
@@ -1378,11 +1375,11 @@ export default class PlayerControls extends PointerLockControls {
 
   private applyGravity(dt: number) {
     if (this.state === "falling") {
-      this.velocity.y -= FALLING_GRAVITY * dt;
+      this.velocity.y -= Physics.FALLING_GRAVITY * dt;
     }
 
     if (this.state === "jumping") {
-      this.velocity.y -= JUMPING_GRAVITY * dt;
+      this.velocity.y -= Physics.JUMPING_GRAVITY * dt;
     }
   }
 

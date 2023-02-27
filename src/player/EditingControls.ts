@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EDITING_DISTANCE, EDITING_ENABLED } from "../config/constants";
+import EnvVars from "../config/EnvVars";
 import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -7,6 +7,8 @@ import InputController from "../io/InputController";
 import { Block, BlockMarker, BlockType } from "../terrain/block";
 
 export default class EditingControls {
+  static readonly EDITING_DISTANCE = 7;
+
   private scene: THREE.Scene;
   private inputController: InputController;
   private terrain: Terrain;
@@ -41,7 +43,7 @@ export default class EditingControls {
   private placeBlock(block: BlockType) {
     const { terrain } = this;
 
-    if (!EDITING_ENABLED) return;
+    if (!EnvVars.EDITING_ENABLED) return;
 
     const targetBlock = this.getTargetBlock();
 
@@ -101,7 +103,7 @@ export default class EditingControls {
 
     const rayLength = new THREE.Vector3();
     rayLength.subVectors(rayEnd, rayStart).normalize();
-    rayLength.multiplyScalar(EDITING_DISTANCE);
+    rayLength.multiplyScalar(EditingControls.EDITING_DISTANCE);
     rayEnd.copy(rayStart).add(rayLength);
 
     return Block.raycast(rayStart, rayEnd, terrain);

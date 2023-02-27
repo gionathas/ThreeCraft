@@ -1,9 +1,4 @@
-import {
-  CONTINENTALNESS_MAX_HEIGHT,
-  CONTINENTALNESS_MIN_HEIGHT,
-  MAX_EROSION,
-  MIN_EROSION,
-} from "../config/constants";
+import World from "../terrain/World";
 import { lerp } from "../utils/helpers";
 import Abstract2DMap from "./Abstract2DMap";
 import ContinentalMap from "./ContinentalMap";
@@ -51,8 +46,8 @@ export default class HeightMap extends Abstract2DMap {
 
   private getBaseHeight(continentalness: number) {
     return lerp(
-      CONTINENTALNESS_MIN_HEIGHT,
-      CONTINENTALNESS_MAX_HEIGHT,
+      World.CONTINENTALNESS_MIN_HEIGHT,
+      World.CONTINENTALNESS_MAX_HEIGHT,
       (continentalness + 1) / 2
     );
   }
@@ -60,8 +55,8 @@ export default class HeightMap extends Abstract2DMap {
   // high erosion -> flat terrain
   // low erosion -> steep terrain
   private getErosionFactor(erosion: number) {
-    const min = MIN_EROSION;
-    const max = MAX_EROSION;
+    const min = World.MIN_EROSION;
+    const max = World.MAX_EROSION;
 
     const lowSlope = min + 6; // 6
     const midSlope = lowSlope * 2; // 12

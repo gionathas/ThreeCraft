@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { AmbientLight } from "three";
-import { DEFAULT_PLAYER_MODE } from "../config/constants";
+import EnvVars from "../config/EnvVars";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -81,7 +81,7 @@ export default class GameManager {
   //TODO wait terrain loading
   private initPlayer(terrain: Terrain) {
     if (!this.player) {
-      this.player = new Player(terrain, DEFAULT_PLAYER_MODE);
+      this.player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE);
 
       this.player.setSpawnOnPosition(0, 25);
     }
