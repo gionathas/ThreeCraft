@@ -6,6 +6,8 @@ import World from "../World";
 import Chunk, { ChunkModel } from "./Chunk";
 
 export default class ChunkGeometryBuilder {
+  private static readonly AO_INTENSITY_LEVEL = [1.0, 0.8, 0.7, 0.6];
+
   static buildChunkGeometry(
     chunk: ChunkModel,
     chunkOrigin: Coordinate,
@@ -113,7 +115,7 @@ export default class ChunkGeometryBuilder {
                   // add vertex position
                   positions.push(vertexX, vertexY, vertexZ);
 
-                  // add normal for this corner
+                  // add vertex normal
                   normals.push(...dir);
 
                   const textureCoords = Block.getBlockUVCoordinates(
@@ -178,49 +180,57 @@ export default class ChunkGeometryBuilder {
     chunk: ChunkModel,
     terrainShapeMap: TerrainShapeMap
   ) {
-    const aoIntensity = [1.0, 0.8, 0.7, 0.6];
     // const aoIntensity = [1.0, 0.6, 0.5, 0.4];
 
-    function isOccluded(dx: number, dy: number, dz: number) {
-      const occludingBlock = chunk.getBlock({
-        x: x + dx,
-        y: y + dy,
-        z: z + dz,
-      });
+    let occlusionLevel = 0;
+    for (const occlusionSide of [side0, side1, side2]) {
+      if (
+        this.isSideOccluded({ x, y, z }, occlusionSide, chunk, terrainShapeMap)
+      ) {
+        occlusionLevel += 1;
+      }
+    }
 
-      if (occludingBlock && occludingBlock.isSolid) {
+    const rgb = this.AO_INTENSITY_LEVEL[occlusionLevel];
+    return [rgb, rgb, rgb];
+  }
+
+  private static isSideOccluded(
+    { x, y, z }: Coordinate,
+    side: [number, number, number],
+    chunk: ChunkModel,
+    terrainShapeMap: TerrainShapeMap
+  ) {
+    const [dx, dy, dz] = side;
+
+    const occludingBlock = chunk.getBlock({
+      x: x + dx,
+      y: y + dy,
+      z: z + dz,
+    });
+
+    if (occludingBlock && occludingBlock.isSolid) {
+      return true;
+    }
+
+    // out of the chunk edges, use the surface height as an heuristic check
+    if (!occludingBlock) {
+      const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeightAt(
+        Math.floor(x + dx),
+        Math.floor(z + dz)
+      );
+
+      // if we are checking a block above us we just a need an higher surface height
+      // to get occlusion, whereas if we are checking a block below us we need
+      // a surface height which is at the same level of the vertex y coordinate
+      if (
+        (Math.sign(dy) > 0 && y < nearbySurfaceHeight) ||
+        (Math.sign(dy) < 0 && Math.abs(y - nearbySurfaceHeight) === 0)
+      ) {
         return true;
       }
-
-      // out of the chunk edges, use the surface height as an heuristic check
-      if (!occludingBlock) {
-        const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeightAt(
-          Math.floor(x + dx),
-          Math.floor(z + dz)
-        );
-
-        // if we are checking a block above us we just a need an higher surface height
-        // to get occlusion, whereas if we are checking a block below us we need
-        // a surface height which is at the same level of the vertex y coordinate
-        if (
-          (Math.sign(dy) > 0 && y < nearbySurfaceHeight) ||
-          (Math.sign(dy) < 0 && Math.abs(y - nearbySurfaceHeight) === 0)
-        ) {
-          return true;
-        }
-      }
-
-      return false;
     }
 
-    let occlusionStep = 0;
-    for (const [dx, dy, dz] of [side0, side1, side2]) {
-      if (isOccluded(dx, dy, dz)) {
-        occlusionStep += 1;
-      }
-    }
-
-    const rgb = aoIntensity[occlusionStep];
-    return [rgb, rgb, rgb];
+    return false;
   }
 }
