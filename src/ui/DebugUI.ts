@@ -5,6 +5,7 @@ import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
+import PVMap from "../maps/PVMap";
 
 export default class DebugUI {
   private player: Player;
@@ -83,7 +84,7 @@ export default class DebugUI {
     debugUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
     debugUI!.innerHTML += `<p>Total Mesh: ${totalMesh}</p>`;
     debugUI!.innerHTML += `<p>Erosion: ${erosion.toFixed(3)}</p>`;
-    debugUI!.innerHTML += `<p>PV: ${pv.toFixed(3)}</p>`;
+    debugUI!.innerHTML += `<p>PV: ${pv.toFixed(3)} | ${PVMap.getType(pv)}</p>`;
     debugUI!.innerHTML += `<p>Continentalness: ${continentalness.toFixed(
       3
     )}</p>`;

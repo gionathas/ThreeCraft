@@ -2,7 +2,17 @@ import World from "../terrain/World";
 import { Noise2DMap } from "./Noise2DMap";
 import TestingMap from "./TestingMap";
 
+export type PVType = "Valley" | "Low" | "Mid" | "High" | "Peak";
+
 export default class PVMap extends Noise2DMap {
+  static readonly NoiseRange: Record<PVType, [number, number]> = {
+    Valley: [-1, -0.7],
+    Low: [-0.7, -0.4],
+    Mid: [-0.4, -0.1],
+    High: [-0.1, 0.8],
+    Peak: [0.8, 1],
+  };
+
   constructor(seed: string) {
     super(seed);
   }
@@ -38,5 +48,19 @@ export default class PVMap extends Noise2DMap {
 
     this.setPointData(x, z, pv);
     return pv;
+  }
+
+  static getType(pv: number): PVType {
+    if (pv <= PVMap.NoiseRange.Valley[1]) {
+      return "Valley";
+    } else if (pv <= PVMap.NoiseRange.Low[1]) {
+      return "Low";
+    } else if (pv <= PVMap.NoiseRange.Mid[1]) {
+      return "Mid";
+    } else if (pv <= PVMap.NoiseRange.High[1]) {
+      return "High";
+    }
+
+    return "Peak";
   }
 }

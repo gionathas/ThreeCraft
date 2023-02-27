@@ -105,28 +105,26 @@ export default class HeightMap extends Abstract2DMap {
     const mid = Math.round(-erosionHeight / 4);
     const peak = erosionHeight;
 
-    // flat valley area
-    if (pv <= -0.7) {
-      return min;
-    }
-    // valley
-    else if (pv > -0.7 && pv < -0.4) {
-      const t = (pv + 0.7) / 0.3;
-      return lerp(min, mid, t);
-    }
-    // small flat area between a valley and an hill
-    else if (pv >= -0.4 && pv < -0.1) {
-      const t = (pv + 0.4) / 0.2;
-      return lerp(mid, mid + 2, t);
-    }
-    // hill
-    else if (pv >= -0.1 && pv < 0.8) {
-      const t = (pv + 0.1) / 0.9;
-      return lerp(mid + 2, peak, t);
-    }
-    // peak flat
-    else {
-      return peak;
+    const pvType = PVMap.getType(pv);
+    const [minN, maxN] = PVMap.NoiseRange[pvType];
+
+    switch (pvType) {
+      case "Valley":
+        return min;
+      case "Low": {
+        const t = (pv - minN) / (maxN - minN);
+        return lerp(min, mid, t);
+      }
+      case "Mid": {
+        const t = (pv - minN) / (maxN - minN);
+        return lerp(mid, mid + 2, t);
+      }
+      case "High": {
+        const t = (pv - minN) / (maxN - minN);
+        return lerp(mid + 2, peak, t);
+      }
+      case "Peak":
+        return peak;
     }
   }
 
