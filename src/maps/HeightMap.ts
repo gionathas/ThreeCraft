@@ -65,27 +65,27 @@ export default class HeightMap extends Abstract2DMap {
     const lowPeak = Math.floor(max * (1 / 3));
 
     // high erosion, mostly flat terrain
-    if (erosion >= 0.5) {
-      const t = (erosion - 1) / -0.5;
+    if (erosion >= 0.7) {
+      const t = (erosion - 1) / -0.3;
       return lerp(min, lowSlope, t);
     }
     // gentle hill/valley ridge
-    else if (erosion >= 0.4 && erosion < 0.5) {
-      const t = (erosion - 0.5) / -0.1;
+    else if (erosion >= 0.6 && erosion < 0.7) {
+      const t = (erosion - 0.7) / -0.1;
       return lerp(lowSlope, lowPeak, t);
     }
-    // gentle hill/valley plateau
-    else if (erosion >= 0.3 && erosion < 0.4) {
+    // hill/valley plateau
+    else if (erosion >= 0.4 && erosion < 0.6) {
       return lowPeak;
     }
     // gentle hill/valley ridge
-    else if (erosion >= 0.2 && erosion < 0.3) {
-      const t = (erosion - 0.2) / 0.1;
+    else if (erosion >= 0.3 && erosion < 0.4) {
+      const t = (erosion - 0.3) / 0.1;
       return lerp(lowSlope, lowPeak, t);
     }
-    // mostly flat
-    else if (erosion >= -0.1 && erosion < 0.2) {
-      const t = (erosion - 0.2) / -0.3;
+    // rolling terrain
+    else if (erosion >= -0.1 && erosion < 0.3) {
+      const t = (erosion - 0.3) / -0.4;
       return lerp(lowSlope, midSlope, t);
     }
     // mid low erosion
