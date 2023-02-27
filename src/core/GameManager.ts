@@ -46,7 +46,7 @@ export default class GameManager {
       terrain.update(player.getPosition());
       player.update(dt);
       debugUI.update(dt);
-      inputController.update(); // this must be come lastly
+      inputController.update(); // this must come lastly
     }
   }
 
