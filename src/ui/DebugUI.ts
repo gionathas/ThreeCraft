@@ -5,6 +5,7 @@ import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
+import ContinentalMap from "../maps/ContinentalMap";
 import ErosionMap from "../maps/ErosionMap";
 import PVMap from "../maps/PVMap";
 
@@ -90,7 +91,7 @@ export default class DebugUI {
     debugUI!.innerHTML += `<p>PV: ${pv.toFixed(3)} | ${PVMap.getType(pv)}</p>`;
     debugUI!.innerHTML += `<p>Continentalness: ${continentalness.toFixed(
       3
-    )}</p>`;
+    )} | ${ContinentalMap.getType(continentalness)}</p>`;
   }
 
   private updateDebugVisibility() {

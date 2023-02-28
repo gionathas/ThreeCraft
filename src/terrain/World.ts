@@ -3,7 +3,7 @@ import { Coordinate } from "../utils/helpers";
 import { Chunk, ChunkID } from "./chunk";
 
 export default class World {
-  static readonly CONTINENTALNESS_NOISE_SCALE = 7000;
+  static readonly CONTINENTALNESS_NOISE_SCALE = 2000;
   static readonly EROSION_NOISE_SCALE = 1024;
   static readonly PV_BASE_SCALE = 180;
 
