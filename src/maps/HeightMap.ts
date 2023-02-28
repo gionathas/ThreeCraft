@@ -52,51 +52,39 @@ export default class HeightMap extends Abstract2DMap {
     );
   }
 
-  // high erosion -> flat terrain
-  // low erosion -> steep terrain
+  // high erosion -> flatter terrain
+  // low erosion -> steeper terrain
   private getErosionFactor(erosion: number) {
     const min = World.MIN_EROSION;
     const max = World.MAX_EROSION;
+    const midPeak = Math.floor(max * (1 / 2));
 
     const lowSlope = min + 6; // 6
     const midSlope = lowSlope * 2; // 12
     const highSlope = midSlope * 2; // 24
 
-    const lowPeak = Math.floor(max * (1 / 3));
+    const erosionType = ErosionMap.getType(erosion);
+    const [minN, maxN] = ErosionMap.NoiseRange[erosionType];
 
-    // high erosion, mostly flat terrain
-    if (erosion >= 0.7) {
-      const t = (erosion - 1) / -0.3;
-      return lerp(min, lowSlope, t);
-    }
-    // gentle hill/valley ridge
-    else if (erosion >= 0.6 && erosion < 0.7) {
-      const t = (erosion - 0.7) / -0.1;
-      return lerp(lowSlope, lowPeak, t);
-    }
-    // hill/valley plateau
-    else if (erosion >= 0.4 && erosion < 0.6) {
-      return lowPeak;
-    }
-    // gentle hill/valley ridge
-    else if (erosion >= 0.3 && erosion < 0.4) {
-      const t = (erosion - 0.3) / 0.1;
-      return lerp(lowSlope, lowPeak, t);
-    }
-    // rolling terrain
-    else if (erosion >= -0.1 && erosion < 0.3) {
-      const t = (erosion - 0.3) / -0.4;
-      return lerp(lowSlope, midSlope, t);
-    }
-    // mid low erosion
-    else if (erosion >= -0.5 && erosion < -0.1) {
-      const t = (erosion + 0.1) / -0.4;
-      return lerp(midSlope, highSlope, t);
-    }
-    // very low erosion
-    else {
-      const t = (erosion + 0.5) / -0.5;
-      return lerp(highSlope, max, t);
+    // inverse lerp
+    const t = (erosion - minN) / (maxN - minN);
+    const invT = (maxN - erosion) / (maxN - minN);
+
+    switch (erosionType) {
+      case "Flat":
+        return lerp(min, lowSlope, invT);
+      case "FlatSpike":
+        return lerp(lowSlope, midPeak, invT);
+      case "MidLow":
+        return midPeak;
+      case "MidSpike":
+        return lerp(lowSlope, midPeak, t);
+      case "Mid":
+        return lerp(lowSlope, midSlope, invT);
+      case "Low":
+        return lerp(midSlope, highSlope, invT);
+      case "VeryLow":
+        return lerp(highSlope, max, invT);
     }
   }
 
@@ -107,20 +95,18 @@ export default class HeightMap extends Abstract2DMap {
 
     const pvType = PVMap.getType(pv);
     const [minN, maxN] = PVMap.NoiseRange[pvType];
+    const t = (pv - minN) / (maxN - minN);
 
     switch (pvType) {
       case "Valley":
         return min;
       case "Low": {
-        const t = (pv - minN) / (maxN - minN);
         return lerp(min, mid, t);
       }
       case "Mid": {
-        const t = (pv - minN) / (maxN - minN);
         return lerp(mid, mid + 2, t);
       }
       case "High": {
-        const t = (pv - minN) / (maxN - minN);
         return lerp(mid + 2, peak, t);
       }
       case "Peak":

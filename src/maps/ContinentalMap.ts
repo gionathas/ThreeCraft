@@ -2,6 +2,13 @@ import World from "../terrain/World";
 import { Noise2DMap } from "./Noise2DMap";
 import TestingMap from "./TestingMap";
 
+export type ContinentalnessType =
+  | "Ocean"
+  | "Coast"
+  | "Near Inland"
+  | "Inland"
+  | "Far Inland";
+
 /**
  * This Map is used for generating the terrain base height
  */
