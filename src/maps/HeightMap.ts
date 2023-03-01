@@ -91,7 +91,9 @@ export default class HeightMap extends Abstract2DMap {
   private getPvHeight(pv: number, erosionHeight: number) {
     const min = Math.round(-erosionHeight * (2 / 3));
     const mid = Math.round(-erosionHeight / 4);
+
     const peak = erosionHeight;
+    const midPeak = Math.round(peak * (1 / 3));
 
     const pvType = PVMap.getType(pv);
     const [minN, maxN] = PVMap.NoiseRange[pvType];
@@ -103,11 +105,14 @@ export default class HeightMap extends Abstract2DMap {
       case "Low": {
         return lerp(min, mid, t);
       }
-      case "Mid": {
+      case "Plateau": {
         return lerp(mid, mid + 2, t);
       }
+      case "Mid": {
+        return lerp(mid + 2, midPeak, t);
+      }
       case "High": {
-        return lerp(mid + 2, peak, t);
+        return lerp(midPeak, peak, t);
       }
       case "Peak":
         return peak;

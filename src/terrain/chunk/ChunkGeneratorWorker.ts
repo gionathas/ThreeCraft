@@ -2,8 +2,8 @@ import { TransferDescriptor } from "threads";
 import { expose, Transfer } from "threads/worker";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
 import { TreeMapBuilder } from "../../maps/tree";
+import { BlockGeneratorFactory } from "../block";
 import Chunk, { ChunkID } from "./Chunk";
-import ChunkDecorator from "./ChunkDecorator";
 import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
 
 function generateChunk(
@@ -26,11 +26,11 @@ function generateChunk(
     terrainShapeMap.getHeightMap()
   );
 
-  // instantiate a chunk decorator
-  const chunkDecorator = new ChunkDecorator(terrainShapeMap, treeMap);
+  // istantiate a block generator factory
+  const blockFactory = new BlockGeneratorFactory(terrainShapeMap, treeMap);
 
   // decorate the chunk
-  chunkDecorator.decorateChunk(chunk);
+  chunk.decorateChunk(blockFactory);
   const chunkBlocks = chunk.getBlocks();
 
   const { solid, transparent } = ChunkGeometryBuilder.buildChunkGeometry(
@@ -51,5 +51,4 @@ function generateChunk(
 }
 
 export type TerrainGeneratorType = typeof generateChunk;
-
 expose(generateChunk);

@@ -28,6 +28,7 @@ export default class World {
 
   static readonly SEA_LEVEL = this.CONTINENTALNESS_MIN_HEIGHT + 10;
   static readonly CLOUD_LEVEL = this.MAX_SURFACE_HEIGHT - 10;
+  static readonly SNOW_LEVEL = this.MAX_SURFACE_HEIGHT - 20;
 
   /**
    * Return the chunkID of the chunk that is supposed to contain the specified position

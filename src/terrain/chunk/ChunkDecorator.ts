@@ -55,16 +55,16 @@ export default class ChunkDecorator {
     surfaceY: number
   ) {
     const { x, y, z } = blockCoord;
-    const distFromSurface = Math.abs(y - surfaceY);
     const pv = this.terrainShapeMap.getPVAt(x, z);
     const erosion = this.terrainShapeMap.getErosionAt(x, z);
+    const depth = Math.abs(y - surfaceY);
 
     const isMountain = pv >= 0.5;
 
     let blockType: BlockType = BlockType.STONE;
 
     // first layer (0 - 1)
-    if (distFromSurface <= 1) {
+    if (depth <= 1) {
       if (y < World.SEA_LEVEL + 2) {
         blockType = BlockType.SAND;
       } else if (isMountain) {
@@ -74,7 +74,7 @@ export default class ChunkDecorator {
       }
     }
     // second layer (2 , 5)
-    else if (distFromSurface <= 5) {
+    else if (depth <= 5) {
       if (erosion <= -0.3 && pv >= 0) {
         blockType = BlockType.STONE;
       } else {

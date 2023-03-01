@@ -1,7 +1,12 @@
 import * as THREE from "three";
 import EnvVars from "../../config/EnvVars";
 import { Coordinate } from "../../utils/helpers";
-import { BlockData, BlockRegistry, BlockType } from "../block";
+import {
+  BlockData,
+  BlockGeneratorFactory,
+  BlockRegistry,
+  BlockType,
+} from "../block";
 import World from "../World";
 
 export type ChunkID = string;
@@ -51,6 +56,27 @@ export default class Chunk implements ChunkModel {
     const blockChunkId = World.getChunkIdFromPosition(blockCoord);
 
     return blockChunkId === this.chunkId;
+  }
+
+  decorateChunk(blockFactory: BlockGeneratorFactory) {
+    const { x: startX, y: startY, z: startZ } = this.getWorldOriginPosition();
+
+    const endX = startX + Chunk.WIDTH;
+    const endY = startY + Chunk.HEIGHT;
+    const endZ = startZ + Chunk.WIDTH;
+
+    // filling the chunk with blocks from bottom to top
+    for (let y = startY; y < endY; y++) {
+      for (let z = startZ; z < endZ; z++) {
+        for (let x = startX; x < endX; x++) {
+          const blockCoord = { x, y, z };
+          const blockGenerator = blockFactory.getBlockGenerator(x, y, z);
+
+          const block = blockGenerator.generateBlock(x, y, z);
+          this.setBlock(blockCoord, block);
+        }
+      }
+    }
   }
 
   private computeBlockIndex({ x, y, z }: Coordinate) {
