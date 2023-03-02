@@ -46,8 +46,8 @@ export default class HeightMap extends Abstract2DMap {
 
   private getBaseHeight(continentalness: number) {
     return lerp(
-      World.CONTINENTALNESS_MIN_HEIGHT,
-      World.CONTINENTALNESS_MAX_HEIGHT,
+      World.MIN_CONTINENTALNESS_HEIGHT,
+      World.MAX_CONTINENTALNESS_HEIGHT,
       (continentalness + 1) / 2
     );
   }
@@ -93,7 +93,7 @@ export default class HeightMap extends Abstract2DMap {
     const mid = Math.round(-erosionHeight / 4);
 
     const peak = erosionHeight;
-    const midPeak = Math.round(peak * (1 / 3));
+    const midPeak = Math.round(peak * (1 / 2));
 
     const pvType = PVMap.getType(pv);
     const [minN, maxN] = PVMap.NoiseRange[pvType];

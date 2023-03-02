@@ -15,20 +15,20 @@ export default class World {
   static readonly MIN_EROSION = 0;
   static readonly MAX_EROSION = 45;
 
-  static readonly CONTINENTALNESS_MIN_HEIGHT = 0;
-  static readonly CONTINENTALNESS_MAX_HEIGHT =
-    this.CONTINENTALNESS_MIN_HEIGHT + 50;
+  static readonly MIN_CONTINENTALNESS_HEIGHT = 0;
+  static readonly MAX_CONTINENTALNESS_HEIGHT =
+    this.MIN_CONTINENTALNESS_HEIGHT + 50;
 
   // WARN must be less than MAX_WORLD_HEIGHT
   static readonly MAX_SURFACE_HEIGHT =
-    this.CONTINENTALNESS_MAX_HEIGHT + this.MAX_EROSION;
+    this.MAX_CONTINENTALNESS_HEIGHT + this.MAX_EROSION;
   // WARN must be greater than MIN_WORLD_HEIGHT
   static readonly MIN_SURFACE_HEIGHT =
-    this.CONTINENTALNESS_MIN_HEIGHT - this.MAX_EROSION;
+    this.MIN_CONTINENTALNESS_HEIGHT - this.MAX_EROSION;
 
-  static readonly SEA_LEVEL = this.CONTINENTALNESS_MIN_HEIGHT + 10;
   static readonly CLOUD_LEVEL = this.MAX_SURFACE_HEIGHT - 10;
-  static readonly SNOW_LEVEL = this.MAX_SURFACE_HEIGHT - 20;
+  static readonly SEA_LEVEL = this.MIN_CONTINENTALNESS_HEIGHT + 10;
+  static readonly SNOW_LEVEL = this.MAX_CONTINENTALNESS_HEIGHT - 5;
 
   /**
    * Return the chunkID of the chunk that is supposed to contain the specified position

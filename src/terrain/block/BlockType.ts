@@ -6,6 +6,7 @@ export enum BlockType {
   COBBLESTONE,
   DIRT,
   GRASS,
+  GRASS_SNOW,
   WATER,
   SAND,
   GLASS,
@@ -83,6 +84,24 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       side: {
         row: 0,
         col: 0,
+      },
+    },
+  },
+  [BlockType.GRASS_SNOW]: {
+    isTransparent: false,
+    isSolid: true,
+    texture: {
+      top: {
+        row: 2,
+        col: 5,
+      },
+      bottom: {
+        row: 0,
+        col: 2,
+      },
+      side: {
+        row: 2,
+        col: 4,
       },
     },
   },

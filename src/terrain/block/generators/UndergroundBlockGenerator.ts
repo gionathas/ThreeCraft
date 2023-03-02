@@ -1,4 +1,4 @@
-import ContinentalMap from "../../../maps/ContinentalMap";
+import ContinentalMap, { ContinentalType } from "../../../maps/ContinentalMap";
 import TerrainShapeMap from "../../../maps/TerrainShapeMap";
 import World from "../../World";
 import { BlockType } from "../BlockType";
@@ -26,36 +26,38 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
   }
 
   private getSurfaceBlockType(x: number, y: number, z: number): BlockType {
-    const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
-    const continentalType = ContinentalMap.getType(continentalness);
-
     const isAboveSnowLevel = y >= World.SNOW_LEVEL;
 
     if (isAboveSnowLevel) {
-      //FIXME
-      return BlockType.COBBLESTONE;
+      return BlockType.GRASS_SNOW;
     }
 
-    if (
-      this.isBelorOrNearSeaLevel(y) &&
-      (continentalType === "Coast" || continentalType === "Ocean")
-    ) {
+    if (this.shouldSpawnSand(x, y, z)) {
       return BlockType.SAND;
+    }
+
+    if (y < World.SEA_LEVEL - 1) {
+      return BlockType.DIRT;
     }
 
     return BlockType.GRASS;
   }
 
   private getSubSurfaceBlockType(x: number, y: number, z: number): BlockType {
-    if (this.isBelorOrNearSeaLevel(y)) {
+    if (this.shouldSpawnSand(x, y, z)) {
       return BlockType.SAND;
     }
 
     return BlockType.DIRT;
   }
 
-  private isBelorOrNearSeaLevel(y: number): boolean {
-    return y <= World.SEA_LEVEL + 4;
+  private shouldSpawnSand(x: number, y: number, z: number): boolean {
+    const continentalType = this.getContinentalType(x, z);
+
+    return (
+      y <= World.SEA_LEVEL + 4 &&
+      (continentalType === "Coast" || continentalType === "Ocean")
+    );
   }
 
   private getDepthLevel(y: number, surfaceY: number): DepthLevel {
@@ -78,5 +80,10 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
     }
 
     return "Mid";
+  }
+
+  private getContinentalType(x: number, z: number): ContinentalType {
+    const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
+    return ContinentalMap.getType(continentalness);
   }
 }
