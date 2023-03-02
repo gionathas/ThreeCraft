@@ -13,14 +13,16 @@ export default class SurfaceBlockGenerator extends BlockGenerator {
   }
 
   generateBlock(x: number, y: number, z: number): BlockType {
-    const surfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
-
-    if (y < World.SEA_LEVEL) {
+    if (this.shouldSpawnWater2(x, y, z)) {
       return BlockType.WATER;
     }
 
     //TODO add trees
 
     return BlockType.AIR;
+  }
+
+  private shouldSpawnWater2(x: number, y: number, z: number): boolean {
+    return y < World.SEA_LEVEL;
   }
 }

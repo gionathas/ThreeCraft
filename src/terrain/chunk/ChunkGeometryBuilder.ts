@@ -42,8 +42,8 @@ export default class ChunkGeometryBuilder {
             const isTransparentBlock = block.isTransparent;
             const isWater = block.type === BlockType.WATER;
 
-            // hack to render the water as plane
-            if (isWater && blockY !== World.SEA_LEVEL - 1) {
+            // hack to render only the surface water blocks
+            if (isWater && this.shouldSkipWaterBlockRendering(blockY)) {
               continue;
             }
 
@@ -232,5 +232,12 @@ export default class ChunkGeometryBuilder {
     }
 
     return false;
+  }
+
+  /**
+   * hack to render only the surface water blocks
+   */
+  private static shouldSkipWaterBlockRendering(y: number) {
+    return y !== World.SEA_LEVEL - 1;
   }
 }

@@ -3,7 +3,7 @@ import { Coordinate } from "../utils/helpers";
 import { Chunk, ChunkID } from "./chunk";
 
 export default class World {
-  static readonly CONTINENTALNESS_NOISE_SCALE = 2000;
+  static readonly CONTINENTALNESS_NOISE_SCALE = 2500;
   static readonly EROSION_NOISE_SCALE = 1024;
   static readonly PV_BASE_SCALE = 180;
 
@@ -16,8 +16,7 @@ export default class World {
   static readonly MAX_EROSION = 45;
 
   static readonly MIN_CONTINENTALNESS_HEIGHT = 0;
-  static readonly MAX_CONTINENTALNESS_HEIGHT =
-    this.MIN_CONTINENTALNESS_HEIGHT + 50;
+  static readonly MAX_CONTINENTALNESS_HEIGHT = 50;
 
   // WARN must be less than MAX_WORLD_HEIGHT
   static readonly MAX_SURFACE_HEIGHT =
@@ -27,8 +26,12 @@ export default class World {
     this.MIN_CONTINENTALNESS_HEIGHT - this.MAX_EROSION;
 
   static readonly CLOUD_LEVEL = this.MAX_SURFACE_HEIGHT - 10;
-  static readonly SEA_LEVEL = this.MIN_CONTINENTALNESS_HEIGHT + 10;
-  static readonly SNOW_LEVEL = this.MAX_CONTINENTALNESS_HEIGHT - 5;
+  static readonly SNOW_LEVEL = this.MAX_CONTINENTALNESS_HEIGHT;
+
+  static readonly SEA_LEVEL = this.MIN_CONTINENTALNESS_HEIGHT + 15;
+  static readonly SAND_LEVEL = World.SEA_LEVEL + 6;
+
+  static readonly BEDROCK_LEVEL = World.MIN_WORLD_HEIGHT / 6;
 
   /**
    * Return the chunkID of the chunk that is supposed to contain the specified position

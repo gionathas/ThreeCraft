@@ -15,8 +15,8 @@ export type ContinentalType =
 export default class ContinentalMap extends Noise2DMap {
   static readonly NoiseRange: Record<ContinentalType, [number, number]> = {
     Ocean: [-1, -0.7],
-    Coast: [-0.7, -0.5],
-    Near_Inland: [-0.5, 0],
+    Coast: [-0.7, -0.4],
+    Near_Inland: [-0.4, 0],
     Inland: [0, 0.7],
     Far_Inland: [0.7, 1],
   };

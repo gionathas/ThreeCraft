@@ -45,15 +45,37 @@ export default class HeightMap extends Abstract2DMap {
   }
 
   private getBaseHeight(continentalness: number) {
-    return lerp(
-      World.MIN_CONTINENTALNESS_HEIGHT,
-      World.MAX_CONTINENTALNESS_HEIGHT,
-      (continentalness + 1) / 2
-    );
+    const continentType = ContinentalMap.getType(continentalness);
+
+    if (continentType === "Ocean") {
+      return World.MIN_CONTINENTALNESS_HEIGHT;
+    }
+
+    if (continentType === "Coast") {
+      const min = ContinentalMap.NoiseRange["Coast"][0];
+      const max = ContinentalMap.NoiseRange["Coast"][1];
+      const t = (continentalness - min) / (max - min);
+      return lerp(World.SEA_LEVEL, World.SEA_LEVEL + 2, t);
+    }
+
+    if (continentType === "Near_Inland" || continentType === "Inland") {
+      const min = ContinentalMap.NoiseRange["Near_Inland"][0];
+      const max = ContinentalMap.NoiseRange["Inland"][1];
+      const t = (continentalness - min) / (max - min);
+      return lerp(World.SEA_LEVEL + 2, World.SEA_LEVEL + 15, t);
+    }
+
+    if (continentType === "Far_Inland") {
+      const min = ContinentalMap.NoiseRange["Far_Inland"][0];
+      const max = ContinentalMap.NoiseRange["Far_Inland"][1];
+
+      const t = (continentalness - min) / (max - min);
+      return lerp(World.SEA_LEVEL + 15, World.MAX_CONTINENTALNESS_HEIGHT, t);
+    }
+
+    return World.MAX_CONTINENTALNESS_HEIGHT;
   }
 
-  // high erosion -> flatter terrain
-  // low erosion -> steeper terrain
   private getErosionFactor(erosion: number) {
     const min = World.MIN_EROSION;
     const max = World.MAX_EROSION;

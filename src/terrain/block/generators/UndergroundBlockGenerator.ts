@@ -1,4 +1,3 @@
-import ContinentalMap, { ContinentalType } from "../../../maps/ContinentalMap";
 import TerrainShapeMap from "../../../maps/TerrainShapeMap";
 import World from "../../World";
 import { BlockType } from "../BlockType";
@@ -26,9 +25,7 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
   }
 
   private getSurfaceBlockType(x: number, y: number, z: number): BlockType {
-    const isAboveSnowLevel = y >= World.SNOW_LEVEL;
-
-    if (isAboveSnowLevel) {
+    if (this.shouldSpawnSnow(x, y, z)) {
       return BlockType.GRASS_SNOW;
     }
 
@@ -40,6 +37,10 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
       return BlockType.DIRT;
     }
 
+    if (this.shouldSpanwSurfaceStone(x, y, z)) {
+      return BlockType.STONE;
+    }
+
     return BlockType.GRASS;
   }
 
@@ -48,16 +49,51 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
       return BlockType.SAND;
     }
 
+    if (this.shouldSpanwSurfaceStone(x, y, z)) {
+      return BlockType.STONE;
+    }
+
     return BlockType.DIRT;
   }
 
   private shouldSpawnSand(x: number, y: number, z: number): boolean {
-    const continentalType = this.getContinentalType(x, z);
+    const continentalType = this.getContinentalTypeAt(x, z);
 
     return (
-      y <= World.SEA_LEVEL + 4 &&
+      y <= World.SAND_LEVEL &&
       (continentalType === "Coast" || continentalType === "Ocean")
     );
+  }
+
+  private shouldSpanwSurfaceStone(x: number, y: number, z: number): boolean {
+    const pvType = this.getPvTypeAt(x, z);
+    const continentalType = this.getContinentalTypeAt(x, z);
+    const erosionType = this.getErosionTypeAt(x, z);
+
+    const isFarInland = continentalType === "Far_Inland";
+    const isLand = continentalType === "Inland";
+
+    const isHighErosion = erosionType === "Flat";
+    const isLowErosion = erosionType === "VeryLow" || erosionType === "Low";
+    const isVeryLowErosion = erosionType === "VeryLow";
+
+    const isValley = pvType === "Valley";
+    const isLowPv = pvType === "Valley" || pvType === "Low";
+
+    const case1 = isFarInland && isVeryLowErosion && isLowPv;
+    const case2 = isFarInland && isLowErosion && isValley;
+    const case3 = (isLand || isFarInland) && isHighErosion && isLowPv;
+
+    return case1 || case2 || case3;
+  }
+
+  private shouldSpawnSnow(x: number, y: number, z: number) {
+    const continentalType = this.getContinentalTypeAt(x, z);
+
+    const isFarInland = continentalType === "Far_Inland";
+    const isAboveSnowLevel = y >= World.SNOW_LEVEL;
+
+    return isFarInland && isAboveSnowLevel;
   }
 
   private getDepthLevel(y: number, surfaceY: number): DepthLevel {
@@ -71,7 +107,7 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
       return "Subsurface";
     }
 
-    if (y <= World.MIN_WORLD_HEIGHT / 6) {
+    if (y <= World.BEDROCK_LEVEL) {
       return "BedRock";
     }
 
@@ -80,10 +116,5 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
     }
 
     return "Mid";
-  }
-
-  private getContinentalType(x: number, z: number): ContinentalType {
-    const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
-    return ContinentalMap.getType(continentalness);
   }
 }
