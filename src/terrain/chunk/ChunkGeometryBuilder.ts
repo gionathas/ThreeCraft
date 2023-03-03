@@ -1,17 +1,23 @@
 import EnvVars from "../../config/EnvVars";
+import DensityMap from "../../maps/DensityMap";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
 import { Coordinate } from "../../utils/helpers";
-import { Block, BlockFaceAO, BlockType } from "../block";
+import { Block, BlockData, BlockFaceAO, BlockType } from "../block";
+import { BlockFace } from "../block/BlockGeometry";
 import World from "../World";
 import Chunk, { ChunkModel } from "./Chunk";
 
+//TODO - refactor this class
+// add internal state to this class
+// - move the block face rendering optimization logic to BlockFaceRenderer
 export default class ChunkGeometryBuilder {
   private static readonly AO_INTENSITY_LEVEL = [1.0, 0.8, 0.7, 0.6];
 
   static buildChunkGeometry(
     chunk: ChunkModel,
     chunkOrigin: Coordinate,
-    terrainShapeMap: TerrainShapeMap
+    terrainShapeMap: TerrainShapeMap,
+    densityMap: DensityMap
   ) {
     const { x: startX, y: startY, z: startZ } = chunkOrigin;
 
@@ -80,21 +86,31 @@ export default class ChunkGeometryBuilder {
                 z: neighbourZ,
               });
 
-              const neighbourSurfaceHeight = terrainShapeMap.getSurfaceHeightAt(
+              const neighbourSurfaceY = terrainShapeMap.getSurfaceHeightAt(
                 neighbourX,
                 neighbourZ
               );
 
-              const terrainOptimization = EnvVars.TERRAIN_OPTIMIZATION_ENABLED;
-              const isEdgeBlock = !neighbourBlock;
-              const isBelowNeighbourSurface =
-                blockY < neighbourSurfaceHeight - (blockFace === "top" ? 1 : 0);
+              const blockDensity = densityMap.getDensityAt(
+                blockX,
+                blockY,
+                blockZ
+              );
+              const neighbourDensity = densityMap.getDensityAt(
+                neighbourX,
+                neighbourY,
+                neighbourZ
+              );
 
-              // this will prevent all the underground blocks to be rendered
               if (
-                terrainOptimization &&
-                isEdgeBlock &&
-                isBelowNeighbourSurface
+                this.isBlockFaceRenderingOptimizable(
+                  { x: blockX, y: blockY, z: blockZ },
+                  blockDensity,
+                  blockFace,
+                  neighbourBlock,
+                  neighbourDensity,
+                  neighbourSurfaceY
+                )
               ) {
                 continue;
               }
@@ -134,7 +150,8 @@ export default class ChunkGeometryBuilder {
                     },
                     aoSides,
                     chunk,
-                    terrainShapeMap
+                    terrainShapeMap,
+                    densityMap
                   );
 
                   aos.push(...vertexAO);
@@ -178,14 +195,21 @@ export default class ChunkGeometryBuilder {
     { x, y, z }: Coordinate,
     { side0, side1, side2 }: BlockFaceAO,
     chunk: ChunkModel,
-    terrainShapeMap: TerrainShapeMap
+    terrainShapeMap: TerrainShapeMap,
+    densityMap: DensityMap
   ) {
     // const aoIntensity = [1.0, 0.6, 0.5, 0.4];
 
     let occlusionLevel = 0;
     for (const occlusionSide of [side0, side1, side2]) {
       if (
-        this.isSideOccluded({ x, y, z }, occlusionSide, chunk, terrainShapeMap)
+        this.isSideOccluded(
+          { x, y, z },
+          occlusionSide,
+          chunk,
+          terrainShapeMap,
+          densityMap
+        )
       ) {
         occlusionLevel += 1;
       }
@@ -199,7 +223,8 @@ export default class ChunkGeometryBuilder {
     { x, y, z }: Coordinate,
     side: [number, number, number],
     chunk: ChunkModel,
-    terrainShapeMap: TerrainShapeMap
+    terrainShapeMap: TerrainShapeMap,
+    densityMap: DensityMap
   ) {
     const [dx, dy, dz] = side;
 
@@ -213,25 +238,60 @@ export default class ChunkGeometryBuilder {
       return true;
     }
 
-    // out of the chunk edges, use the surface height as an heuristic check
+    // out of the chunk edges, use the surface heigh  t as an heuristic check
     if (!occludingBlock) {
-      const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeightAt(
-        Math.floor(x + dx),
-        Math.floor(z + dz)
-      );
+      const nx = Math.floor(x + dx);
+      const ny = Math.floor(y + dy);
+      const nz = Math.floor(z + dz);
+
+      const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeightAt(nx, nz);
+      const nearbyDensity = densityMap.getDensityAt(nx, ny, nz);
+
+      const isNearbyBlockSolid = Math.sign(nearbyDensity) > 0;
+
+      const isCheckingBlockAbove = Math.sign(dy) > 0;
+      const isCheckinBlockBelow = Math.sign(dy) < 0;
+
+      const hasNearbyBlockAbove = y < nearbySurfaceHeight;
+      const hasNearbyBlockAtSameYLevel =
+        Math.abs(y - nearbySurfaceHeight) === 0;
 
       // if we are checking a block above us we just a need an higher surface height
       // to get occlusion, whereas if we are checking a block below us we need
       // a surface height which is at the same level of the vertex y coordinate
-      if (
-        (Math.sign(dy) > 0 && y < nearbySurfaceHeight) ||
-        (Math.sign(dy) < 0 && Math.abs(y - nearbySurfaceHeight) === 0)
-      ) {
-        return true;
+      if (isNearbyBlockSolid) {
+        return (
+          (isCheckingBlockAbove && hasNearbyBlockAbove) ||
+          (isCheckinBlockBelow && hasNearbyBlockAtSameYLevel)
+        );
       }
     }
 
     return false;
+  }
+
+  private static isBlockFaceRenderingOptimizable(
+    { y: blockY }: Coordinate,
+    blockDensity: number,
+    blockFace: BlockFace,
+    neighbourBlock: BlockData | null,
+    neighbourDensity: number,
+    neighbourSurfaceY: number
+  ) {
+    const terrainOptimization = EnvVars.TERRAIN_OPTIMIZATION_ENABLED;
+
+    if (!terrainOptimization) {
+      return false;
+    }
+
+    const isEdgeBlock = !neighbourBlock;
+    const isBelowNeighbourSurface =
+      blockY < neighbourSurfaceY - (blockFace === "top" ? 1 : 0);
+
+    const hasSameDensity =
+      Math.sign(blockDensity) === Math.sign(neighbourDensity);
+
+    return isEdgeBlock && isBelowNeighbourSurface && hasSameDensity;
   }
 
   /**

@@ -1,6 +1,4 @@
-import AbstractMap from "./AbstractMap";
-
-export type MapData = Record<string, number>;
+import AbstractMap, { MapData } from "./AbstractMap";
 
 export default abstract class Abstract2DMap extends AbstractMap {
   protected data: MapData;
@@ -30,6 +28,6 @@ export default abstract class Abstract2DMap extends AbstractMap {
   }
 
   static computeKey(x: number, z: number) {
-    return `${Math.floor(x)},${Math.floor(z)}`;
+    return `${Math.floor(x)}_${Math.floor(z)}`;
   }
 }

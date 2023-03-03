@@ -1,35 +1,35 @@
+import DensityMap from "../../../maps/DensityMap";
 import TerrainShapeMap from "../../../maps/TerrainShapeMap";
 import { TreeMap } from "../../../maps/tree";
 import BlockGenerator from "./BlockGenerator";
-import SurfaceBlockGenerator from "./SurfaceBlockGenerator";
-import UndergroundBlockGenerator from "./UndergroundBlockGenerator";
+import FeaturesGenerator from "./FeaturesGenerator";
+import TerrainGenerator from "./TerrainGenerator";
+
+export enum Phase {
+  TERRAIN,
+  FEATURES,
+}
 
 export default class BlockGeneratorFactory {
-  private terrainShapeMap: TerrainShapeMap;
-
   // generators
-  private undergroundBlockGenerator: UndergroundBlockGenerator;
-  private surfaceBlockGenerator: SurfaceBlockGenerator;
+  private terrainGenerator: TerrainGenerator;
+  private featuresGenerator: FeaturesGenerator;
 
-  constructor(terrainShapeMap: TerrainShapeMap, treeMap: TreeMap) {
-    this.terrainShapeMap = terrainShapeMap;
-
-    this.undergroundBlockGenerator = new UndergroundBlockGenerator(
-      terrainShapeMap
-    );
-    this.surfaceBlockGenerator = new SurfaceBlockGenerator(
-      terrainShapeMap,
-      treeMap
-    );
+  constructor(
+    terrainShapeMap: TerrainShapeMap,
+    densityMap: DensityMap,
+    treeMap: TreeMap
+  ) {
+    this.terrainGenerator = new TerrainGenerator(terrainShapeMap, densityMap);
+    this.featuresGenerator = new FeaturesGenerator(terrainShapeMap, treeMap);
   }
 
-  getBlockGenerator(x: number, y: number, z: number): BlockGenerator {
-    const surfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
-
-    if (y < surfaceY) {
-      return this.undergroundBlockGenerator;
-    } else {
-      return this.surfaceBlockGenerator;
+  getBlockGenerator(phase: Phase): BlockGenerator {
+    switch (phase) {
+      case Phase.TERRAIN:
+        return this.terrainGenerator;
+      case Phase.FEATURES:
+        return this.featuresGenerator;
     }
   }
 }

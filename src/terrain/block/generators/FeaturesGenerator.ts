@@ -4,7 +4,7 @@ import World from "../../World";
 import { BlockType } from "../BlockType";
 import BlockGenerator from "./BlockGenerator";
 
-export default class SurfaceBlockGenerator extends BlockGenerator {
+export default class FeaturesGenerator extends BlockGenerator {
   protected treeMap: TreeMap;
 
   constructor(terrainShapeMap: TerrainShapeMap, treeMap: TreeMap) {
@@ -13,7 +13,7 @@ export default class SurfaceBlockGenerator extends BlockGenerator {
   }
 
   generateBlock(x: number, y: number, z: number): BlockType {
-    if (this.shouldSpawnWater2(x, y, z)) {
+    if (this.shouldSpawnWater(x, y, z)) {
       return BlockType.WATER;
     }
 
@@ -22,7 +22,7 @@ export default class SurfaceBlockGenerator extends BlockGenerator {
     return BlockType.AIR;
   }
 
-  private shouldSpawnWater2(x: number, y: number, z: number): boolean {
+  private shouldSpawnWater(x: number, y: number, z: number): boolean {
     return y < World.SEA_LEVEL;
   }
 }

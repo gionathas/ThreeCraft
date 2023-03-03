@@ -6,6 +6,7 @@ export default class World {
   static readonly CONTINENTALNESS_NOISE_SCALE = 2500;
   static readonly EROSION_NOISE_SCALE = 1024;
   static readonly PV_BASE_SCALE = 180;
+  static readonly DENSITY_NOISE_SCALE = 32;
 
   static readonly MAX_WORLD_HEIGHT =
     EnvVars.TOP_RENDER_DISTANCE_IN_CHUNKS * Chunk.HEIGHT;
@@ -17,6 +18,10 @@ export default class World {
 
   static readonly MIN_CONTINENTALNESS_HEIGHT = 0;
   static readonly MAX_CONTINENTALNESS_HEIGHT = 50;
+
+  static readonly MIN_DENSITY_HEIGHT = this.MIN_CONTINENTALNESS_HEIGHT - 40;
+  static readonly MAX_DENSITY_HEIGHT = this.MAX_CONTINENTALNESS_HEIGHT;
+  static readonly LARGE_CAVES_HEIGHT = this.MIN_CONTINENTALNESS_HEIGHT - 10;
 
   // WARN must be less than MAX_WORLD_HEIGHT
   static readonly MAX_SURFACE_HEIGHT =

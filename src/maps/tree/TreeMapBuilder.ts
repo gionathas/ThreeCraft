@@ -1,20 +1,19 @@
 import { ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
-import { MapData } from "../Abstract2DMap";
-import HeightMap from "../HeightMap";
+import { MapData } from "../AbstractMap";
+import TerrainShapeMap from "../TerrainShapeMap";
 import TreeMap from "./TreeMap";
 
 export default class TreeMapBuilder {
   static generateChunkTreeMapFromBuffer(
     chunkId: ChunkID,
     buffer: Uint16Array,
-    seed: string,
-    heightMap: HeightMap
+    terrainShapeMap: TerrainShapeMap
   ): TreeMap {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
-    const treeMap = new TreeMap(seed, heightMap);
+    const treeMap = new TreeMap(terrainShapeMap);
     const treeMapData: MapData = {};
 
     const startX = originX - Tree.RADIUS;

@@ -1,3 +1,4 @@
+import DensityMap from "../../../maps/DensityMap";
 import TerrainShapeMap from "../../../maps/TerrainShapeMap";
 import World from "../../World";
 import { BlockType } from "../BlockType";
@@ -5,13 +6,26 @@ import BlockGenerator from "./BlockGenerator";
 
 type DepthLevel = "Surface" | "Subsurface" | "Mid" | "Deep" | "BedRock";
 
-export default class UndergroundBlockGenerator extends BlockGenerator {
-  constructor(terrainShapeMap: TerrainShapeMap) {
+export default class TerrainGenerator extends BlockGenerator {
+  private densityMap: DensityMap;
+
+  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
     super(terrainShapeMap);
+    this.densityMap = densityMap;
   }
 
   generateBlock(x: number, y: number, z: number): BlockType {
+    const density = this.densityMap.getDensityAt(x, y, z);
     const surfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
+
+    if (density < 0) {
+      return BlockType.AIR;
+    }
+
+    if (y >= surfaceY) {
+      return BlockType.AIR;
+    }
+
     const depthLevel = this.getDepthLevel(y, surfaceY);
 
     switch (depthLevel) {
@@ -103,7 +117,7 @@ export default class UndergroundBlockGenerator extends BlockGenerator {
       return "Surface";
     }
 
-    if (distFromSurface <= 5) {
+    if (distFromSurface <= 3) {
       return "Subsurface";
     }
 

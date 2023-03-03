@@ -2,7 +2,7 @@ import alea from "alea";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
-import HeightMap from "../HeightMap";
+import TerrainShapeMap from "../TerrainShapeMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
@@ -15,11 +15,11 @@ const treesDensityFactor = 0.98;
  * //NOTE extract a TreeGenerator class ?
  */
 export default class GlobalTreeMap extends TreeMap {
-  private loadedMaps: Map<string, Array<TreeMapType>>;
+  private loadedRegions: Map<string, Array<TreeMapType>>;
 
-  constructor(seed: string, heightMap: HeightMap) {
-    super(seed, heightMap);
-    this.loadedMaps = new Map();
+  constructor(terrainShapeMap: TerrainShapeMap) {
+    super(terrainShapeMap);
+    this.loadedRegions = new Map();
   }
 
   /**
@@ -30,8 +30,8 @@ export default class GlobalTreeMap extends TreeMap {
 
     const chunkRegionKey = TreeMap.computeKey(originX, originZ);
 
-    if (this.loadedMaps.has(chunkRegionKey)) {
-      const chunkTreeMapData = this.loadedMaps.get(chunkRegionKey)!;
+    if (this.loadedRegions.has(chunkRegionKey)) {
+      const chunkTreeMapData = this.loadedRegions.get(chunkRegionKey)!;
       return Uint16Array.from(chunkTreeMapData);
     }
 
@@ -58,7 +58,7 @@ export default class GlobalTreeMap extends TreeMap {
       }
     }
 
-    this.loadedMaps.set(chunkRegionKey, chunkTreeMapData);
+    this.loadedRegions.set(chunkRegionKey, chunkTreeMapData);
     return Uint16Array.from(chunkTreeMapData);
   }
 
@@ -66,7 +66,7 @@ export default class GlobalTreeMap extends TreeMap {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
     const chunkRegionKey = TreeMap.computeKey(originX, originZ);
-    this.loadedMaps.delete(chunkRegionKey);
+    this.loadedRegions.delete(chunkRegionKey);
   }
 
   private generateTreeMapValueAt(x: number, z: number) {
@@ -105,7 +105,7 @@ export default class GlobalTreeMap extends TreeMap {
     }
 
     // mark the current block as a tree trunk
-    const trunkSurfaceHeight = this.heightMap.getSurfaceHeightAt(x, z);
+    const trunkSurfaceHeight = this.terrainShapeMap.getSurfaceHeightAt(x, z);
     const trunkData = this.setTreeTrunkAt(x, z, trunkSurfaceHeight);
 
     // mark all the nearby blocks as tree leafs

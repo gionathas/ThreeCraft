@@ -1,8 +1,10 @@
 import { TransferDescriptor } from "threads";
 import { expose, Transfer } from "threads/worker";
+import DensityMap from "../../maps/DensityMap";
 import TerrainShapeMap from "../../maps/TerrainShapeMap";
 import { TreeMapBuilder } from "../../maps/tree";
 import { BlockGeneratorFactory } from "../block";
+import { Phase } from "../block/generators/BlockGeneratorFactory";
 import Chunk, { ChunkID } from "./Chunk";
 import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
 
@@ -18,25 +20,35 @@ function generateChunk(
 
   // load maps
   const terrainShapeMap = new TerrainShapeMap(seed);
+  const densityMap = new DensityMap(terrainShapeMap);
   const treeMap = TreeMapBuilder.generateChunkTreeMapFromBuffer(
     chunkId,
     //@ts-ignore
     new Uint16Array(treeMapDataBuffer),
-    seed,
-    terrainShapeMap.getHeightMap()
+    terrainShapeMap
   );
 
   // istantiate a block generator factory
-  const blockFactory = new BlockGeneratorFactory(terrainShapeMap, treeMap);
+  const blockFactory = new BlockGeneratorFactory(
+    terrainShapeMap,
+    densityMap,
+    treeMap
+  );
+  const surfaceGenerator = blockFactory.getBlockGenerator(Phase.TERRAIN);
+  // const decorationGenerator = blockFactory.getBlockGenerator(Phase.DECORATION);
 
-  // decorate the chunk
-  chunk.decorateChunk(blockFactory);
+  // apply phase 1
+  chunk.decorateChunk(surfaceGenerator);
+  // apply phase 2
+  // chunk.decorateChunk(decorationGenerator);
+
   const chunkBlocks = chunk.getBlocks();
 
   const { solid, transparent } = ChunkGeometryBuilder.buildChunkGeometry(
     chunk,
     chunk.getWorldOriginPosition(),
-    terrainShapeMap
+    terrainShapeMap,
+    densityMap
   );
 
   const end = performance.now();

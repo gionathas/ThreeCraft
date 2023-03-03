@@ -2,7 +2,7 @@ import { Chunk } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
 import Abstract2DMap from "../Abstract2DMap";
-import HeightMap from "../HeightMap";
+import TerrainShapeMap from "../TerrainShapeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
 export enum TreeMapType {
@@ -23,11 +23,11 @@ export default class TreeMap extends Abstract2DMap {
    * because a tree can spawn on the edge of the chunk
    */
   static readonly MAP_SIZE = Chunk.WIDTH + Tree.RADIUS * 2;
-  protected heightMap: HeightMap;
+  protected terrainShapeMap: TerrainShapeMap;
 
-  constructor(seed: string, heightMap: HeightMap) {
-    super(seed);
-    this.heightMap = heightMap;
+  constructor(terrainShapeMap: TerrainShapeMap) {
+    super(terrainShapeMap.getSeed());
+    this.terrainShapeMap = terrainShapeMap;
   }
 
   shouldSpawnTreeLeafAt(x: number, y: number, z: number, surfaceY: number) {

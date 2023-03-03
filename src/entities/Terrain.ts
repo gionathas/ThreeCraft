@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import Engine from "../core/Engine";
+import DensityMap from "../maps/DensityMap";
 import TerrainShapeMap from "../maps/TerrainShapeMap";
 import { GlobalTreeMap } from "../maps/tree";
 import { BlockType } from "../terrain/block";
@@ -22,12 +23,14 @@ export default class Terrain {
 
     this.seed = "seed"; //FIXME
     this.terrainShapeMap = new TerrainShapeMap(this.seed);
-    this.treeMap = new GlobalTreeMap(
-      this.seed,
-      this.terrainShapeMap.getHeightMap()
-    );
+    this.treeMap = new GlobalTreeMap(this.terrainShapeMap);
+    const densityMap = new DensityMap(this.terrainShapeMap);
 
-    this.chunksManager = new ChunkManager(this.terrainShapeMap, this.treeMap);
+    this.chunksManager = new ChunkManager(
+      this.terrainShapeMap,
+      this.treeMap,
+      densityMap
+    );
     this.chunksLoader = new ChunkLoader(centerPosition, this.chunksManager);
   }
 

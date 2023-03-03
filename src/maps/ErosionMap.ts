@@ -16,9 +16,9 @@ export default class ErosionMap extends Noise2DMap {
     Low: [-0.5, -0.1],
     Mid: [-0.1, 0.3],
     MidSpike: [0.3, 0.4],
-    MidLow: [0.4, 0.6],
-    FlatSpike: [0.6, 0.7],
-    Flat: [0.7, 1],
+    MidLow: [0.4, 0.7],
+    FlatSpike: [0.7, 0.8],
+    Flat: [0.8, 1],
   };
 
   constructor(seed: string) {
