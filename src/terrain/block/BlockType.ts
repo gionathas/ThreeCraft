@@ -12,6 +12,7 @@ export enum BlockType {
   GLASS,
   OAK_LOG,
   OAK_LEAVES,
+  COAL_ORE,
 }
 
 export const BlockRegistry: Record<BlockType, BlockMetadata> = {
@@ -210,6 +211,24 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       bottom: {
         row: 2,
         col: 0,
+      },
+    },
+  },
+  [BlockType.COAL_ORE]: {
+    isTransparent: false,
+    isSolid: true,
+    texture: {
+      side: {
+        row: 0,
+        col: 6,
+      },
+      top: {
+        row: 0,
+        col: 6,
+      },
+      bottom: {
+        row: 0,
+        col: 6,
       },
     },
   },

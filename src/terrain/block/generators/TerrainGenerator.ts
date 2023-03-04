@@ -1,5 +1,6 @@
 import DensityMap from "../../../maps/DensityMap";
 import TerrainShapeMap from "../../../maps/TerrainShapeMap";
+import { isInRange } from "../../../utils/helpers";
 import World from "../../World";
 import { BlockType } from "../BlockType";
 import BlockGenerator from "./BlockGenerator";
@@ -26,16 +27,32 @@ export default class TerrainGenerator extends BlockGenerator {
       return BlockType.AIR;
     }
 
-    const depthLevel = this.getDepthLevel(y, surfaceY);
+    const distFromSurface = Math.abs(y - surfaceY);
+    const depthLevel = this.getDepthLevel(y, distFromSurface);
 
     switch (depthLevel) {
       case "Surface":
         return this.getSurfaceBlockType(x, y, z);
       case "Subsurface":
         return this.getSubSurfaceBlockType(x, y, z);
+      case "Mid":
+        return this.getMidBlockType(x, y, z, distFromSurface);
       default:
         return BlockType.STONE;
     }
+  }
+
+  private getMidBlockType(
+    x: number,
+    y: number,
+    z: number,
+    distFromSurface: number
+  ): BlockType {
+    if (this.shouldSpawnCoal(x, y, z, distFromSurface)) {
+      return BlockType.COAL_ORE;
+    }
+
+    return BlockType.STONE;
   }
 
   private getSurfaceBlockType(x: number, y: number, z: number): BlockType {
@@ -51,7 +68,7 @@ export default class TerrainGenerator extends BlockGenerator {
       return BlockType.DIRT;
     }
 
-    if (this.shouldSpanwSurfaceStone(x, y, z)) {
+    if (this.shouldSpawnSurfaceStone(x, y, z)) {
       return BlockType.STONE;
     }
 
@@ -63,7 +80,7 @@ export default class TerrainGenerator extends BlockGenerator {
       return BlockType.SAND;
     }
 
-    if (this.shouldSpanwSurfaceStone(x, y, z)) {
+    if (this.shouldSpawnSurfaceStone(x, y, z)) {
       return BlockType.STONE;
     }
 
@@ -79,7 +96,7 @@ export default class TerrainGenerator extends BlockGenerator {
     );
   }
 
-  private shouldSpanwSurfaceStone(x: number, y: number, z: number): boolean {
+  private shouldSpawnSurfaceStone(x: number, y: number, z: number): boolean {
     const pvType = this.getPvTypeAt(x, z);
     const continentalType = this.getContinentalTypeAt(x, z);
     const erosionType = this.getErosionTypeAt(x, z);
@@ -101,6 +118,19 @@ export default class TerrainGenerator extends BlockGenerator {
     return case1 || case2 || case3;
   }
 
+  private shouldSpawnCoal(
+    x: number,
+    y: number,
+    z: number,
+    distFromSurface: number
+  ): boolean {
+    const density = this.densityMap.getDensityAt(x, y, z);
+    const isDensityInRange = isInRange(density, 0.05, 0.07);
+    const isDepthInRange = isInRange(distFromSurface, 5, 20);
+
+    return isDepthInRange && isDensityInRange;
+  }
+
   private shouldSpawnSnow(x: number, y: number, z: number) {
     const continentalType = this.getContinentalTypeAt(x, z);
 
@@ -110,9 +140,7 @@ export default class TerrainGenerator extends BlockGenerator {
     return isFarInland && isAboveSnowLevel;
   }
 
-  private getDepthLevel(y: number, surfaceY: number): DepthLevel {
-    const distFromSurface = Math.abs(y - surfaceY);
-
+  private getDepthLevel(y: number, distFromSurface: number): DepthLevel {
     if (distFromSurface <= 1) {
       return "Surface";
     }

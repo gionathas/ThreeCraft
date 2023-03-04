@@ -20,7 +20,7 @@ export default class World {
   static readonly MAX_CONTINENTALNESS_HEIGHT = 50;
 
   static readonly MIN_DENSITY_HEIGHT = this.MIN_CONTINENTALNESS_HEIGHT - 40;
-  static readonly MAX_DENSITY_HEIGHT = this.MAX_CONTINENTALNESS_HEIGHT;
+  static readonly MAX_DENSITY_HEIGHT = this.MAX_WORLD_HEIGHT;
   static readonly LARGE_CAVES_HEIGHT = this.MIN_CONTINENTALNESS_HEIGHT - 10;
 
   // WARN must be less than MAX_WORLD_HEIGHT

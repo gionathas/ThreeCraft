@@ -1,5 +1,4 @@
 import World from "../terrain/World";
-import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
 import { Noise3DMap } from "./Noise3DMap";
 import PVMap from "./PVMap";
@@ -44,11 +43,9 @@ export default class DensityMap extends Noise3DMap {
 
   /** Determine the probability of the terrain to be carved out */
   private getSquashingFactorAt(x: number, y: number, z: number): number {
-    const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
     const erosion = this.terrainShapeMap.getErosionAt(x, z);
     const pv = this.terrainShapeMap.getPVAt(x, z);
 
-    const continentalType = ContinentalMap.getType(continentalness);
     const erosionType = ErosionMap.getType(erosion);
     const isHighPv = pv >= PVMap.NoiseRange["Mid"][0];
 

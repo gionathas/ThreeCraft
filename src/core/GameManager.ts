@@ -83,7 +83,7 @@ export default class GameManager {
     if (!this.player) {
       this.player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE);
 
-      this.player.setSpawnOnPosition(0, 25);
+      this.player.setSpawnOnPosition(0, 20);
     }
   }
 
