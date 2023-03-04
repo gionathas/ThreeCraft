@@ -39,7 +39,7 @@ export default class DensityMap extends Noise3DMap {
       return 256;
     }
 
-    return 32;
+    return 36;
   }
 
   /** Determine the probability of the terrain to be carved out */
@@ -50,22 +50,17 @@ export default class DensityMap extends Noise3DMap {
 
     const continentalType = ContinentalMap.getType(continentalness);
     const erosionType = ErosionMap.getType(erosion);
-    const isHighPv = pv >= PVMap.NoiseRange["High"][0];
+    const isHighPv = pv >= PVMap.NoiseRange["Mid"][0];
 
     switch (erosionType) {
       case "VeryLow": {
-        return isHighPv ? 0.5 : 0.7;
+        return isHighPv ? 0.6 : 0.8;
       }
       case "Low":
-        return isHighPv ? 0.6 : 0.8;
+        return isHighPv ? 0.8 : 0.9;
 
-      case "Mid":
       case "MidLow":
-        return isHighPv ? 0.7 : 0.8;
-
-      case "FlatSpike":
-      case "MidSpike":
-        return 0.9;
+        return isHighPv ? 0.9 : 0.9;
 
       default:
         // no chance

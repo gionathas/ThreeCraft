@@ -49,7 +49,7 @@ export default class Engine {
     });
   }
 
-  render(update: (dt: number) => void) {
+  start(update: (dt: number) => void) {
     let previousTime = performance.now();
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) * 0.001;
@@ -64,6 +64,10 @@ export default class Engine {
 
       previousTime = time;
     });
+  }
+
+  stop() {
+    this.renderer.setAnimationLoop(null);
   }
 
   getCanvas(): HTMLCanvasElement {

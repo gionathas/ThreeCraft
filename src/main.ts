@@ -6,6 +6,6 @@ const engine = Engine.getInstance();
 const game = new GameManager(engine);
 game.initGame();
 
-engine.render((dt) => {
+engine.start((dt) => {
   game.update(dt);
 });
