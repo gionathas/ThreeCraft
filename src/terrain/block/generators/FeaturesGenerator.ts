@@ -12,12 +12,24 @@ export default class FeaturesGenerator extends BlockGenerator {
     this.treeMap = treeMap;
   }
 
-  generateBlock(x: number, y: number, z: number): BlockType {
+  generateBlock(x: number, y: number, z: number): BlockType | null {
+    const surfaceY = this.getSurfaceHeightAt(x, z);
+
+    if (y < surfaceY) {
+      return null;
+    }
+
     if (this.shouldSpawnWater(x, y, z)) {
       return BlockType.WATER;
     }
 
-    //TODO add trees
+    if (this.treeMap.shouldSpawnTreeTrunkAt(x, y, z, surfaceY)) {
+      return BlockType.OAK_LOG;
+    }
+
+    if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
+      return BlockType.OAK_LEAVES;
+    }
 
     return BlockType.AIR;
   }

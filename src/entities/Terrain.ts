@@ -23,8 +23,8 @@ export default class Terrain {
 
     this.seed = "seed"; //FIXME
     this.terrainShapeMap = new TerrainShapeMap(this.seed);
-    this.treeMap = new GlobalTreeMap(this.terrainShapeMap);
     const densityMap = new DensityMap(this.terrainShapeMap);
+    this.treeMap = new GlobalTreeMap(this.terrainShapeMap, densityMap);
 
     this.chunksManager = new ChunkManager(
       this.terrainShapeMap,

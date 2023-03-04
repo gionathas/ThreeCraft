@@ -2,6 +2,7 @@ import alea from "alea";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
+import DensityMap from "../DensityMap";
 import TerrainShapeMap from "../TerrainShapeMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
@@ -16,9 +17,11 @@ const treesDensityFactor = 0.98;
  */
 export default class GlobalTreeMap extends TreeMap {
   private loadedRegions: Map<string, Array<TreeMapType>>;
+  private densityMap: DensityMap;
 
-  constructor(terrainShapeMap: TerrainShapeMap) {
+  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
     super(terrainShapeMap);
+    this.densityMap = densityMap;
     this.loadedRegions = new Map();
   }
 
@@ -77,8 +80,12 @@ export default class GlobalTreeMap extends TreeMap {
       return prevValue;
     }
 
+    const trunkSurfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
+    const isAboveWater = trunkSurfaceY < World.SEA_LEVEL;
+    const isAboveAir = this.densityMap.getDensityAt(x, trunkSurfaceY, z) < 0;
+
     // no chance to spawn a trunk here
-    if (!this.hasTrunkChanceToSpawnAt(x, z)) {
+    if (!this.hasTrunkChanceToSpawnAt(x, z) || isAboveWater || isAboveAir) {
       return this.setTreeMapEmptyAt(x, z);
     }
 
@@ -105,8 +112,7 @@ export default class GlobalTreeMap extends TreeMap {
     }
 
     // mark the current block as a tree trunk
-    const trunkSurfaceHeight = this.terrainShapeMap.getSurfaceHeightAt(x, z);
-    const trunkData = this.setTreeTrunkAt(x, z, trunkSurfaceHeight);
+    const trunkData = this.setTreeTrunkAt(x, z, trunkSurfaceY);
 
     // mark all the nearby blocks as tree leafs
     for (const [nearX, nearZ] of nearbyBlocks) {

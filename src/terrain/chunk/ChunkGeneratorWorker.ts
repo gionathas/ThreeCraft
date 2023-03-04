@@ -35,12 +35,12 @@ function generateChunk(
     treeMap
   );
   const surfaceGenerator = blockFactory.getBlockGenerator(Phase.TERRAIN);
-  // const decorationGenerator = blockFactory.getBlockGenerator(Phase.DECORATION);
+  const featureGenerator = blockFactory.getBlockGenerator(Phase.FEATURES);
 
   // apply phase 1
   chunk.decorateChunk(surfaceGenerator);
   // apply phase 2
-  // chunk.decorateChunk(decorationGenerator);
+  chunk.decorateChunk(featureGenerator);
 
   const chunkBlocks = chunk.getBlocks();
 

@@ -11,7 +11,11 @@ export default abstract class BlockGenerator {
     this.terrainShapeMap = terrainShapeMap;
   }
 
-  abstract generateBlock(x: number, y: number, z: number): BlockType;
+  abstract generateBlock(x: number, y: number, z: number): BlockType | null;
+
+  protected getSurfaceHeightAt(x: number, z: number): number {
+    return this.terrainShapeMap.getSurfaceHeightAt(x, z);
+  }
 
   protected getContinentalTypeAt(x: number, z: number): ContinentalType {
     const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);

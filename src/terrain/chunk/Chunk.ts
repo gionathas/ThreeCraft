@@ -68,7 +68,10 @@ export default class Chunk implements ChunkModel {
           const blockCoord = { x, y, z };
 
           const block = blockGenerator.generateBlock(x, y, z);
-          this.setBlock(blockCoord, block);
+
+          if (block) {
+            this.setBlock(blockCoord, block);
+          }
         }
       }
     }

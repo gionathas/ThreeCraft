@@ -16,14 +16,10 @@ export default class TerrainGenerator extends BlockGenerator {
   }
 
   generateBlock(x: number, y: number, z: number): BlockType {
+    const surfaceY = this.getSurfaceHeightAt(x, z);
     const density = this.densityMap.getDensityAt(x, y, z);
-    const surfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
 
-    if (density < 0) {
-      return BlockType.AIR;
-    }
-
-    if (y >= surfaceY) {
+    if (density < 0 || y >= surfaceY) {
       return BlockType.AIR;
     }
 
