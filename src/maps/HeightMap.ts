@@ -52,22 +52,24 @@ export default class HeightMap extends Abstract2DMap {
     }
 
     if (continentType === "Coast") {
-      const min = ContinentalMap.NoiseRange["Coast"][0];
-      const max = ContinentalMap.NoiseRange["Coast"][1];
+      const min = ContinentalMap.NoiseRange.Coast.min;
+      const max = ContinentalMap.NoiseRange.Coast.max;
+
       const t = (continentalness - min) / (max - min);
       return lerp(World.SEA_LEVEL, World.SEA_LEVEL + 2, t);
     }
 
     if (continentType === "Near_Inland" || continentType === "Inland") {
-      const min = ContinentalMap.NoiseRange["Near_Inland"][0];
-      const max = ContinentalMap.NoiseRange["Inland"][1];
+      const min = ContinentalMap.NoiseRange.Near_Inland.min;
+      const max = ContinentalMap.NoiseRange.Inland.max;
+
       const t = (continentalness - min) / (max - min);
       return lerp(World.SEA_LEVEL + 2, World.SEA_LEVEL + 15, t);
     }
 
     if (continentType === "Far_Inland") {
-      const min = ContinentalMap.NoiseRange["Far_Inland"][0];
-      const max = ContinentalMap.NoiseRange["Far_Inland"][1];
+      const min = ContinentalMap.NoiseRange.Far_Inland.min;
+      const max = ContinentalMap.NoiseRange.Far_Inland.max;
 
       const t = (continentalness - min) / (max - min);
       return lerp(World.SEA_LEVEL + 15, World.MAX_CONTINENTALNESS_HEIGHT, t);

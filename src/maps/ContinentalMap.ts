@@ -1,4 +1,5 @@
 import World from "../terrain/World";
+import { ValueRange } from "../utils/helpers";
 import { Noise2DMap } from "./Noise2DMap";
 import TestingMap from "./TestingMap";
 
@@ -13,12 +14,12 @@ export type ContinentalType =
  * This Map is used for generating the terrain base height
  */
 export default class ContinentalMap extends Noise2DMap {
-  static readonly NoiseRange: Record<ContinentalType, [number, number]> = {
-    Ocean: [-1, -0.7],
-    Coast: [-0.7, -0.4],
-    Near_Inland: [-0.4, 0],
-    Inland: [0, 0.7],
-    Far_Inland: [0.7, 1],
+  static readonly NoiseRange: Record<ContinentalType, ValueRange> = {
+    Ocean: { min: -1, max: -0.7 },
+    Coast: { min: -0.7, max: -0.4 },
+    Near_Inland: { min: -0.4, max: 0 },
+    Inland: { min: 0, max: 0.7 },
+    Far_Inland: { min: 0.7, max: 1 },
   };
 
   constructor(seed: string) {
@@ -46,16 +47,16 @@ export default class ContinentalMap extends Noise2DMap {
   }
 
   static getType(continentalness: number): ContinentalType {
-    if (continentalness <= ContinentalMap.NoiseRange.Ocean[1]) {
+    if (continentalness <= ContinentalMap.NoiseRange.Ocean.max) {
       return "Ocean";
     }
-    if (continentalness <= ContinentalMap.NoiseRange.Coast[1]) {
+    if (continentalness <= ContinentalMap.NoiseRange.Coast.max) {
       return "Coast";
     }
-    if (continentalness <= ContinentalMap.NoiseRange.Near_Inland[1]) {
+    if (continentalness <= ContinentalMap.NoiseRange.Near_Inland.max) {
       return "Near_Inland";
     }
-    if (continentalness <= ContinentalMap.NoiseRange.Inland[1]) {
+    if (continentalness <= ContinentalMap.NoiseRange.Inland.max) {
       return "Inland";
     }
     return "Far_Inland";

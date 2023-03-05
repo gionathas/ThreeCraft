@@ -7,7 +7,6 @@ import TerrainShapeMap from "./TerrainShapeMap";
 export default class DensityMap extends Noise3DMap {
   private readonly SOLID = 1;
   private readonly AIR = -1;
-  private readonly NOISE_SCALE = World.DENSITY_NOISE_SCALE;
 
   private terrainShapeMap: TerrainShapeMap;
 
