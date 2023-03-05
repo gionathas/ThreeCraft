@@ -1,4 +1,5 @@
 import World from "../terrain/World";
+import { ValueRange } from "../utils/helpers";
 import { Noise2DMap } from "./Noise2DMap";
 import TestingMap from "./TestingMap";
 
@@ -11,14 +12,14 @@ export type ErosionType =
   | "Low"
   | "VeryLow";
 export default class ErosionMap extends Noise2DMap {
-  static readonly NoiseRange: Record<ErosionType, [number, number]> = {
-    VeryLow: [-1, -0.5],
-    Low: [-0.5, -0.1],
-    Mid: [-0.1, 0.3],
-    MidSpike: [0.3, 0.4],
-    MidLow: [0.4, 0.7],
-    FlatSpike: [0.7, 0.8],
-    Flat: [0.8, 1],
+  static readonly NoiseRange: Record<ErosionType, ValueRange> = {
+    VeryLow: { min: -1, max: -0.5 },
+    Low: { min: -0.5, max: -0.1 },
+    Mid: { min: -0.1, max: 0.3 },
+    MidSpike: { min: 0.3, max: 0.4 },
+    MidLow: { min: 0.4, max: 0.7 },
+    FlatSpike: { min: 0.7, max: 0.8 },
+    Flat: { min: 0.8, max: 1 },
   };
 
   constructor(seed: string) {
@@ -46,22 +47,22 @@ export default class ErosionMap extends Noise2DMap {
   }
 
   static getType(erosion: number): ErosionType {
-    if (erosion <= ErosionMap.NoiseRange.VeryLow[1]) {
+    if (erosion <= ErosionMap.NoiseRange.VeryLow.max) {
       return "VeryLow";
     }
-    if (erosion <= ErosionMap.NoiseRange.Low[1]) {
+    if (erosion <= ErosionMap.NoiseRange.Low.max) {
       return "Low";
     }
-    if (erosion <= ErosionMap.NoiseRange.Mid[1]) {
+    if (erosion <= ErosionMap.NoiseRange.Mid.max) {
       return "Mid";
     }
-    if (erosion <= ErosionMap.NoiseRange.MidSpike[1]) {
+    if (erosion <= ErosionMap.NoiseRange.MidSpike.max) {
       return "MidSpike";
     }
-    if (erosion <= ErosionMap.NoiseRange.MidLow[1]) {
+    if (erosion <= ErosionMap.NoiseRange.MidLow.max) {
       return "MidLow";
     }
-    if (erosion <= ErosionMap.NoiseRange.FlatSpike[1]) {
+    if (erosion <= ErosionMap.NoiseRange.FlatSpike.max) {
       return "FlatSpike";
     }
 

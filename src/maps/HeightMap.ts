@@ -88,7 +88,7 @@ export default class HeightMap extends Abstract2DMap {
     const highSlope = midSlope * 2; // 24
 
     const erosionType = ErosionMap.getType(erosion);
-    const [minN, maxN] = ErosionMap.NoiseRange[erosionType];
+    const { min: minN, max: maxN } = ErosionMap.NoiseRange[erosionType];
 
     // inverse lerp
     const t = (erosion - minN) / (maxN - minN);
