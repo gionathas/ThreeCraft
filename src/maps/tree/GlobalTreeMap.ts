@@ -1,13 +1,17 @@
 import alea from "alea";
+import { lerp } from "three/src/math/MathUtils";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
+import ContinentalMap from "../ContinentalMap";
 import DensityMap from "../DensityMap";
+import ErosionMap from "../ErosionMap";
+import PVMap from "../PVMap";
 import TerrainShapeMap from "../TerrainShapeMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
-const treesDensityFactor = 0.98;
+// const treesDensityFactor = 0.99;
 
 /**
  * //WARN This class store the data of all the chunks loaded,
@@ -125,8 +129,65 @@ export default class GlobalTreeMap extends TreeMap {
     const treeSeed = this.seed + "_" + TreeMap.computeKey(x, z);
     const prng = alea(treeSeed);
     const treeTrunkSpawnProbability = prng();
+    const treeDensityFactor = this.getTreeDensityFactorAt(x, z);
 
-    return treeTrunkSpawnProbability > treesDensityFactor;
+    return treeTrunkSpawnProbability > treeDensityFactor;
+  }
+
+  private getTreeDensityFactorAt(x: number, z: number) {
+    const erosion = this.terrainShapeMap.getErosionAt(x, z);
+    const pv = this.terrainShapeMap.getPVAt(x, z);
+    const pvType = PVMap.getType(pv);
+
+    const erosionType = ErosionMap.getType(erosion);
+
+    const noTrees = 1;
+    const baseDensity = this.getBaseDensityAt(x, z);
+
+    // no trees on flat terrains
+    if (erosionType === "Flat") {
+      return noTrees;
+    }
+
+    if (pvType === "Plateau") {
+      return baseDensity;
+    }
+
+    if (pv < PVMap.NoiseRange["Plateau"][0]) {
+      const min = PVMap.NoiseRange["Valley"][0];
+      const max = PVMap.NoiseRange["Plateau"][0];
+      const t = (max - pv) / (max - min);
+      return lerp(baseDensity, noTrees, t);
+    } else {
+      const min = PVMap.NoiseRange["Plateau"][1];
+      const max = PVMap.NoiseRange["High"][1];
+      const t = (pv - min) / (max - min);
+      return lerp(baseDensity, noTrees, t);
+    }
+  }
+
+  private getBaseDensityAt(x: number, z: number) {
+    const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
+    const continentType = ContinentalMap.getType(continentalness);
+
+    const veryLowDensity = 0.998;
+    const midDensity = 0.985;
+    const veryHighDensity = 0.96;
+
+    if (continentType === "Inland") {
+      return veryHighDensity;
+    }
+
+    if (continentType === "Near_Inland" || continentType === "Far_Inland") {
+      return midDensity;
+    }
+
+    if (continentType === "Coast") {
+      return veryLowDensity;
+    }
+
+    // no trees on ocean
+    return 1;
   }
 
   private setTreeTrunkAt(x: number, z: number, surfaceY: number) {
