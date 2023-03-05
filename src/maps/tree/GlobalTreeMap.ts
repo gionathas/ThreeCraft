@@ -11,8 +11,6 @@ import TerrainShapeMap from "../TerrainShapeMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
-// const treesDensityFactor = 0.99;
-
 /**
  * //WARN This class store the data of all the chunks loaded,
  *  without garbage collecting the data associated to unloaded chunks
@@ -20,6 +18,10 @@ import TreeMapValueEncoder from "./TreeMapValueEncoder";
  * //NOTE extract a TreeGenerator class ?
  */
 export default class GlobalTreeMap extends TreeMap {
+  private readonly LOW_DENSITY = 0.002;
+  private readonly MID_DENSITY = 0.02;
+  private readonly HIGH_DENSITY = 0.04;
+
   private loadedRegions: Map<string, Array<TreeMapType>>;
   private densityMap: DensityMap;
 
@@ -85,11 +87,11 @@ export default class GlobalTreeMap extends TreeMap {
     }
 
     const trunkSurfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
+    const isFloating = this.densityMap.getDensityAt(x, trunkSurfaceY, z) < 0;
     const isAboveWater = trunkSurfaceY < World.SEA_LEVEL;
-    const isAboveAir = this.densityMap.getDensityAt(x, trunkSurfaceY, z) < 0;
 
     // no chance to spawn a trunk here
-    if (!this.hasTrunkChanceToSpawnAt(x, z) || isAboveWater || isAboveAir) {
+    if (!this.hasTrunkChanceToSpawnAt(x, z) || isAboveWater || isFloating) {
       return this.setTreeMapEmptyAt(x, z);
     }
 
@@ -130,7 +132,7 @@ export default class GlobalTreeMap extends TreeMap {
     const treeTrunkSpawnProbability = prng();
     const treeDensityFactor = this.getTreeDensityFactorAt(x, z);
 
-    return treeTrunkSpawnProbability > treeDensityFactor;
+    return treeTrunkSpawnProbability < treeDensityFactor;
   }
 
   private getTreeDensityFactorAt(x: number, z: number) {
@@ -140,54 +142,52 @@ export default class GlobalTreeMap extends TreeMap {
 
     const erosionType = ErosionMap.getType(erosion);
 
-    const noTrees = 1;
-    const baseDensity = this.getBaseDensityAt(x, z);
+    const noTreesDensity = 0;
+    const maxTreeDensity = this.getMaxTreeDensityAt(x, z);
 
     // no trees on flat terrains
-    if (erosionType === "Flat") {
-      return noTrees;
+    if (erosionType === "Flat" || pvType === "Peak") {
+      return noTreesDensity;
     }
 
     if (pvType === "Plateau") {
-      return baseDensity;
+      return maxTreeDensity;
     }
 
     if (pv < PVMap.NoiseRange.Plateau.min) {
       const min = PVMap.NoiseRange.Valley.min;
       const max = PVMap.NoiseRange.Plateau.min;
 
-      const t = (max - pv) / (max - min);
-      return lerp(baseDensity, noTrees, t);
+      const t = (pv - min) / (max - min);
+      return lerp(noTreesDensity, maxTreeDensity, t);
     } else {
       const min = PVMap.NoiseRange.Plateau.max;
       const max = PVMap.NoiseRange.High.max;
-      const t = (pv - min) / (max - min);
-      return lerp(baseDensity, noTrees, t);
+
+      const invT = (max - pv) / (max - min);
+      return lerp(noTreesDensity, maxTreeDensity, invT);
     }
   }
 
-  private getBaseDensityAt(x: number, z: number) {
+  private getMaxTreeDensityAt(x: number, z: number) {
+    const { LOW_DENSITY, MID_DENSITY, HIGH_DENSITY } = this;
     const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
     const continentType = ContinentalMap.getType(continentalness);
 
-    const veryLowDensity = 0.998;
-    const midDensity = 0.985;
-    const veryHighDensity = 0.96;
-
     if (continentType === "Inland") {
-      return veryHighDensity;
+      return HIGH_DENSITY;
     }
 
     if (continentType === "Near_Inland" || continentType === "Far_Inland") {
-      return midDensity;
+      return MID_DENSITY;
     }
 
     if (continentType === "Coast") {
-      return veryLowDensity;
+      return LOW_DENSITY;
     }
 
     // no trees on ocean
-    return 1;
+    return 0;
   }
 
   private setTreeTrunkAt(x: number, z: number, surfaceY: number) {

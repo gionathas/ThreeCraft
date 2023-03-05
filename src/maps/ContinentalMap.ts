@@ -18,8 +18,8 @@ export default class ContinentalMap extends Noise2DMap {
     Ocean: { min: -1, max: -0.7 },
     Coast: { min: -0.7, max: -0.4 },
     Near_Inland: { min: -0.4, max: 0 },
-    Inland: { min: 0, max: 0.7 },
-    Far_Inland: { min: 0.7, max: 1 },
+    Inland: { min: 0, max: 0.6 },
+    Far_Inland: { min: 0.6, max: 1 },
   };
 
   constructor(seed: string) {
