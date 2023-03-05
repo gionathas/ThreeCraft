@@ -4,6 +4,8 @@ export type Coordinate = { x: number; y: number; z: number };
 
 export type UV = { u: number; v: number };
 
+export type ValueRange = { min: number; max: number };
+
 export type Direction =
   | "forward"
   | "backward"

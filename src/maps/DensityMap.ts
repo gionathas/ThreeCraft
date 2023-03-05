@@ -47,7 +47,7 @@ export default class DensityMap extends Noise3DMap {
     const pv = this.terrainShapeMap.getPVAt(x, z);
 
     const erosionType = ErosionMap.getType(erosion);
-    const isHighPv = pv >= PVMap.NoiseRange["Mid"][0];
+    const isHighPv = pv >= PVMap.NoiseRange.Mid.min;
 
     switch (erosionType) {
       case "VeryLow": {

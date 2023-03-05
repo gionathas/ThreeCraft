@@ -1,17 +1,18 @@
 import World from "../terrain/World";
+import { ValueRange } from "../utils/helpers";
 import { Noise2DMap } from "./Noise2DMap";
 import TestingMap from "./TestingMap";
 
 export type PVType = "Valley" | "Low" | "Plateau" | "Mid" | "High" | "Peak";
 
 export default class PVMap extends Noise2DMap {
-  static readonly NoiseRange: Record<PVType, [number, number]> = {
-    Valley: [-1, -0.7],
-    Low: [-0.7, -0.4],
-    Plateau: [-0.4, -0.1],
-    Mid: [-0.1, 0.4],
-    High: [0.4, 0.8],
-    Peak: [0.8, 1],
+  static readonly NoiseRange: Record<PVType, ValueRange> = {
+    Valley: { min: -1, max: -0.7 },
+    Low: { min: -0.7, max: -0.4 },
+    Plateau: { min: -0.4, max: -0.1 },
+    Mid: { min: -0.1, max: 0.4 },
+    High: { min: 0.4, max: 0.8 },
+    Peak: { min: 0.8, max: 1 },
   };
 
   constructor(seed: string) {
@@ -52,23 +53,23 @@ export default class PVMap extends Noise2DMap {
   }
 
   static getType(pv: number): PVType {
-    if (pv <= PVMap.NoiseRange.Valley[1]) {
+    if (pv <= PVMap.NoiseRange.Valley.max) {
       return "Valley";
     }
 
-    if (pv <= PVMap.NoiseRange.Low[1]) {
+    if (pv <= PVMap.NoiseRange.Low.max) {
       return "Low";
     }
 
-    if (pv <= PVMap.NoiseRange.Plateau[1]) {
+    if (pv <= PVMap.NoiseRange.Plateau.max) {
       return "Plateau";
     }
 
-    if (pv <= PVMap.NoiseRange.Mid[1]) {
+    if (pv <= PVMap.NoiseRange.Mid.max) {
       return "Mid";
     }
 
-    if (pv <= PVMap.NoiseRange.High[1]) {
+    if (pv <= PVMap.NoiseRange.High.max) {
       return "High";
     }
 

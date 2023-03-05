@@ -118,7 +118,7 @@ export default class HeightMap extends Abstract2DMap {
     const midPeak = Math.round(peak * (1 / 2));
 
     const pvType = PVMap.getType(pv);
-    const [minN, maxN] = PVMap.NoiseRange[pvType];
+    const { min: minN, max: maxN } = PVMap.NoiseRange[pvType];
     const t = (pv - minN) / (maxN - minN);
 
     switch (pvType) {

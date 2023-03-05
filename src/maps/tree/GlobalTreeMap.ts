@@ -124,7 +124,6 @@ export default class GlobalTreeMap extends TreeMap {
     }
   }
 
-  //TODO to improve
   private hasTrunkChanceToSpawnAt(x: number, z: number) {
     const treeSeed = this.seed + "_" + TreeMap.computeKey(x, z);
     const prng = alea(treeSeed);
@@ -153,14 +152,15 @@ export default class GlobalTreeMap extends TreeMap {
       return baseDensity;
     }
 
-    if (pv < PVMap.NoiseRange["Plateau"][0]) {
-      const min = PVMap.NoiseRange["Valley"][0];
-      const max = PVMap.NoiseRange["Plateau"][0];
+    if (pv < PVMap.NoiseRange.Plateau.min) {
+      const min = PVMap.NoiseRange.Valley.min;
+      const max = PVMap.NoiseRange.Plateau.min;
+
       const t = (max - pv) / (max - min);
       return lerp(baseDensity, noTrees, t);
     } else {
-      const min = PVMap.NoiseRange["Plateau"][1];
-      const max = PVMap.NoiseRange["High"][1];
+      const min = PVMap.NoiseRange.Plateau.max;
+      const max = PVMap.NoiseRange.High.max;
       const t = (pv - min) / (max - min);
       return lerp(baseDensity, noTrees, t);
     }
