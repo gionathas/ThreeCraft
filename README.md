@@ -8,6 +8,7 @@ This is a Minecraft clone built using Three.js and TypeScript. It is a 3D sandbo
 - Basic Player movement and collision detection
 - Block selection and placement
 - Trees and foliage generation
+- Caves and Ores generation
 
 ## Technologies Used
 
