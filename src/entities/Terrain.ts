@@ -16,6 +16,7 @@ export default class Terrain {
 
   private seed: string;
   private terrainShapeMap: TerrainShapeMap;
+  private densityMap: DensityMap;
   private treeMap: GlobalTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
@@ -23,13 +24,13 @@ export default class Terrain {
 
     this.seed = "seed"; //FIXME
     this.terrainShapeMap = new TerrainShapeMap(this.seed);
-    const densityMap = new DensityMap(this.terrainShapeMap);
-    this.treeMap = new GlobalTreeMap(this.terrainShapeMap, densityMap);
+    this.densityMap = new DensityMap(this.terrainShapeMap);
+    this.treeMap = new GlobalTreeMap(this.terrainShapeMap, this.densityMap);
 
     this.chunksManager = new ChunkManager(
       this.terrainShapeMap,
-      this.treeMap,
-      densityMap
+      this.densityMap,
+      this.treeMap
     );
     this.chunksLoader = new ChunkLoader(centerPosition, this.chunksManager);
   }

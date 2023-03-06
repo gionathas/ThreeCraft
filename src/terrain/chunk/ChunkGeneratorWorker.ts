@@ -44,11 +44,15 @@ function generateChunk(
 
   const chunkBlocks = chunk.getBlocks();
 
-  const { solid, transparent } = ChunkGeometryBuilder.buildChunkGeometry(
-    chunk,
-    chunk.getWorldOriginPosition(),
+  // build chunk geometry
+  const chunkGeometryBuilder = new ChunkGeometryBuilder(
     terrainShapeMap,
     densityMap
+  );
+
+  const { solid, transparent } = chunkGeometryBuilder.buildChunkGeometry(
+    chunk,
+    chunk.getWorldOriginPosition()
   );
 
   const end = performance.now();

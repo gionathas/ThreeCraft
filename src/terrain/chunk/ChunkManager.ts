@@ -34,10 +34,12 @@ export default class ChunkManager implements ChunkModel {
   private processingChunks: Set<ChunkID>;
   private generatorsPool;
 
+  private chunkGeometryBuilder: ChunkGeometryBuilder;
+
   constructor(
     terrainShapeMap: TerrainShapeMap,
-    treeMap: GlobalTreeMap,
-    densityMap: DensityMap
+    densityMap: DensityMap,
+    treeMap: GlobalTreeMap
   ) {
     this.terrainShapeMap = terrainShapeMap;
     this.treeMap = treeMap;
@@ -51,6 +53,11 @@ export default class ChunkManager implements ChunkModel {
     this.processingChunks = new Set();
     this.generatorsPool = Pool(() =>
       spawn<TerrainGeneratorType>(new ChunkGeneratorWorker())
+    );
+
+    this.chunkGeometryBuilder = new ChunkGeometryBuilder(
+      terrainShapeMap,
+      densityMap
     );
   }
 
@@ -145,11 +152,9 @@ export default class ChunkManager implements ChunkModel {
           const {
             solid: chunkSolidGeometry,
             transparent: chunkTransparentGeometry,
-          } = ChunkGeometryBuilder.buildChunkGeometry(
+          } = this.chunkGeometryBuilder.buildChunkGeometry(
             this,
-            chunkWorldOrigin,
-            this.terrainShapeMap,
-            this.densityMap
+            chunkWorldOrigin
           );
 
           const hasSolidMesh = !isEmptyGeometry(chunkSolidGeometry);

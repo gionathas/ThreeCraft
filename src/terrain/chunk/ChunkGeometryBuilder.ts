@@ -7,18 +7,18 @@ import { BlockFace } from "../block/BlockGeometry";
 import World from "../World";
 import Chunk, { ChunkModel } from "./Chunk";
 
-//TODO - refactor this class
-// add internal state to this class
-// - move the block face rendering optimization logic to BlockFaceRenderer
 export default class ChunkGeometryBuilder {
-  private static readonly AO_INTENSITY_LEVEL = [1.0, 0.8, 0.7, 0.6];
+  private readonly AO_INTENSITY_LEVEL = [1.0, 0.8, 0.7, 0.6];
 
-  static buildChunkGeometry(
-    chunk: ChunkModel,
-    chunkOrigin: Coordinate,
-    terrainShapeMap: TerrainShapeMap,
-    densityMap: DensityMap
-  ) {
+  private terrainShapeMap: TerrainShapeMap;
+  private densityMap: DensityMap;
+
+  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
+    this.terrainShapeMap = terrainShapeMap;
+    this.densityMap = densityMap;
+  }
+
+  buildChunkGeometry(chunk: ChunkModel, chunkOrigin: Coordinate) {
     const { x: startX, y: startY, z: startZ } = chunkOrigin;
 
     const soldidPositions: number[] = [];
@@ -46,10 +46,10 @@ export default class ChunkGeometryBuilder {
 
           if (block && isVisibleBlock) {
             const isTransparentBlock = block.isTransparent;
-            const isWater = block.type === BlockType.WATER;
+            const isWaterBlock = block.type === BlockType.WATER;
 
             // hack to render only the surface water blocks
-            if (isWater && this.shouldSkipWaterBlockRendering(blockY)) {
+            if (isWaterBlock && this.canSkipWaterBlockRendering(blockY)) {
               continue;
             }
 
@@ -67,8 +67,8 @@ export default class ChunkGeometryBuilder {
 
             // iterate over each face of this block
             for (const blockFace of Block.getBlockFaces()) {
-              // hack
-              if (isWater && blockFace !== "top") {
+              // hack to render only the surface of water blocks
+              if (isWaterBlock && blockFace !== "top") {
                 continue;
               }
 
@@ -86,30 +86,19 @@ export default class ChunkGeometryBuilder {
                 z: neighbourZ,
               });
 
-              const neighbourSurfaceY = terrainShapeMap.getSurfaceHeightAt(
-                neighbourX,
-                neighbourZ
-              );
-
-              const blockDensity = densityMap.getDensityAt(
-                blockX,
-                blockY,
-                blockZ
-              );
-              const neighbourDensity = densityMap.getDensityAt(
-                neighbourX,
-                neighbourY,
-                neighbourZ
-              );
+              const blockCoords = { x: blockX, y: blockY, z: blockZ };
+              const neighCoords = {
+                x: neighbourX,
+                y: neighbourY,
+                z: neighbourZ,
+              };
 
               if (
-                this.isBlockFaceRenderingOptimizable(
-                  { x: blockX, y: blockY, z: blockZ },
-                  blockDensity,
+                this.canCullBlockFace(
+                  blockCoords,
                   blockFace,
-                  neighbourBlock,
-                  neighbourDensity,
-                  neighbourSurfaceY
+                  neighCoords,
+                  neighbourBlock
                 )
               ) {
                 continue;
@@ -124,9 +113,9 @@ export default class ChunkGeometryBuilder {
 
                 // for each vertex of the current face
                 for (const { pos, uv, ao: aoSides } of vertices) {
-                  const vertexX = pos[0] + blockX;
-                  const vertexY = pos[1] + blockY;
-                  const vertexZ = pos[2] + blockZ;
+                  const vertexX = blockX + pos[0];
+                  const vertexY = blockY + pos[1];
+                  const vertexZ = blockZ + pos[2];
 
                   // add vertex position
                   positions.push(vertexX, vertexY, vertexZ);
@@ -149,9 +138,7 @@ export default class ChunkGeometryBuilder {
                       z: vertexZ,
                     },
                     aoSides,
-                    chunk,
-                    terrainShapeMap,
-                    densityMap
+                    chunk
                   );
 
                   aos.push(...vertexAO);
@@ -184,6 +171,46 @@ export default class ChunkGeometryBuilder {
   }
 
   /**
+   * Check if the current block face can be culled by doing some checks on the neighbour block
+   */
+  private canCullBlockFace(
+    blockCoord: Coordinate,
+    blockFace: BlockFace,
+    neighbourCoords: Coordinate,
+    neighbourBlock: BlockData | null
+  ) {
+    const { terrainShapeMap, densityMap } = this;
+    const { x: blockX, y: blockY, z: blockZ } = blockCoord;
+    const { x: neighbourX, y: neighbourY, z: neighbourZ } = neighbourCoords;
+
+    if (!EnvVars.TERRAIN_OPTIMIZATION_ENABLED) {
+      return false;
+    }
+
+    const isEdgeBlock = !neighbourBlock;
+    const blockDensity = densityMap.getDensityAt(blockX, blockY, blockZ);
+
+    const neighbourSurfaceY = terrainShapeMap.getSurfaceHeightAt(
+      neighbourX,
+      neighbourZ
+    );
+
+    const neighbourDensity = densityMap.getDensityAt(
+      neighbourX,
+      neighbourY,
+      neighbourZ
+    );
+
+    const isBelowNeighbourSurface =
+      blockY < neighbourSurfaceY - (blockFace === "top" ? 1 : 0);
+
+    const hasSameDensity =
+      Math.sign(blockDensity) === Math.sign(neighbourDensity);
+
+    return isEdgeBlock && isBelowNeighbourSurface && hasSameDensity;
+  }
+
+  /**
    * This function compute the ambient occlusion for a particular vertex of a block face.
    *
    * It will return an rgb value representing how much occluded the vertex is, from no occlusion
@@ -191,26 +218,15 @@ export default class ChunkGeometryBuilder {
    *
    * //TODO fix ambient occlusion asintropy issue
    */
-  private static computeVertexAO(
+  private computeVertexAO(
     { x, y, z }: Coordinate,
     { side0, side1, side2 }: BlockFaceAO,
-    chunk: ChunkModel,
-    terrainShapeMap: TerrainShapeMap,
-    densityMap: DensityMap
+    chunk: ChunkModel
   ) {
-    // const aoIntensity = [1.0, 0.6, 0.5, 0.4];
-
     let occlusionLevel = 0;
+
     for (const occlusionSide of [side0, side1, side2]) {
-      if (
-        this.isSideOccluded(
-          { x, y, z },
-          occlusionSide,
-          chunk,
-          terrainShapeMap,
-          densityMap
-        )
-      ) {
+      if (this.isSideOccluded({ x, y, z }, occlusionSide, chunk)) {
         occlusionLevel += 1;
       }
     }
@@ -219,14 +235,13 @@ export default class ChunkGeometryBuilder {
     return [rgb, rgb, rgb];
   }
 
-  private static isSideOccluded(
+  private isSideOccluded(
     { x, y, z }: Coordinate,
-    side: [number, number, number],
-    chunk: ChunkModel,
-    terrainShapeMap: TerrainShapeMap,
-    densityMap: DensityMap
+    aoSide: [number, number, number],
+    chunk: ChunkModel
   ) {
-    const [dx, dy, dz] = side;
+    const { terrainShapeMap, densityMap } = this;
+    const [dx, dy, dz] = aoSide;
 
     const occludingBlock = chunk.getBlock({
       x: x + dx,
@@ -270,34 +285,10 @@ export default class ChunkGeometryBuilder {
     return false;
   }
 
-  private static isBlockFaceRenderingOptimizable(
-    { y: blockY }: Coordinate,
-    blockDensity: number,
-    blockFace: BlockFace,
-    neighbourBlock: BlockData | null,
-    neighbourDensity: number,
-    neighbourSurfaceY: number
-  ) {
-    const terrainOptimization = EnvVars.TERRAIN_OPTIMIZATION_ENABLED;
-
-    if (!terrainOptimization) {
-      return false;
-    }
-
-    const isEdgeBlock = !neighbourBlock;
-    const isBelowNeighbourSurface =
-      blockY < neighbourSurfaceY - (blockFace === "top" ? 1 : 0);
-
-    const hasSameDensity =
-      Math.sign(blockDensity) === Math.sign(neighbourDensity);
-
-    return isEdgeBlock && isBelowNeighbourSurface && hasSameDensity;
-  }
-
   /**
    * hack to render only the surface water blocks
    */
-  private static shouldSkipWaterBlockRendering(y: number) {
+  private canSkipWaterBlockRendering(y: number) {
     return y !== World.SEA_LEVEL - 1;
   }
 }
