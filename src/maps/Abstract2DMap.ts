@@ -5,7 +5,7 @@ export default abstract class Abstract2DMap extends AbstractMap {
 
   constructor(seed: string) {
     super(seed);
-    this.data = {};
+    this.data = new Map();
   }
 
   getData() {
@@ -18,12 +18,12 @@ export default abstract class Abstract2DMap extends AbstractMap {
 
   protected getPointData(x: number, z: number): number | undefined {
     const key = Abstract2DMap.computeKey(x, z);
-    return this.data[key];
+    return this.data.get(key);
   }
 
   protected setPointData(x: number, z: number, val: number) {
     const key = Abstract2DMap.computeKey(x, z);
-    this.data[key] = val;
+    this.data.set(key, val);
     return val;
   }
 

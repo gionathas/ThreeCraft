@@ -14,7 +14,7 @@ export default class TreeMapBuilder {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
     const treeMap = new TreeMap(terrainShapeMap);
-    const treeMapData: MapData = {};
+    const treeMapData: MapData = new Map();
 
     const startX = originX - Tree.RADIUS;
     const startZ = originZ - Tree.RADIUS;
@@ -24,7 +24,7 @@ export default class TreeMapBuilder {
       const z = (i % TreeMap.MAP_SIZE) + startZ;
 
       const key = TreeMap.computeKey(x, z);
-      treeMapData[key] = buffer[i];
+      treeMapData.set(key, buffer[i]);
     }
 
     treeMap.setData(treeMapData);

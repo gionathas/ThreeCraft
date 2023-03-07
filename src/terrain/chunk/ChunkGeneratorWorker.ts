@@ -14,13 +14,13 @@ function generateChunk(
   treeMapDataBuffer: TransferDescriptor<number>
 ) {
   const start = performance.now();
-
   // create the chunk
   const chunk = new Chunk(chunkId);
 
   // load maps
   const terrainShapeMap = new TerrainShapeMap(seed);
   const densityMap = new DensityMap(terrainShapeMap);
+
   const treeMap = TreeMapBuilder.generateChunkTreeMapFromBuffer(
     chunkId,
     //@ts-ignore
@@ -54,8 +54,8 @@ function generateChunk(
     chunk,
     chunk.getWorldOriginPosition()
   );
-
   const end = performance.now();
+
   const time = (end - start) / 1000;
 
   return {
