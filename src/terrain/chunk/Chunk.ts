@@ -96,8 +96,13 @@ export default class Chunk implements ChunkModel {
   }
 
   static chunkIdAsCoordinate(chunkID: ChunkID): Coordinate {
-    const [x, y, z] = chunkID.split(",").map((val) => Number(val));
-    return { x, y, z };
+    const matches = chunkID.match(/^([^,]+),([^,]+),(.+)$/);
+    if (!matches) {
+      throw new Error("Invalid chunkId");
+    }
+
+    const [_, x, y, z] = matches;
+    return { x: Number(x), y: Number(y), z: Number(z) };
   }
 
   getId() {

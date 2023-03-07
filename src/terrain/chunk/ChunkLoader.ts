@@ -35,19 +35,15 @@ export default class ChunkLoader {
     const isSameChunk = this.prevCenterChunk === currCenterChunk;
 
     if ((!isSameChunk && isGenerationEnabled) || isFirstUpdate) {
-      // FIXME hacky
-      new Promise((resolve) => {
-        const terrainBoundaries =
-          this.getTerrainBoundariesFromPosition(centerPosition);
+      const terrainBoundaries =
+        this.getTerrainBoundariesFromPosition(centerPosition);
 
-        this.unloadTerrain(terrainBoundaries);
-        this.loadTerrain(terrainBoundaries);
-        this.prevCenterChunk = currCenterChunk;
+      this.unloadTerrain(terrainBoundaries);
+      this.loadTerrain(terrainBoundaries);
+      this.prevCenterChunk = currCenterChunk;
 
-        resolve(null);
-        // console.debug(`solidPool: ${this.chunkFactory._poolSolidMeshSize}`);
-        // console.log(`transPool: ${this.chunkFactory._poolTransparentMeshSize}`);
-      });
+      // console.log(`solidPool: ${this.chunksManager._poolSolidMeshSize}`);
+      // console.log(`transPool: ${this.chunksManager._poolTransparentMeshSize}`);
     }
   }
 
