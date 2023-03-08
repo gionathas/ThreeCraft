@@ -2,14 +2,14 @@ import { ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
 import { MapData } from "../AbstractMap";
-import TerrainShapeMap from "../TerrainShapeMap";
+import TerrainMap from "../TerrainMap";
 import TreeMap from "./TreeMap";
 
 export default class TreeMapBuilder {
   static generateChunkTreeMapFromBuffer(
     chunkId: ChunkID,
     buffer: Uint16Array,
-    terrainShapeMap: TerrainShapeMap
+    terrainShapeMap: TerrainMap
   ): TreeMap {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
@@ -27,7 +27,7 @@ export default class TreeMapBuilder {
       treeMapData.set(key, buffer[i]);
     }
 
-    treeMap.setData(treeMapData);
+    treeMap.setMapData(treeMapData);
     return treeMap;
   }
 }

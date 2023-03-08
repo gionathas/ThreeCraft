@@ -1,7 +1,7 @@
 import { createNoise3D, NoiseFunction3D } from "simplex-noise";
-import Abstract3DMap from "./Abstract3DMap";
+import Local3DMap from "./Local3DMap";
 
-export abstract class Noise3DMap extends Abstract3DMap {
+export abstract class Noise3DMap extends Local3DMap {
   protected noise3D: NoiseFunction3D;
 
   constructor(seed: string) {

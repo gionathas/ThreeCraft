@@ -1,5 +1,4 @@
-import DensityMap from "../../../maps/DensityMap";
-import TerrainShapeMap from "../../../maps/TerrainShapeMap";
+import TerrainMap from "../../../maps/TerrainMap";
 import { TreeMap } from "../../../maps/tree";
 import BlockGenerator from "./BlockGenerator";
 import FeaturesGenerator from "./FeaturesGenerator";
@@ -15,12 +14,8 @@ export default class BlockGeneratorFactory {
   private terrainGenerator: TerrainGenerator;
   private featuresGenerator: FeaturesGenerator;
 
-  constructor(
-    terrainShapeMap: TerrainShapeMap,
-    densityMap: DensityMap,
-    treeMap: TreeMap
-  ) {
-    this.terrainGenerator = new TerrainGenerator(terrainShapeMap, densityMap);
+  constructor(terrainShapeMap: TerrainMap, treeMap: TreeMap) {
+    this.terrainGenerator = new TerrainGenerator(terrainShapeMap);
     this.featuresGenerator = new FeaturesGenerator(terrainShapeMap, treeMap);
   }
 

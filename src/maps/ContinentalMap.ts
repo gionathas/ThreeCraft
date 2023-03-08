@@ -1,5 +1,6 @@
 import World from "../terrain/World";
 import { ValueRange } from "../utils/helpers";
+import { Map2D } from "./AbstractMap";
 import { Noise2DMap } from "./Noise2DMap";
 import TestingMap from "./TestingMap";
 
@@ -13,7 +14,7 @@ export type ContinentalType =
 /**
  * This Map is used for generating the terrain base height
  */
-export default class ContinentalMap extends Noise2DMap {
+export default class ContinentalMap extends Noise2DMap implements Map2D {
   static readonly NoiseRange: Record<ContinentalType, ValueRange> = {
     Ocean: { min: -1, max: -0.7 },
     Coast: { min: -0.7, max: -0.4 },
@@ -26,7 +27,11 @@ export default class ContinentalMap extends Noise2DMap {
     super(seed);
   }
 
-  getContinentalnessAt(x: number, z: number) {
+  getValueAt(x: number, z: number): number {
+    return this.getContinentalnessAt(x, z);
+  }
+
+  private getContinentalnessAt(x: number, z: number) {
     if (TestingMap.ENABLED && TestingMap.CONTINENTALNESS != null) {
       return TestingMap.CONTINENTALNESS;
     }

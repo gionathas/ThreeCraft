@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Engine from "../core/Engine";
-import DensityMap from "../maps/DensityMap";
-import TerrainShapeMap from "../maps/TerrainShapeMap";
+import GlobalMapManager from "../maps/GlobalMapManager";
+import TerrainMap from "../maps/TerrainMap";
 import { GlobalTreeMap } from "../maps/tree";
 import { BlockType } from "../terrain/block";
 import { ChunkLoader, ChunkManager } from "../terrain/chunk";
@@ -14,29 +14,27 @@ export default class Terrain {
   private chunksManager: ChunkManager;
   private chunksLoader: ChunkLoader;
 
-  private seed: string;
-  private terrainShapeMap: TerrainShapeMap;
-  private densityMap: DensityMap;
+  private globalMapManager: GlobalMapManager;
+  private terrainMap: TerrainMap;
   private treeMap: GlobalTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
 
-    this.seed = "seed"; //FIXME
-    this.terrainShapeMap = new TerrainShapeMap(this.seed);
-    this.densityMap = new DensityMap(this.terrainShapeMap);
-    this.treeMap = new GlobalTreeMap(this.terrainShapeMap, this.densityMap);
+    //FIXME
+    const seed = "seed";
+    this.globalMapManager = GlobalMapManager.getInstance(seed);
+    this.terrainMap = this.globalMapManager.getGlobalTerrainMap();
+    this.treeMap = new GlobalTreeMap(this.terrainMap);
 
-    this.chunksManager = new ChunkManager(
-      this.terrainShapeMap,
-      this.densityMap,
-      this.treeMap
-    );
+    this.chunksManager = new ChunkManager(this.globalMapManager, this.treeMap);
     this.chunksLoader = new ChunkLoader(centerPosition, this.chunksManager);
   }
 
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
     this.chunksLoader.update(newCenterPosition, isFirstUpdate);
+
+    // this.globalMapManager._logTotalRegionCount();
   }
 
   setBlock(blockCoord: Coordinate, block: BlockType) {
@@ -82,25 +80,19 @@ export default class Terrain {
   }
 
   getSurfaceHeight(x: number, z: number) {
-    return this.terrainShapeMap.getSurfaceHeightAt(x, z);
+    return this.terrainMap.getSurfaceHeightAt(x, z);
   }
 
-  /**
-   * //WARN if this function is invoked frequently
-   * it can lead to an high memory usage due to his caching behavior,
-   * use it only in debug mode
-   */
   _getContinentalness(x: number, z: number) {
-    return this.terrainShapeMap.getContinentalnessAt(x, z);
+    return this.terrainMap.getContinentalnessAt(x, z);
   }
 
   _getErosion(x: number, z: number) {
-    return this.terrainShapeMap.getErosionAt(x, z);
+    return this.terrainMap.getErosionAt(x, z);
   }
 
   _getPV(x: number, z: number) {
-    const erosion = this._getErosion(x, z);
-    return this.terrainShapeMap.getPVAt(x, z, erosion);
+    return this.terrainMap.getPVAt(x, z);
   }
 
   get _totalChunks() {

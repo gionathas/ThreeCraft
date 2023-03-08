@@ -1,8 +1,8 @@
 import { Chunk } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
-import Abstract2DMap from "../Abstract2DMap";
-import TerrainShapeMap from "../TerrainShapeMap";
+import Local2DMap from "../Local2DMap";
+import TerrainMap from "../TerrainMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
 export enum TreeMapType {
@@ -17,15 +17,15 @@ export type TreeMapValue = {
   trunkSurfaceY: number;
   trunkDistance: number;
 };
-export default class TreeMap extends Abstract2DMap {
+export default class TreeMap extends Local2DMap {
   /**
    * The size of the tree map is the size of the chunk + the radius of the tree
    * because a tree can spawn on the edge of the chunk
    */
   static readonly MAP_SIZE = Chunk.WIDTH + Tree.RADIUS * 2;
-  protected terrainShapeMap: TerrainShapeMap;
+  protected terrainShapeMap: TerrainMap;
 
-  constructor(terrainShapeMap: TerrainShapeMap) {
+  constructor(terrainShapeMap: TerrainMap) {
     super(terrainShapeMap.getSeed());
     this.terrainShapeMap = terrainShapeMap;
   }
@@ -89,6 +89,10 @@ export default class TreeMap extends Abstract2DMap {
     }
 
     return null;
+  }
+
+  getValueAt(x: number, z: number) {
+    return this.getTreeMapValueAt(x, z) ?? TreeMapType.EMPTY;
   }
 
   protected getTreeMapValueAt(x: number, z: number) {

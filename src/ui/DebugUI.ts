@@ -1,13 +1,9 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
-import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import ContinentalMap from "../maps/ContinentalMap";
-import ErosionMap from "../maps/ErosionMap";
-import PVMap from "../maps/PVMap";
 
 export default class DebugUI {
   private player: Player;
@@ -56,42 +52,37 @@ export default class DebugUI {
   }
 
   private updateGameInfo() {
-    const { debugUI } = this;
-
-    const [px, py, pz] = this.player.getPosition().toArray();
-    const [vx, vy, vz] = this.player.getVelocity().toArray();
-    const orientation = this.player.getOrientation();
-
-    // const targetBlock = this.player.getTargetBlock();
-    const currentChunkId = this.player._currentChunkId;
-    const totalChunks = this.terrain._totalChunks;
-    const totalMesh = Engine.getInstance().getTotalMeshes();
-
-    const continentalness = this.terrain._getContinentalness(px, pz);
-    const erosion = this.terrain._getErosion(px, pz);
-    const pv = this.terrain._getPV(px, pz);
-
-    debugUI!.innerHTML = `<p>Orientation: ${orientation}</p>`;
-    debugUI!.innerHTML += `<p>x: ${px.toFixed(2)} y: ${py.toFixed(
-      2
-    )} z: ${pz.toFixed(2)}</p>`;
-    debugUI!.innerHTML += `<p>vx: ${vx.toFixed(2)} vy: ${vy.toFixed(
-      2
-    )} vz: ${vz.toFixed(2)}</p>`;
-
-    // infoUI!.innerHTML += `<p>Target Block: (${targetBlock?.position.map(
-    //   (block) => Math.floor(block)
-    // )})</p>`;
-    debugUI!.innerHTML += `<p>Current Chunk: (${currentChunkId})</p>`;
-    debugUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
-    debugUI!.innerHTML += `<p>Total Mesh: ${totalMesh}</p>`;
-    debugUI!.innerHTML += `<p>Erosion: ${erosion.toFixed(
-      3
-    )} | ${ErosionMap.getType(erosion)}</p>`;
-    debugUI!.innerHTML += `<p>PV: ${pv.toFixed(3)} | ${PVMap.getType(pv)}</p>`;
-    debugUI!.innerHTML += `<p>Continentalness: ${continentalness.toFixed(
-      3
-    )} | ${ContinentalMap.getType(continentalness)}</p>`;
+    // const { debugUI } = this;
+    // const [px, py, pz] = this.player.getPosition().toArray();
+    // const [vx, vy, vz] = this.player.getVelocity().toArray();
+    // const orientation = this.player.getOrientation();
+    // // const targetBlock = this.player.getTargetBlock();
+    // const currentChunkId = this.player._currentChunkId;
+    // const totalChunks = this.terrain._totalChunks;
+    // const totalMesh = Engine.getInstance().getTotalMeshes();
+    // const continentalness = this.terrain._getContinentalness(px, pz);
+    // const erosion = this.terrain._getErosion(px, pz);
+    // const pv = this.terrain._getPV(px, pz);
+    // debugUI!.innerHTML = `<p>Orientation: ${orientation}</p>`;
+    // debugUI!.innerHTML += `<p>x: ${px.toFixed(2)} y: ${py.toFixed(
+    //   2
+    // )} z: ${pz.toFixed(2)}</p>`;
+    // debugUI!.innerHTML += `<p>vx: ${vx.toFixed(2)} vy: ${vy.toFixed(
+    //   2
+    // )} vz: ${vz.toFixed(2)}</p>`;
+    // // infoUI!.innerHTML += `<p>Target Block: (${targetBlock?.position.map(
+    // //   (block) => Math.floor(block)
+    // // )})</p>`;
+    // debugUI!.innerHTML += `<p>Current Chunk: (${currentChunkId})</p>`;
+    // debugUI!.innerHTML += `<p>Chunks: ${totalChunks}</p>`;
+    // debugUI!.innerHTML += `<p>Total Mesh: ${totalMesh}</p>`;
+    // debugUI!.innerHTML += `<p>Erosion: ${erosion.toFixed(
+    //   3
+    // )} | ${ErosionMap.getType(erosion)}</p>`;
+    // debugUI!.innerHTML += `<p>PV: ${pv.toFixed(3)} | ${PVMap.getType(pv)}</p>`;
+    // debugUI!.innerHTML += `<p>Continentalness: ${continentalness.toFixed(
+    //   3
+    // )} | ${ContinentalMap.getType(continentalness)}</p>`;
   }
 
   private updateDebugVisibility() {

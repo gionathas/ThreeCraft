@@ -9,9 +9,9 @@ export default class World {
   static readonly DENSITY_NOISE_SCALE = 32;
 
   static readonly MAX_WORLD_HEIGHT =
-    EnvVars.TOP_RENDER_DISTANCE_IN_CHUNKS * Chunk.HEIGHT;
+    EnvVars.TOP_RENDER_DISTANCE_IN_CHUNKS * EnvVars.CHUNK_HEIGHT;
   static readonly MIN_WORLD_HEIGHT =
-    EnvVars.BOTTOM_RENDER_DISTANCE_IN_CHUNKS * -Chunk.HEIGHT;
+    EnvVars.BOTTOM_RENDER_DISTANCE_IN_CHUNKS * -EnvVars.CHUNK_HEIGHT;
 
   static readonly MIN_EROSION = 0;
   static readonly MAX_EROSION = 45;

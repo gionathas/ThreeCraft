@@ -1,6 +1,5 @@
 import EnvVars from "../../config/EnvVars";
-import DensityMap from "../../maps/DensityMap";
-import TerrainShapeMap from "../../maps/TerrainShapeMap";
+import TerrainMap from "../../maps/TerrainMap";
 import { Coordinate } from "../../utils/helpers";
 import { Block, BlockData, BlockFaceAO, BlockType } from "../block";
 import { BlockFace } from "../block/BlockGeometry";
@@ -10,12 +9,10 @@ import Chunk, { ChunkModel } from "./Chunk";
 export default class ChunkGeometryBuilder {
   private readonly AO_INTENSITY_LEVEL = [1.0, 0.8, 0.7, 0.6];
 
-  private terrainShapeMap: TerrainShapeMap;
-  private densityMap: DensityMap;
+  private terrainMap: TerrainMap;
 
-  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
-    this.terrainShapeMap = terrainShapeMap;
-    this.densityMap = densityMap;
+  constructor(terrainMap: TerrainMap) {
+    this.terrainMap = terrainMap;
   }
 
   buildChunkGeometry(chunk: ChunkModel, chunkOrigin: Coordinate) {
@@ -179,7 +176,7 @@ export default class ChunkGeometryBuilder {
     neighbourCoords: Coordinate,
     neighbourBlock: BlockData | null
   ) {
-    const { terrainShapeMap, densityMap } = this;
+    const { terrainMap } = this;
     const { x: blockX, y: blockY, z: blockZ } = blockCoord;
     const { x: neighbourX, y: neighbourY, z: neighbourZ } = neighbourCoords;
 
@@ -188,14 +185,14 @@ export default class ChunkGeometryBuilder {
     }
 
     const isEdgeBlock = !neighbourBlock;
-    const blockDensity = densityMap.getDensityAt(blockX, blockY, blockZ);
+    const blockDensity = terrainMap.getDensityAt(blockX, blockY, blockZ);
 
-    const neighbourSurfaceY = terrainShapeMap.getSurfaceHeightAt(
+    const neighbourSurfaceY = terrainMap.getSurfaceHeightAt(
       neighbourX,
       neighbourZ
     );
 
-    const neighbourDensity = densityMap.getDensityAt(
+    const neighbourDensity = terrainMap.getDensityAt(
       neighbourX,
       neighbourY,
       neighbourZ
@@ -240,7 +237,7 @@ export default class ChunkGeometryBuilder {
     aoSide: [number, number, number],
     chunk: ChunkModel
   ) {
-    const { terrainShapeMap, densityMap } = this;
+    const { terrainMap } = this;
     const [dx, dy, dz] = aoSide;
 
     const occludingBlock = chunk.getBlock({
@@ -259,8 +256,8 @@ export default class ChunkGeometryBuilder {
       const ny = Math.floor(y + dy);
       const nz = Math.floor(z + dz);
 
-      const nearbySurfaceHeight = terrainShapeMap.getSurfaceHeightAt(nx, nz);
-      const nearbyDensity = densityMap.getDensityAt(nx, ny, nz);
+      const nearbySurfaceHeight = terrainMap.getSurfaceHeightAt(nx, nz);
+      const nearbyDensity = terrainMap.getDensityAt(nx, ny, nz);
 
       const isNearbyBlockSolid = Math.sign(nearbyDensity) > 0;
 

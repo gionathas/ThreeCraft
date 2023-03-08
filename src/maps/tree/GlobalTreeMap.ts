@@ -4,10 +4,9 @@ import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
 import ContinentalMap from "../ContinentalMap";
-import DensityMap from "../DensityMap";
 import ErosionMap from "../ErosionMap";
 import PVMap from "../PVMap";
-import TerrainShapeMap from "../TerrainShapeMap";
+import TerrainMap from "../TerrainMap";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
@@ -23,11 +22,9 @@ export default class GlobalTreeMap extends TreeMap {
   private readonly HIGH_DENSITY = 0.04;
 
   private loadedRegions: Map<string, Array<TreeMapType>>;
-  private densityMap: DensityMap;
 
-  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
-    super(terrainShapeMap);
-    this.densityMap = densityMap;
+  constructor(terrainMap: TerrainMap) {
+    super(terrainMap);
     this.loadedRegions = new Map();
   }
 
@@ -36,6 +33,8 @@ export default class GlobalTreeMap extends TreeMap {
    */
   loadChunkTreeMap(chunkId: ChunkID): Uint16Array {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
+
+    // console.log("Global Tree Map Size:", this.data.size);
 
     const chunkRegionKey = TreeMap.computeKey(originX, originZ);
 
@@ -87,7 +86,8 @@ export default class GlobalTreeMap extends TreeMap {
     }
 
     const trunkSurfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
-    const isFloating = this.densityMap.getDensityAt(x, trunkSurfaceY, z) < 0;
+    const isFloating =
+      this.terrainShapeMap.getDensityAt(x, trunkSurfaceY, z) < 0;
     const isAboveWater = trunkSurfaceY < World.SEA_LEVEL;
 
     // no chance to spawn a trunk here
