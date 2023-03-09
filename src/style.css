@@ -46,7 +46,7 @@ body {
 }
 
 /* UI */
-#debugUI {
+#debugPanel {
   position: absolute;
   padding: 4px;
   color: white;
