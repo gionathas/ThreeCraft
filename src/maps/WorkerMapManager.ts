@@ -1,3 +1,7 @@
+import { ChunkID } from "../terrain/chunk";
+import Tree from "../terrain/Tree";
+import World from "../terrain/World";
+import { MapData } from "./AbstractMap";
 import ContinentalMap from "./ContinentalMap";
 import DensityMap from "./DensityMap";
 import ErosionMap from "./ErosionMap";
@@ -5,6 +9,7 @@ import HeightMap from "./HeightMap";
 import MapManager from "./MapManager";
 import PVMap from "./PVMap";
 import TerrainMap from "./TerrainMap";
+import { TreeMap } from "./tree";
 
 export default class WorkerMapManager extends MapManager {
   constructor(seed: string) {
@@ -44,5 +49,26 @@ export default class WorkerMapManager extends MapManager {
     );
 
     return terrainMap;
+  }
+
+  getTreeMapFromBuffer(chunkId: ChunkID, buffer: Uint16Array): TreeMap {
+    const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
+
+    const treeMap = new TreeMap(this.seed);
+    const treeMapData: MapData = new Map();
+
+    const startX = originX - Tree.RADIUS;
+    const startZ = originZ - Tree.RADIUS;
+
+    for (let i = 0; i < buffer.length; i++) {
+      const x = Math.floor(i / TreeMap.MAP_SIZE) + startX;
+      const z = (i % TreeMap.MAP_SIZE) + startZ;
+
+      const key = TreeMap.computeKey(x, z);
+      treeMapData.set(key, buffer[i]);
+    }
+
+    treeMap.setMapData(treeMapData);
+    return treeMap;
   }
 }

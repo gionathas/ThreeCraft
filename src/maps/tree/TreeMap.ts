@@ -1,8 +1,8 @@
 import { Chunk } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
+import { Map2D } from "../AbstractMap";
 import Local2DMap from "../Local2DMap";
-import TerrainMap from "../TerrainMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
 export enum TreeMapType {
@@ -17,20 +17,18 @@ export type TreeMapValue = {
   trunkSurfaceY: number;
   trunkDistance: number;
 };
-export default class TreeMap extends Local2DMap {
+export default class TreeMap extends Local2DMap implements Map2D {
   /**
    * The size of the tree map is the size of the chunk + the radius of the tree
    * because a tree can spawn on the edge of the chunk
    */
   static readonly MAP_SIZE = Chunk.WIDTH + Tree.RADIUS * 2;
-  protected terrainShapeMap: TerrainMap;
 
-  constructor(terrainShapeMap: TerrainMap) {
-    super(terrainShapeMap.getSeed());
-    this.terrainShapeMap = terrainShapeMap;
+  constructor(seed: string) {
+    super(seed);
   }
 
-  shouldSpawnTreeLeafAt(x: number, y: number, z: number, surfaceY: number) {
+  shouldSpawnTreeLeafAt(x: number, y: number, z: number) {
     const value = this.getTreeMapValueAt(x, z);
 
     if (value == null) {
@@ -81,8 +79,8 @@ export default class TreeMap extends Local2DMap {
     return type === TreeMapType.TRUNK;
   }
 
-  protected getTreeMapTypeAt(x: number, z: number): TreeMapType | null {
-    const value = this.getPointData(x, z);
+  private getTreeMapTypeAt(x: number, z: number): TreeMapType | null {
+    const value = this.getTreeMapValueAt(x, z);
 
     if (value != null) {
       return TreeMapValueEncoder.getType(value);
@@ -91,11 +89,19 @@ export default class TreeMap extends Local2DMap {
     return null;
   }
 
-  getValueAt(x: number, z: number) {
-    return this.getTreeMapValueAt(x, z) ?? TreeMapType.EMPTY;
+  private getTreeMapValueAt(x: number, z: number) {
+    return this.getPointData(x, z);
   }
 
-  protected getTreeMapValueAt(x: number, z: number) {
-    return this.getPointData(x, z);
+  static getTreeSeedAt(seed: string, x: number, z: number) {
+    return `${seed}_${x}_${z}`;
+  }
+
+  setValueAt(x: number, z: number, value: number): number {
+    return this.setPointData(x, z, value);
+  }
+
+  getValueAt(x: number, z: number) {
+    return this.getPointData(x, z) ?? TreeMapType.EMPTY;
   }
 }

@@ -26,9 +26,23 @@ export default class Global2DMap<T extends Map2D> implements Map2D {
     }
 
     const map = this.createNewMap();
-    const val = map.getValueAt(x, z);
     this.regions.set(regionKey, map);
-    return val;
+
+    return map.getValueAt(x, z);
+  }
+
+  setValueAt(x: number, z: number, val: number) {
+    const regionKey = this.getRegionKey(x, z);
+    const regionMap = this.regions.get(regionKey);
+
+    if (regionMap) {
+      return regionMap.setValueAt(x, z, val);
+    }
+
+    const map = this.createNewMap();
+    this.regions.set(regionKey, map);
+
+    return map.setValueAt(x, z, val);
   }
 
   private getRegionKey(x: number, z: number) {

@@ -23,6 +23,10 @@ export default class HeightMap extends Local2DMap implements Map2D {
     this.pvMap = pvMap;
   }
 
+  setValueAt(x: number, z: number, value: number): number {
+    return this.setPointData(x, z, value);
+  }
+
   getValueAt(x: number, z: number) {
     return this.getSurfaceHeightAt(x, z);
   }

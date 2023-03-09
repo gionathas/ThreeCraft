@@ -27,7 +27,7 @@ export default class FeaturesGenerator extends BlockGenerator {
       return BlockType.OAK_LOG;
     }
 
-    if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
+    if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z)) {
       return BlockType.OAK_LEAVES;
     }
 

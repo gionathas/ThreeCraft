@@ -7,6 +7,7 @@ export default abstract class MapManager {
   protected static getPvMapSeed = (seed: string) => seed + "_pv";
   protected static getHeightMapSeed = (seed: string) => seed + "_height";
   protected static getDensityMapSeed = (seed: string) => seed + "_density";
+  protected static getTreeMapSeed = (seed: string) => seed + "_tree";
 
   constructor(seed: string) {
     this.seed = seed;

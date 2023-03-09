@@ -36,10 +36,10 @@ export default class ChunkManager implements ChunkModel {
 
   private chunkGeometryBuilder: ChunkGeometryBuilder;
 
-  constructor(globalMapManager: GlobalMapManager, treeMap: GlobalTreeMap) {
+  constructor(globalMapManager: GlobalMapManager) {
     this.globalMapManager = globalMapManager;
-    this.terrainMap = this.globalMapManager.getGlobalTerrainMap();
-    this.treeMap = treeMap;
+    this.terrainMap = this.globalMapManager.getTerrainMap();
+    this.treeMap = this.globalMapManager.getTreeMap();
 
     this.loadedChunks = new Map();
     this.solidMesh = new Map();
@@ -73,7 +73,7 @@ export default class ChunkManager implements ChunkModel {
 
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunk) => {
-      const chunkTreeMap = this.treeMap.loadChunkTreeMap(chunkId);
+      const chunkTreeMap = this.treeMap.loadChunkTreeMapData(chunkId);
 
       const seed = this.globalMapManager.getSeed();
       const { solidGeometry, transparentGeometry, blocksBuffer, time } =
@@ -379,9 +379,8 @@ export default class ChunkManager implements ChunkModel {
     const { x, y, z } = World.getChunkOriginPosition(chunkId);
 
     this.loadedChunks.delete(chunkId);
-    this.globalMapManager.unloadRegion(x, y, z);
-    //FIXME
-    this.treeMap.unloadChunkTreeMap(chunkId);
+    this.globalMapManager.unloadMapsRegionAt(x, y, z);
+    this.treeMap.unloadChunkTreeMapData(chunkId);
   }
 
   getBlock(blockCoord: Coordinate) {

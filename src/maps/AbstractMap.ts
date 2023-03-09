@@ -6,10 +6,12 @@ export type MapData = Map<string, number>;
 
 export interface Map2D {
   getValueAt(x: number, z: number): number;
+  setValueAt(x: number, z: number, value: number): number;
 }
 
 export interface Map3D {
   getValueAt(x: number, y: number, z: number): number;
+  setValueAt(x: number, y: number, z: number, value: number): number;
 }
 
 export default abstract class AbstractMap {

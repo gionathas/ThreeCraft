@@ -2,7 +2,6 @@ import * as THREE from "three";
 import Engine from "../core/Engine";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import TerrainMap from "../maps/TerrainMap";
-import { GlobalTreeMap } from "../maps/tree";
 import { BlockType } from "../terrain/block";
 import { ChunkLoader, ChunkManager } from "../terrain/chunk";
 import World from "../terrain/World";
@@ -16,7 +15,6 @@ export default class Terrain {
 
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
-  private treeMap: GlobalTreeMap;
 
   constructor(centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
@@ -24,10 +22,9 @@ export default class Terrain {
     //FIXME
     const seed = "seed";
     this.globalMapManager = GlobalMapManager.getInstance(seed);
-    this.terrainMap = this.globalMapManager.getGlobalTerrainMap();
-    this.treeMap = new GlobalTreeMap(this.terrainMap);
+    this.terrainMap = this.globalMapManager.getTerrainMap();
 
-    this.chunksManager = new ChunkManager(this.globalMapManager, this.treeMap);
+    this.chunksManager = new ChunkManager(this.globalMapManager);
     this.chunksLoader = new ChunkLoader(centerPosition, this.chunksManager);
   }
 

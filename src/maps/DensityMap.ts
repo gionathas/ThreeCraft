@@ -17,6 +17,10 @@ export default class DensityMap extends Noise3DMap implements Map3D {
     this.pvMap = pvMap;
   }
 
+  setValueAt(x: number, y: number, z: number, value: number): number {
+    return this.setPointData(x, y, z, value);
+  }
+
   getValueAt(x: number, y: number, z: number): number {
     return this.getDensityAt(x, y, z);
   }

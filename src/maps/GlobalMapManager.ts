@@ -8,17 +8,20 @@ import HeightMap from "./HeightMap";
 import MapManager from "./MapManager";
 import PVMap from "./PVMap";
 import TerrainMap from "./TerrainMap";
+import { GlobalTreeMap, TreeMap } from "./tree";
 
 export default class GlobalMapManager extends MapManager {
   private static instance: GlobalMapManager;
 
-  // global terrain maps
+  // global maps
   private continentalMap: Global2DMap<ContinentalMap> | null;
   private erosionMap: Global2DMap<ErosionMap> | null;
   private pvMap: Global2DMap<PVMap> | null;
   private heightMap: Global2DMap<HeightMap> | null;
   private densityMap: Global3DMap<DensityMap> | null;
+
   private globalTerrainMap: TerrainMap | null;
+  private globalTreeMap: GlobalTreeMap | null;
 
   private constructor(seed: string) {
     super(seed);
@@ -28,7 +31,9 @@ export default class GlobalMapManager extends MapManager {
     this.pvMap = null;
     this.heightMap = null;
     this.densityMap = null;
+
     this.globalTerrainMap = null;
+    this.globalTreeMap = null;
   }
 
   static getInstance(seed: string): GlobalMapManager {
@@ -39,7 +44,7 @@ export default class GlobalMapManager extends MapManager {
     return this.instance;
   }
 
-  getGlobalTerrainMap() {
+  getTerrainMap() {
     const { seed } = this;
 
     if (this.globalTerrainMap) {
@@ -95,25 +100,47 @@ export default class GlobalMapManager extends MapManager {
     return this.globalTerrainMap;
   }
 
-  //FIXME
-  unloadRegion(x: number, y: number, z: number) {
+  getTreeMap() {
+    const { seed } = this;
+
+    if (this.globalTreeMap) {
+      return this.globalTreeMap;
+    }
+
+    const treeMapSeed = MapManager.getTreeMapSeed(seed);
+
+    const globalTerrainMap = this.getTerrainMap();
+    const globalTreeMap = new Global2DMap(
+      TreeMap.MAP_SIZE,
+      () => new TreeMap(treeMapSeed)
+    );
+
+    this.globalTreeMap = new GlobalTreeMap(
+      treeMapSeed,
+      globalTreeMap,
+      globalTerrainMap
+    );
+
+    return this.globalTreeMap;
+  }
+
+  unloadMapsRegionAt(x: number, y: number, z: number) {
     this.continentalMap?.unloadRegionAt(x, z);
     this.erosionMap?.unloadRegionAt(x, z);
     this.pvMap?.unloadRegionAt(x, z);
     this.heightMap?.unloadRegionAt(x, z);
-    this.densityMap?.unloadRegion(x, y, z);
+    this.densityMap?.unloadRegionAt(x, y, z);
+    this.globalTreeMap?.unloadRegionAt(x, z);
   }
 
   _logTotalRegionCount() {
     console.group("GlobalMapManager");
-    console.log(
-      "total region count:",
-      this.continentalMap?._totalRegionsCount(),
-      this.erosionMap?._totalRegionsCount(),
-      this.pvMap?._totalRegionsCount(),
-      this.heightMap?._totalRegionsCount(),
-      this.densityMap?._totalRegionsCount()
-    );
+    console.log("continentalMap", this.continentalMap?._totalRegionsCount());
+    console.log("erosionMap", this.erosionMap?._totalRegionsCount());
+    console.log("pvMap", this.pvMap?._totalRegionsCount());
+    console.log("heightMap", this.heightMap?._totalRegionsCount());
+    console.log("densityMap", this.densityMap?._totalRegionsCount());
+    console.log("globalTreeMap", this.globalTreeMap?._totalRegionsCount());
     console.groupEnd();
   }
 }

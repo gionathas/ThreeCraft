@@ -27,6 +27,10 @@ export default class ErosionMap extends Noise2DMap implements Map2D {
     super(seed);
   }
 
+  setValueAt(x: number, z: number, value: number): number {
+    return this.setPointData(x, z, value);
+  }
+
   getValueAt(x: number, z: number): number {
     return this.getErosionAt(x, z);
   }

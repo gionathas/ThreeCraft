@@ -15,7 +15,7 @@ export default class Global3DMap<T extends Map3D> implements Map3D {
     this.createNewMap = createMapFn;
   }
 
-  unloadRegion(x: number, y: number, z: number) {
+  unloadRegionAt(x: number, y: number, z: number) {
     const regionKey = this.getRegionKey(x, y, z);
     this.regions.delete(regionKey);
   }
@@ -30,6 +30,21 @@ export default class Global3DMap<T extends Map3D> implements Map3D {
 
     const map = this.createNewMap();
     const val = map.getValueAt(x, y, z);
+    this.regions.set(regionKey, map);
+
+    return val;
+  }
+
+  setValueAt(x: number, y: number, z: number, value: number): number {
+    const regionKey = this.getRegionKey(x, y, z);
+    const regionMap = this.regions.get(regionKey);
+
+    if (regionMap) {
+      return regionMap.setValueAt(x, y, z, value);
+    }
+
+    const map = this.createNewMap();
+    const val = map.setValueAt(x, y, z, value);
     this.regions.set(regionKey, map);
 
     return val;

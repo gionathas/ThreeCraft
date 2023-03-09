@@ -1,6 +1,5 @@
 import { TransferDescriptor } from "threads";
 import { expose, Transfer } from "threads/worker";
-import { TreeMapBuilder } from "../../maps/tree";
 import WorkerMapManager from "../../maps/WorkerMapManager";
 import { BlockGeneratorFactory } from "../block";
 import { Phase } from "../block/generators/BlockGeneratorFactory";
@@ -19,12 +18,10 @@ function generateChunk(
   // load maps
   const mapManager = new WorkerMapManager(seed);
   const terrainMap = mapManager.getTerrainMap();
-
-  const treeMap = TreeMapBuilder.generateChunkTreeMapFromBuffer(
+  const treeMap = mapManager.getTreeMapFromBuffer(
     chunkId,
     //@ts-ignore
-    new Uint16Array(treeMapDataBuffer),
-    terrainMap
+    new Uint16Array(treeMapDataBuffer)
   );
 
   // istantiate a block generator factory
