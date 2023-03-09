@@ -8,7 +8,7 @@ import HeightMap from "./HeightMap";
 import MapManager from "./MapManager";
 import PVMap from "./PVMap";
 import TerrainMap from "./TerrainMap";
-import { GlobalTreeMap, TreeMap } from "./tree";
+import { GlobalTreeMap } from "./tree";
 
 export default class GlobalMapManager extends MapManager {
   private static instance: GlobalMapManager;
@@ -108,18 +108,9 @@ export default class GlobalMapManager extends MapManager {
     }
 
     const treeMapSeed = MapManager.getTreeMapSeed(seed);
-
     const globalTerrainMap = this.getTerrainMap();
-    const globalTreeMap = new Global2DMap(
-      TreeMap.MAP_SIZE,
-      () => new TreeMap(treeMapSeed)
-    );
 
-    this.globalTreeMap = new GlobalTreeMap(
-      treeMapSeed,
-      globalTreeMap,
-      globalTerrainMap
-    );
+    this.globalTreeMap = new GlobalTreeMap(treeMapSeed, globalTerrainMap);
 
     return this.globalTreeMap;
   }

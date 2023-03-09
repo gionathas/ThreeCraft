@@ -3,7 +3,6 @@ import { lerp } from "three/src/math/MathUtils";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
-import AbstractMap from "../AbstractMap";
 import ContinentalMap from "../ContinentalMap";
 import ErosionMap from "../ErosionMap";
 import Global2DMap from "../Global2DMap";
@@ -15,23 +14,19 @@ import TreeMapValueEncoder from "./TreeMapValueEncoder";
 /**
  * This class is responsible for generating on demand the tree map data for a given chunk.
  */
-export default class SharedTreeMap extends AbstractMap {
+export default class GlobalTreeMap extends Global2DMap<TreeMap> {
   private readonly LOW_DENSITY = 0.002;
   private readonly MID_DENSITY = 0.02;
   private readonly HIGH_DENSITY = 0.04;
 
-  private treeMap: Global2DMap<TreeMap>;
+  private seed: string;
   private terrainMap: TerrainMap;
 
   private chunksTreeMapDataCache: Map<string, Array<TreeMapType>>;
 
-  constructor(
-    seed: string,
-    treeMap: Global2DMap<TreeMap>,
-    terrainMap: TerrainMap
-  ) {
-    super(seed);
-    this.treeMap = treeMap;
+  constructor(seed: string, terrainMap: TerrainMap) {
+    super(TreeMap.MAP_SIZE, () => new TreeMap(seed));
+    this.seed = seed;
     this.terrainMap = terrainMap;
     this.chunksTreeMapDataCache = new Map();
   }
@@ -67,7 +62,7 @@ export default class SharedTreeMap extends AbstractMap {
     // load the tree map data into a buffer
     for (let x = startX; x < endX; x++) {
       for (let z = startZ; z < endZ; z++) {
-        const value = this.treeMap.getValueAt(x, z)!;
+        const value = this.getValueAt(x, z)!;
         chunkTreeMapData.push(value);
       }
     }
@@ -83,12 +78,8 @@ export default class SharedTreeMap extends AbstractMap {
     this.chunksTreeMapDataCache.delete(chunkCacheKey);
   }
 
-  unloadRegionAt(x: number, z: number) {
-    this.treeMap.unloadRegionAt(x, z);
-  }
-
   private generateTreeMapValueAt(x: number, z: number) {
-    const prevValue = this.treeMap.getValueAt(x, z);
+    const prevValue = this.getValueAt(x, z);
 
     // already a tree or leaf here
     if (!this.isEmptyValue(prevValue)) {
@@ -203,7 +194,7 @@ export default class SharedTreeMap extends AbstractMap {
   }
 
   private getTreeMapTypeAt(x: number, z: number): TreeMapType | null {
-    const value = this.treeMap.getValueAt(x, z);
+    const value = this.getValueAt(x, z);
 
     if (value != null) {
       return TreeMapValueEncoder.getType(value);
@@ -225,7 +216,7 @@ export default class SharedTreeMap extends AbstractMap {
     };
 
     const trunkValue = TreeMapValueEncoder.encode(trunkData);
-    this.treeMap.setValueAt(x, z, trunkValue);
+    this.setValueAt(x, z, trunkValue);
 
     return trunkData;
   }
@@ -248,7 +239,7 @@ export default class SharedTreeMap extends AbstractMap {
       trunkDistance: leafDistance,
     });
 
-    return this.treeMap.setValueAt(leafX, leafZ, leafValue);
+    return this.setValueAt(leafX, leafZ, leafValue);
   }
 
   private setTreeMapEmptyAt(x: number, z: number) {
@@ -259,14 +250,10 @@ export default class SharedTreeMap extends AbstractMap {
       trunkDistance: 0,
     });
 
-    return this.treeMap.setValueAt(x, z, emptyData);
+    return this.setValueAt(x, z, emptyData);
   }
 
   private computeChunkCacheKey(x: number, z: number) {
     return `${x}_${z}`;
-  }
-
-  _totalRegionsCount() {
-    return this.treeMap._totalRegionsCount();
   }
 }

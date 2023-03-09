@@ -1,4 +1,4 @@
-import SharedTreeMap from "./SharedTreeMap";
+import GlobalTreeMap from "./GlobalTreeMap";
 import TreeMap from "./TreeMap";
 
-export { TreeMap, SharedTreeMap as GlobalTreeMap };
+export { TreeMap, GlobalTreeMap };
