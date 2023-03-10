@@ -1,31 +1,29 @@
-import AbstractMap from "./AbstractMap";
-
-export type MapData = Record<string, number>;
+import AbstractMap, { MapData } from "./AbstractMap";
 
 export default abstract class Local3DMap extends AbstractMap {
   protected data: MapData;
 
   constructor(seed: string) {
     super(seed);
-    this.data = {};
+    this.data = new Map();
   }
 
-  getData() {
+  getMapData() {
     return this.data;
   }
 
-  setData(data: MapData) {
+  setMapData(data: MapData) {
     this.data = data;
   }
 
   protected getPointData(x: number, y: number, z: number): number | undefined {
     const key = Local3DMap.computeKey(x, y, z);
-    return this.data[key];
+    return this.data.get(key);
   }
 
   protected setPointData(x: number, y: number, z: number, val: number) {
     const key = Local3DMap.computeKey(x, y, z);
-    this.data[key] = val;
+    this.data.set(key, val);
     return val;
   }
 
