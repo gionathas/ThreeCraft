@@ -1,4 +1,4 @@
-import TerrainShapeMap from "../../../maps/TerrainShapeMap";
+import { TerrainMap } from "../../../maps/terrain";
 import { TreeMap } from "../../../maps/tree";
 import World from "../../World";
 import { BlockType } from "../BlockType";
@@ -7,8 +7,8 @@ import BlockGenerator from "./BlockGenerator";
 export default class FeaturesGenerator extends BlockGenerator {
   protected treeMap: TreeMap;
 
-  constructor(terrainShapeMap: TerrainShapeMap, treeMap: TreeMap) {
-    super(terrainShapeMap);
+  constructor(terrainMap: TerrainMap, treeMap: TreeMap) {
+    super(terrainMap);
     this.treeMap = treeMap;
   }
 
@@ -27,7 +27,7 @@ export default class FeaturesGenerator extends BlockGenerator {
       return BlockType.OAK_LOG;
     }
 
-    if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z, surfaceY)) {
+    if (this.treeMap.shouldSpawnTreeLeafAt(x, y, z)) {
       return BlockType.OAK_LEAVES;
     }
 

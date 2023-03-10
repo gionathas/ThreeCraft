@@ -1,5 +1,4 @@
-import DensityMap from "../../../maps/DensityMap";
-import TerrainShapeMap from "../../../maps/TerrainShapeMap";
+import { TerrainMap } from "../../../maps/terrain";
 import { isInRange } from "../../../utils/helpers";
 import World from "../../World";
 import { BlockType } from "../BlockType";
@@ -8,16 +7,13 @@ import BlockGenerator from "./BlockGenerator";
 type DepthLevel = "Surface" | "Subsurface" | "Mid" | "Deep" | "BedRock";
 
 export default class TerrainGenerator extends BlockGenerator {
-  private densityMap: DensityMap;
-
-  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
-    super(terrainShapeMap);
-    this.densityMap = densityMap;
+  constructor(terrainMap: TerrainMap) {
+    super(terrainMap);
   }
 
   generateBlock(x: number, y: number, z: number): BlockType {
     const surfaceY = this.getSurfaceHeightAt(x, z);
-    const density = this.densityMap.getDensityAt(x, y, z);
+    const density = this.terrainMap.getDensityAt(x, y, z);
 
     if (density < 0 || y >= surfaceY) {
       return BlockType.AIR;
@@ -120,7 +116,7 @@ export default class TerrainGenerator extends BlockGenerator {
     z: number,
     distFromSurface: number
   ): boolean {
-    const density = this.densityMap.getDensityAt(x, y, z);
+    const density = this.terrainMap.getDensityAt(x, y, z);
     const isDensityInRange = isInRange(density, 0.05, 0.07);
     const isDepthInRange = isInRange(distFromSurface, 5, 20);
 

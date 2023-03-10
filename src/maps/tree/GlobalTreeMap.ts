@@ -3,44 +3,41 @@ import { lerp } from "three/src/math/MathUtils";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
-import ContinentalMap from "../ContinentalMap";
-import DensityMap from "../DensityMap";
-import ErosionMap from "../ErosionMap";
-import PVMap from "../PVMap";
-import TerrainShapeMap from "../TerrainShapeMap";
+import Global2DMap from "../Global2DMap";
+import { ContinentalMap, ErosionMap, PVMap, TerrainMap } from "../terrain";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 
 /**
- * //WARN This class store the data of all the chunks loaded,
- *  without garbage collecting the data associated to unloaded chunks
- *
- * //NOTE extract a TreeGenerator class ?
+ * This class is responsible for generating on demand the tree map data for a given chunk.
  */
-export default class GlobalTreeMap extends TreeMap {
+export default class GlobalTreeMap extends Global2DMap<TreeMap> {
   private readonly LOW_DENSITY = 0.002;
   private readonly MID_DENSITY = 0.02;
   private readonly HIGH_DENSITY = 0.04;
 
-  private loadedRegions: Map<string, Array<TreeMapType>>;
-  private densityMap: DensityMap;
+  private seed: string;
+  private terrainMap: TerrainMap;
 
-  constructor(terrainShapeMap: TerrainShapeMap, densityMap: DensityMap) {
-    super(terrainShapeMap);
-    this.densityMap = densityMap;
-    this.loadedRegions = new Map();
+  private chunksTreeMapDataCache: Map<string, Array<TreeMapType>>;
+
+  constructor(seed: string, terrainMap: TerrainMap) {
+    super(TreeMap.MAP_SIZE, () => new TreeMap(seed));
+    this.seed = seed;
+    this.terrainMap = terrainMap;
+    this.chunksTreeMapDataCache = new Map();
   }
 
   /**
    * //WARN This method create a new Array each time it is called
    */
-  loadChunkTreeMap(chunkId: ChunkID): Uint16Array {
+  loadChunkTreeMapData(chunkId: ChunkID): Uint16Array {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
-    const chunkRegionKey = TreeMap.computeKey(originX, originZ);
+    const chunkCacheKey = this.computeChunkCacheKey(originX, originZ);
 
-    if (this.loadedRegions.has(chunkRegionKey)) {
-      const chunkTreeMapData = this.loadedRegions.get(chunkRegionKey)!;
+    if (this.chunksTreeMapDataCache.has(chunkCacheKey)) {
+      const chunkTreeMapData = this.chunksTreeMapDataCache.get(chunkCacheKey)!;
       return Uint16Array.from(chunkTreeMapData);
     }
 
@@ -62,32 +59,32 @@ export default class GlobalTreeMap extends TreeMap {
     // load the tree map data into a buffer
     for (let x = startX; x < endX; x++) {
       for (let z = startZ; z < endZ; z++) {
-        const value = this.getTreeMapValueAt(x, z)!;
+        const value = this.getValueAt(x, z)!;
         chunkTreeMapData.push(value);
       }
     }
 
-    this.loadedRegions.set(chunkRegionKey, chunkTreeMapData);
+    this.chunksTreeMapDataCache.set(chunkCacheKey, chunkTreeMapData);
     return Uint16Array.from(chunkTreeMapData);
   }
 
-  unloadChunkTreeMap(chunkId: ChunkID) {
+  unloadChunkTreeMapData(chunkId: ChunkID) {
     const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
 
-    const chunkRegionKey = TreeMap.computeKey(originX, originZ);
-    this.loadedRegions.delete(chunkRegionKey);
+    const chunkCacheKey = this.computeChunkCacheKey(originX, originZ);
+    this.chunksTreeMapDataCache.delete(chunkCacheKey);
   }
 
   private generateTreeMapValueAt(x: number, z: number) {
-    const prevValue = this.getTreeMapValueAt(x, z);
+    const prevValue = this.getValueAt(x, z);
 
-    // position already processed
-    if (prevValue != null) {
+    // already a tree or leaf here
+    if (!this.isEmptyValue(prevValue)) {
       return prevValue;
     }
 
-    const trunkSurfaceY = this.terrainShapeMap.getSurfaceHeightAt(x, z);
-    const isFloating = this.densityMap.getDensityAt(x, trunkSurfaceY, z) < 0;
+    const trunkSurfaceY = this.terrainMap.getSurfaceHeightAt(x, z);
+    const isFloating = this.terrainMap.getDensityAt(x, trunkSurfaceY, z) < 0;
     const isAboveWater = trunkSurfaceY < World.SEA_LEVEL;
 
     // no chance to spawn a trunk here
@@ -124,10 +121,13 @@ export default class GlobalTreeMap extends TreeMap {
     for (const [nearX, nearZ] of nearbyBlocks) {
       this.setTreeLeafAt(nearX, nearZ, x, z, trunkData);
     }
+
+    return TreeMapType.TRUNK;
   }
 
   private hasTrunkChanceToSpawnAt(x: number, z: number) {
-    const treeSeed = this.seed + "_" + TreeMap.computeKey(x, z);
+    const treeSeed = TreeMap.getTreeSeedAt(this.seed, x, z);
+
     const prng = alea(treeSeed);
     const treeTrunkSpawnProbability = prng();
     const treeDensityFactor = this.getTreeDensityFactorAt(x, z);
@@ -136,8 +136,8 @@ export default class GlobalTreeMap extends TreeMap {
   }
 
   private getTreeDensityFactorAt(x: number, z: number) {
-    const erosion = this.terrainShapeMap.getErosionAt(x, z);
-    const pv = this.terrainShapeMap.getPVAt(x, z);
+    const erosion = this.terrainMap.getErosionAt(x, z);
+    const pv = this.terrainMap.getPVAt(x, z);
     const pvType = PVMap.getType(pv);
 
     const erosionType = ErosionMap.getType(erosion);
@@ -171,7 +171,7 @@ export default class GlobalTreeMap extends TreeMap {
 
   private getMaxTreeDensityAt(x: number, z: number) {
     const { LOW_DENSITY, MID_DENSITY, HIGH_DENSITY } = this;
-    const continentalness = this.terrainShapeMap.getContinentalnessAt(x, z);
+    const continentalness = this.terrainMap.getContinentalnessAt(x, z);
     const continentType = ContinentalMap.getType(continentalness);
 
     if (continentType === "Inland") {
@@ -190,6 +190,20 @@ export default class GlobalTreeMap extends TreeMap {
     return 0;
   }
 
+  private getTreeMapTypeAt(x: number, z: number): TreeMapType | null {
+    const value = this.getValueAt(x, z);
+
+    if (value != null) {
+      return TreeMapValueEncoder.getType(value);
+    }
+
+    return null;
+  }
+
+  private isEmptyValue(value: number) {
+    return TreeMapValueEncoder.getType(value) === TreeMapType.EMPTY;
+  }
+
   private setTreeTrunkAt(x: number, z: number, surfaceY: number) {
     const trunkData: TreeMapValue = {
       type: TreeMapType.TRUNK,
@@ -199,7 +213,8 @@ export default class GlobalTreeMap extends TreeMap {
     };
 
     const trunkValue = TreeMapValueEncoder.encode(trunkData);
-    this.setPointData(x, z, trunkValue);
+    this.setValueAt(x, z, trunkValue);
+
     return trunkData;
   }
 
@@ -221,7 +236,7 @@ export default class GlobalTreeMap extends TreeMap {
       trunkDistance: leafDistance,
     });
 
-    this.setPointData(leafX, leafZ, leafValue);
+    return this.setValueAt(leafX, leafZ, leafValue);
   }
 
   private setTreeMapEmptyAt(x: number, z: number) {
@@ -232,6 +247,10 @@ export default class GlobalTreeMap extends TreeMap {
       trunkDistance: 0,
     });
 
-    this.setPointData(x, z, emptyData);
+    return this.setValueAt(x, z, emptyData);
+  }
+
+  private computeChunkCacheKey(x: number, z: number) {
+    return `${x}_${z}`;
   }
 }

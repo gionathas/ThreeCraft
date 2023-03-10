@@ -1,20 +1,21 @@
-import World from "../terrain/World";
-import { lerp } from "../utils/helpers";
-import Abstract2DMap from "./Abstract2DMap";
+import World from "../../terrain/World";
+import { lerp } from "../../utils/helpers";
+import { Map2D } from "../AbstractMap";
+import Local2DMap from "../Local2DMap";
 import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
 import PVMap from "./PVMap";
 
-export default class HeightMap extends Abstract2DMap {
-  private continentalMap: ContinentalMap;
-  private erosionMap: ErosionMap;
-  private pvMap: PVMap;
+export default class HeightMap extends Local2DMap implements Map2D {
+  private continentalMap: Map2D;
+  private erosionMap: Map2D;
+  private pvMap: Map2D;
 
   constructor(
     seed: string,
-    continentalMap: ContinentalMap,
-    erosionMap: ErosionMap,
-    pvMap: PVMap
+    continentalMap: Map2D,
+    erosionMap: Map2D,
+    pvMap: Map2D
   ) {
     super(seed);
     this.continentalMap = continentalMap;
@@ -22,7 +23,15 @@ export default class HeightMap extends Abstract2DMap {
     this.pvMap = pvMap;
   }
 
-  getSurfaceHeightAt(x: number, z: number) {
+  setValueAt(x: number, z: number, value: number): number {
+    return this.setPointData(x, z, value);
+  }
+
+  getValueAt(x: number, z: number) {
+    return this.getSurfaceHeightAt(x, z);
+  }
+
+  private getSurfaceHeightAt(x: number, z: number) {
     const cachedValue = this.getPointData(x, z);
 
     if (cachedValue != null) {
@@ -35,7 +44,7 @@ export default class HeightMap extends Abstract2DMap {
     const erosion = this.getErosion(x, z);
     const erosionFactor = this.getErosionFactor(erosion);
 
-    const pv = this.getPV(x, z, erosion);
+    const pv = this.getPV(x, z);
     const pvHeight = this.getPvHeight(pv, erosionFactor);
 
     const height = baseHeight + pvHeight;
@@ -144,14 +153,14 @@ export default class HeightMap extends Abstract2DMap {
   }
 
   private getContinentalness(x: number, z: number): number {
-    return this.continentalMap.getContinentalnessAt(x, z);
+    return this.continentalMap.getValueAt(x, z);
   }
 
   private getErosion(x: number, z: number): number {
-    return this.erosionMap.getErosionAt(x, z);
+    return this.erosionMap.getValueAt(x, z);
   }
 
-  private getPV(x: number, z: number, erosion?: number): number {
-    return this.pvMap.getPVAt(x, z, erosion);
+  private getPV(x: number, z: number): number {
+    return this.pvMap.getValueAt(x, z);
   }
 }

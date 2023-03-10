@@ -1,7 +1,8 @@
-import World from "../terrain/World";
-import { ValueRange } from "../utils/helpers";
-import { Noise2DMap } from "./Noise2DMap";
-import TestingMap from "./TestingMap";
+import World from "../../terrain/World";
+import { ValueRange } from "../../utils/helpers";
+import { Map2D } from "../AbstractMap";
+import { Noise2DMap } from "../Noise2DMap";
+import TestingMap from "../TestingMap";
 
 export type ErosionType =
   | "Flat"
@@ -11,7 +12,7 @@ export type ErosionType =
   | "Mid"
   | "Low"
   | "VeryLow";
-export default class ErosionMap extends Noise2DMap {
+export default class ErosionMap extends Noise2DMap implements Map2D {
   static readonly NoiseRange: Record<ErosionType, ValueRange> = {
     VeryLow: { min: -1, max: -0.5 },
     Low: { min: -0.5, max: -0.1 },
@@ -26,7 +27,15 @@ export default class ErosionMap extends Noise2DMap {
     super(seed);
   }
 
-  getErosionAt(x: number, z: number) {
+  setValueAt(x: number, z: number, value: number): number {
+    return this.setPointData(x, z, value);
+  }
+
+  getValueAt(x: number, z: number): number {
+    return this.getErosionAt(x, z);
+  }
+
+  private getErosionAt(x: number, z: number) {
     if (TestingMap.ENABLED && TestingMap.EROSION != null) {
       return TestingMap.EROSION;
     }

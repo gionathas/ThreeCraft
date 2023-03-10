@@ -1,11 +1,12 @@
-import World from "../terrain/World";
-import { ValueRange } from "../utils/helpers";
-import { Noise2DMap } from "./Noise2DMap";
-import TestingMap from "./TestingMap";
+import World from "../../terrain/World";
+import { ValueRange } from "../../utils/helpers";
+import { Map2D } from "../AbstractMap";
+import { Noise2DMap } from "../Noise2DMap";
+import TestingMap from "../TestingMap";
 
 export type PVType = "Valley" | "Low" | "Plateau" | "Mid" | "High" | "Peak";
 
-export default class PVMap extends Noise2DMap {
+export default class PVMap extends Noise2DMap implements Map2D {
   static readonly NoiseRange: Record<PVType, ValueRange> = {
     Valley: { min: -1, max: -0.7 },
     Low: { min: -0.7, max: -0.4 },
@@ -19,7 +20,15 @@ export default class PVMap extends Noise2DMap {
     super(seed);
   }
 
-  getPVAt(x: number, z: number, erosion: number = 0) {
+  setValueAt(x: number, z: number, value: number): number {
+    return this.setPointData(x, z, value);
+  }
+
+  getValueAt(x: number, z: number): number {
+    return this.getPVAt(x, z);
+  }
+
+  private getPVAt(x: number, z: number) {
     if (TestingMap.ENABLED && TestingMap.PV != null) {
       return TestingMap.PV;
     }

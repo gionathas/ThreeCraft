@@ -1,29 +1,30 @@
 import AbstractMap, { MapData } from "./AbstractMap";
 
-export default abstract class Abstract2DMap extends AbstractMap {
+export default abstract class Local2DMap extends AbstractMap {
   protected data: MapData;
 
   constructor(seed: string) {
     super(seed);
-    this.data = {};
+    this.data = new Map();
   }
 
-  getData() {
+  getMapData() {
     return this.data;
   }
 
-  setData(data: MapData) {
+  setMapData(data: MapData) {
     this.data = data;
   }
 
   protected getPointData(x: number, z: number): number | undefined {
-    const key = Abstract2DMap.computeKey(x, z);
-    return this.data[key];
+    const key = Local2DMap.computeKey(x, z);
+    return this.data.get(key);
   }
 
   protected setPointData(x: number, z: number, val: number) {
-    const key = Abstract2DMap.computeKey(x, z);
-    this.data[key] = val;
+    const key = Local2DMap.computeKey(x, z);
+
+    this.data.set(key, val);
     return val;
   }
 

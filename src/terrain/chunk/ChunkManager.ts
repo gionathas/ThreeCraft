@@ -1,7 +1,7 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
-import DensityMap from "../../maps/DensityMap";
-import TerrainShapeMap from "../../maps/TerrainShapeMap";
+import GlobalMapManager from "../../maps/GlobalMapManager";
+import { TerrainMap } from "../../maps/terrain";
 import { GlobalTreeMap } from "../../maps/tree";
 import {
   BufferGeometryData,
@@ -21,9 +21,9 @@ const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 
 //TODO rename into terrain
 export default class ChunkManager implements ChunkModel {
-  private terrainShapeMap: TerrainShapeMap;
+  private globalMapManager: GlobalMapManager;
+  private terrainMap: TerrainMap;
   private treeMap: GlobalTreeMap;
-  private densityMap: DensityMap;
 
   private loadedChunks: Map<ChunkID, Chunk>;
   private solidMesh: Map<ChunkID, THREE.Mesh>;
@@ -36,14 +36,10 @@ export default class ChunkManager implements ChunkModel {
 
   private chunkGeometryBuilder: ChunkGeometryBuilder;
 
-  constructor(
-    terrainShapeMap: TerrainShapeMap,
-    densityMap: DensityMap,
-    treeMap: GlobalTreeMap
-  ) {
-    this.terrainShapeMap = terrainShapeMap;
-    this.treeMap = treeMap;
-    this.densityMap = densityMap;
+  constructor(globalMapManager: GlobalMapManager) {
+    this.globalMapManager = globalMapManager;
+    this.terrainMap = this.globalMapManager.getTerrainMap();
+    this.treeMap = this.globalMapManager.getTreeMap();
 
     this.loadedChunks = new Map();
     this.solidMesh = new Map();
@@ -55,10 +51,7 @@ export default class ChunkManager implements ChunkModel {
       spawn<TerrainGeneratorType>(new ChunkGeneratorWorker())
     );
 
-    this.chunkGeometryBuilder = new ChunkGeometryBuilder(
-      terrainShapeMap,
-      densityMap
-    );
+    this.chunkGeometryBuilder = new ChunkGeometryBuilder(this.terrainMap);
   }
 
   generateChunkAt(
@@ -80,14 +73,11 @@ export default class ChunkManager implements ChunkModel {
 
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunk) => {
-      const chunkTreeMap = this.treeMap.loadChunkTreeMap(chunkId);
+      const chunkTreeMap = this.treeMap.loadChunkTreeMapData(chunkId);
 
+      const seed = this.globalMapManager.getSeed();
       const { solidGeometry, transparentGeometry, blocksBuffer, time } =
-        await generateChunk(
-          chunkId,
-          this.terrainShapeMap.getSeed(),
-          Transfer(chunkTreeMap.buffer)
-        );
+        await generateChunk(chunkId, seed, Transfer(chunkTreeMap.buffer));
 
       // @ts-ignore retrieve the chunk blocks
       const blocks = new Uint8Array(...blocksBuffer.transferables);
@@ -386,8 +376,11 @@ export default class ChunkManager implements ChunkModel {
   }
 
   unloadChunk(chunkId: ChunkID) {
+    const { x, y, z } = World.getChunkOriginPosition(chunkId);
+
     this.loadedChunks.delete(chunkId);
-    this.treeMap.unloadChunkTreeMap(chunkId);
+    this.globalMapManager.unloadMapsRegionAt(x, y, z);
+    this.treeMap.unloadChunkTreeMapData(chunkId);
   }
 
   getBlock(blockCoord: Coordinate) {

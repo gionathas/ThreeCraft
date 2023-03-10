@@ -1,21 +1,31 @@
-import World from "../terrain/World";
+import World from "../../terrain/World";
+import { Map2D, Map3D } from "../AbstractMap";
+import { Noise3DMap } from "../Noise3DMap";
 import ErosionMap from "./ErosionMap";
-import { Noise3DMap } from "./Noise3DMap";
 import PVMap from "./PVMap";
-import TerrainShapeMap from "./TerrainShapeMap";
 
-export default class DensityMap extends Noise3DMap {
+export default class DensityMap extends Noise3DMap implements Map3D {
   private readonly SOLID = 1;
   private readonly AIR = -1;
 
-  private terrainShapeMap: TerrainShapeMap;
+  private erosionMap: Map2D;
+  private pvMap: Map2D;
 
-  constructor(terrainShapeMap: TerrainShapeMap) {
-    super(terrainShapeMap.getSeed());
-    this.terrainShapeMap = terrainShapeMap;
+  constructor(seed: string, erosionMap: Map2D, pvMap: Map2D) {
+    super(seed);
+    this.erosionMap = erosionMap;
+    this.pvMap = pvMap;
   }
 
-  getDensityAt(x: number, y: number, z: number): number {
+  setValueAt(x: number, y: number, z: number, value: number): number {
+    return this.setPointData(x, y, z, value);
+  }
+
+  getValueAt(x: number, y: number, z: number): number {
+    return this.getDensityAt(x, y, z);
+  }
+
+  private getDensityAt(x: number, y: number, z: number): number {
     const { AIR, SOLID } = this;
 
     if (y < World.MIN_DENSITY_HEIGHT) {
@@ -42,8 +52,8 @@ export default class DensityMap extends Noise3DMap {
 
   /** Determine the probability of the terrain to be carved out */
   private getSquashingFactorAt(x: number, y: number, z: number): number {
-    const erosion = this.terrainShapeMap.getErosionAt(x, z);
-    const pv = this.terrainShapeMap.getPVAt(x, z);
+    const erosion = this.erosionMap.getValueAt(x, z);
+    const pv = this.pvMap.getValueAt(x, z);
 
     const erosionType = ErosionMap.getType(erosion);
     const isHighPv = pv >= PVMap.NoiseRange.Mid.min;
