@@ -1,5 +1,5 @@
 import EnvVars from "../../config/EnvVars";
-import TerrainMap from "../../maps/TerrainMap";
+import { TerrainMap } from "../../maps/terrain";
 import { Coordinate } from "../../utils/helpers";
 import { Block, BlockData, BlockFaceAO, BlockType } from "../block";
 import { BlockFace } from "../block/BlockGeometry";

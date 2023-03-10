@@ -1,4 +1,4 @@
-import AbstractMap, { Map2D, Map3D } from "./AbstractMap";
+import AbstractMap, { Map2D, Map3D } from "../AbstractMap";
 
 export default class TerrainMap extends AbstractMap {
   private continentalMap: Map2D;

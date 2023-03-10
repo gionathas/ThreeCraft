@@ -1,13 +1,15 @@
 import { Chunk } from "../terrain/chunk";
-import ContinentalMap from "./ContinentalMap";
-import DensityMap from "./DensityMap";
-import ErosionMap from "./ErosionMap";
 import Global2DMap from "./Global2DMap";
 import Global3DMap from "./Global3DMap";
-import HeightMap from "./HeightMap";
 import MapManager from "./MapManager";
-import PVMap from "./PVMap";
-import TerrainMap from "./TerrainMap";
+import {
+  ContinentalMap,
+  DensityMap,
+  ErosionMap,
+  HeightMap,
+  PVMap,
+  TerrainMap,
+} from "./terrain";
 import { GlobalTreeMap } from "./tree";
 
 export default class GlobalMapManager extends MapManager {

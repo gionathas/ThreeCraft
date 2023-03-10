@@ -1,4 +1,4 @@
-import TerrainMap from "../../../maps/TerrainMap";
+import { TerrainMap } from "../../../maps/terrain";
 import { TreeMap } from "../../../maps/tree";
 import World from "../../World";
 import { BlockType } from "../BlockType";

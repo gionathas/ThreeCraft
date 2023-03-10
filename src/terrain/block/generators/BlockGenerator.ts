@@ -1,7 +1,12 @@
-import ContinentalMap, { ContinentalType } from "../../../maps/ContinentalMap";
-import ErosionMap, { ErosionType } from "../../../maps/ErosionMap";
-import PVMap, { PVType } from "../../../maps/PVMap";
-import TerrainMap from "../../../maps/TerrainMap";
+import {
+  ContinentalMap,
+  ContinentalType,
+  ErosionMap,
+  ErosionType,
+  PVMap,
+  PVType,
+  TerrainMap,
+} from "../../../maps/terrain";
 import { BlockType } from "../BlockType";
 
 export default abstract class BlockGenerator {

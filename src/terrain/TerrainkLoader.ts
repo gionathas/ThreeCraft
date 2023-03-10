@@ -1,9 +1,9 @@
-import EnvVars from "../../config/EnvVars";
-import Engine from "../../core/Engine";
-import { Coordinate } from "../../utils/helpers";
-import World from "../World";
-import Chunk, { ChunkID } from "./Chunk";
-import ChunkManager from "./ChunkManager";
+import EnvVars from "../config/EnvVars";
+import Engine from "../core/Engine";
+import { Coordinate } from "../utils/helpers";
+import Chunk, { ChunkID } from "./chunk/Chunk";
+import ChunkManager from "./chunk/ChunkManager";
+import World from "./World";
 
 type TerrainBoundaries = {
   lowerX: number;
@@ -14,7 +14,7 @@ type TerrainBoundaries = {
   upperZ: number;
 };
 
-export default class ChunkLoader {
+export default class TerrainLoader {
   static readonly HORIZONTAL_RENDER_DISTANCE =
     EnvVars.DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
 
@@ -97,11 +97,15 @@ export default class ChunkLoader {
     const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
     const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
 
-    const lowerX = centerChunkOriginX - ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
-    const upperX = centerChunkOriginX + ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
+    const lowerX =
+      centerChunkOriginX - TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
+    const upperX =
+      centerChunkOriginX + TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
 
-    const upperZ = centerChunkOriginZ + ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
-    const lowerZ = centerChunkOriginZ - ChunkLoader.HORIZONTAL_RENDER_DISTANCE;
+    const upperZ =
+      centerChunkOriginZ + TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
+    const lowerZ =
+      centerChunkOriginZ - TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
 
     const upperY = World.MAX_WORLD_HEIGHT;
     const lowerY = World.MIN_WORLD_HEIGHT;

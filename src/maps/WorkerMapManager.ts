@@ -2,13 +2,15 @@ import { ChunkID } from "../terrain/chunk";
 import Tree from "../terrain/Tree";
 import World from "../terrain/World";
 import { MapData } from "./AbstractMap";
-import ContinentalMap from "./ContinentalMap";
-import DensityMap from "./DensityMap";
-import ErosionMap from "./ErosionMap";
-import HeightMap from "./HeightMap";
 import MapManager from "./MapManager";
-import PVMap from "./PVMap";
-import TerrainMap from "./TerrainMap";
+import {
+  ContinentalMap,
+  DensityMap,
+  ErosionMap,
+  HeightMap,
+  PVMap,
+  TerrainMap,
+} from "./terrain";
 import { TreeMap } from "./tree";
 
 export default class WorkerMapManager extends MapManager {

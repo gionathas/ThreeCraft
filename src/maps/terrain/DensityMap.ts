@@ -1,7 +1,7 @@
-import World from "../terrain/World";
-import { Map2D, Map3D } from "./AbstractMap";
+import World from "../../terrain/World";
+import { Map2D, Map3D } from "../AbstractMap";
+import { Noise3DMap } from "../Noise3DMap";
 import ErosionMap from "./ErosionMap";
-import { Noise3DMap } from "./Noise3DMap";
 import PVMap from "./PVMap";
 
 export default class DensityMap extends Noise3DMap implements Map3D {

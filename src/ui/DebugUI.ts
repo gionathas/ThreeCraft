@@ -5,9 +5,7 @@ import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import ContinentalMap from "../maps/ContinentalMap";
-import ErosionMap from "../maps/ErosionMap";
-import PVMap from "../maps/PVMap";
+import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
 
 export default class DebugUI {
   private player: Player;

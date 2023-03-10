@@ -3,11 +3,8 @@ import { lerp } from "three/src/math/MathUtils";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
-import ContinentalMap from "../ContinentalMap";
-import ErosionMap from "../ErosionMap";
 import Global2DMap from "../Global2DMap";
-import PVMap from "../PVMap";
-import TerrainMap from "../TerrainMap";
+import { ContinentalMap, ErosionMap, PVMap, TerrainMap } from "../terrain";
 import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
 import TreeMapValueEncoder from "./TreeMapValueEncoder";
 

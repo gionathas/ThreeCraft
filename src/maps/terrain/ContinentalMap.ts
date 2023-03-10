@@ -1,8 +1,8 @@
-import World from "../terrain/World";
-import { ValueRange } from "../utils/helpers";
-import { Map2D } from "./AbstractMap";
-import { Noise2DMap } from "./Noise2DMap";
-import TestingMap from "./TestingMap";
+import World from "../../terrain/World";
+import { ValueRange } from "../../utils/helpers";
+import { Map2D } from "../AbstractMap";
+import { Noise2DMap } from "../Noise2DMap";
+import TestingMap from "../TestingMap";
 
 export type ContinentalType =
   | "Ocean"

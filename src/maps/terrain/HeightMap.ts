@@ -1,9 +1,9 @@
-import World from "../terrain/World";
-import { lerp } from "../utils/helpers";
-import { Map2D } from "./AbstractMap";
+import World from "../../terrain/World";
+import { lerp } from "../../utils/helpers";
+import { Map2D } from "../AbstractMap";
+import Local2DMap from "../Local2DMap";
 import ContinentalMap from "./ContinentalMap";
 import ErosionMap from "./ErosionMap";
-import Local2DMap from "./Local2DMap";
 import PVMap from "./PVMap";
 
 export default class HeightMap extends Local2DMap implements Map2D {

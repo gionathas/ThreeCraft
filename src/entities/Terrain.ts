@@ -1,9 +1,10 @@
 import * as THREE from "three";
 import Engine from "../core/Engine";
 import GlobalMapManager from "../maps/GlobalMapManager";
-import TerrainMap from "../maps/TerrainMap";
+import { TerrainMap } from "../maps/terrain";
 import { BlockType } from "../terrain/block";
-import { ChunkLoader, ChunkManager } from "../terrain/chunk";
+import { ChunkManager } from "../terrain/chunk";
+import TerrainLoader from "../terrain/TerrainkLoader";
 import World from "../terrain/World";
 import { Coordinate } from "../utils/helpers";
 
@@ -11,7 +12,7 @@ export default class Terrain {
   private scene: THREE.Scene;
 
   private chunksManager: ChunkManager;
-  private chunksLoader: ChunkLoader;
+  private terrainLoader: TerrainLoader;
 
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
@@ -25,11 +26,11 @@ export default class Terrain {
     this.terrainMap = this.globalMapManager.getTerrainMap();
 
     this.chunksManager = new ChunkManager(this.globalMapManager);
-    this.chunksLoader = new ChunkLoader(centerPosition, this.chunksManager);
+    this.terrainLoader = new TerrainLoader(centerPosition, this.chunksManager);
   }
 
   update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    this.chunksLoader.update(newCenterPosition, isFirstUpdate);
+    this.terrainLoader.update(newCenterPosition, isFirstUpdate);
 
     // this.globalMapManager._logTotalRegionCount();
   }

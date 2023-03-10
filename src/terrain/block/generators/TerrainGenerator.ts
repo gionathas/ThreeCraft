@@ -1,4 +1,4 @@
-import TerrainMap from "../../../maps/TerrainMap";
+import { TerrainMap } from "../../../maps/terrain";
 import { isInRange } from "../../../utils/helpers";
 import World from "../../World";
 import { BlockType } from "../BlockType";
