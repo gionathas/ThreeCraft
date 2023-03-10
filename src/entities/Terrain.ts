@@ -4,7 +4,7 @@ import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
 import { BlockType } from "../terrain/block";
 import { ChunkManager } from "../terrain/chunk";
-import TerrainLoader from "../terrain/TerrainkLoader";
+import TerrainLoader from "../terrain/TerrainLoader";
 import World from "../terrain/World";
 import { Coordinate } from "../utils/helpers";
 

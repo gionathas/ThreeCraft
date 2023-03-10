@@ -11,7 +11,7 @@ import {
 import { Block, BlockMaterial } from "../block";
 import World from "../World";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
-import { TerrainGeneratorType } from "./ChunkGeneratorWorker";
+import { ChunkGeneratorWorkerType } from "./ChunkGeneratorWorker";
 import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";
 import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
 
@@ -48,7 +48,7 @@ export default class ChunkManager implements ChunkModel {
     this.transparentMeshPool = [];
     this.processingChunks = new Set();
     this.generatorsPool = Pool(() =>
-      spawn<TerrainGeneratorType>(new ChunkGeneratorWorker())
+      spawn<ChunkGeneratorWorkerType>(new ChunkGeneratorWorker())
     );
 
     this.chunkGeometryBuilder = new ChunkGeometryBuilder(this.terrainMap);

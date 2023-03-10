@@ -55,5 +55,5 @@ function generateChunk(
   };
 }
 
-export type TerrainGeneratorType = typeof generateChunk;
+export type ChunkGeneratorWorkerType = typeof generateChunk;
 expose(generateChunk);
