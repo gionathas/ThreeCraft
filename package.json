@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@types/stats": "^0.16.30",
+    "dexie": "^3.2.3",
     "perlin-noise": "^0.0.1",
     "simplex-noise": "^4.0.1",
     "stats.js": "^0.17.0",
