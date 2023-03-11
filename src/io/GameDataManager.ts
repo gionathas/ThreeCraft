@@ -60,4 +60,8 @@ export default class GameDataManager extends Dexie {
       chunk.getId()
     );
   }
+
+  clearAllData() {
+    return Promise.all([this.chunks.clear(), this.chunksGeometries.clear()]);
+  }
 }

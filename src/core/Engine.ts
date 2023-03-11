@@ -67,6 +67,7 @@ export default class Engine {
   }
 
   stop() {
+    //TODO clear scene
     this.renderer.setAnimationLoop(null);
   }
 
