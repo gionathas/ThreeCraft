@@ -11,7 +11,6 @@ function generateChunk(
   seed: string,
   treeMapDataBuffer: TransferDescriptor<number>
 ) {
-  const start = performance.now();
   // create the chunk
   const chunk = new Chunk(chunkId);
 
@@ -44,14 +43,10 @@ function generateChunk(
     chunk.getWorldOriginPosition()
   );
 
-  const end = performance.now();
-  const time = (end - start) / 1000;
-
   return {
     solidGeometry: solid,
     transparentGeometry: transparent,
     blocksBuffer: Transfer(chunkBlocks.buffer),
-    time,
   };
 }
 

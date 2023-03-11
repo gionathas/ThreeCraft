@@ -17,10 +17,12 @@ export default class Chunk implements ChunkModel {
   private chunkId: ChunkID;
   private worldOriginPosition: Coordinate;
   private blocks: Uint8Array;
+  private isDirt: boolean;
 
   constructor(chunkId: ChunkID, blocks?: Uint8Array) {
     this.chunkId = chunkId;
     this.worldOriginPosition = World.getChunkOriginPosition(chunkId);
+    this.isDirt = false;
     this.blocks =
       blocks ?? new Uint8Array(Chunk.HEIGHT * Chunk.WIDTH * Chunk.WIDTH);
   }
@@ -103,6 +105,14 @@ export default class Chunk implements ChunkModel {
 
     const [_, x, y, z] = matches;
     return { x: Number(x), y: Number(y), z: Number(z) };
+  }
+
+  markAsDirt() {
+    this.isDirt = true;
+  }
+
+  isDirty() {
+    return this.isDirt;
   }
 
   getId() {

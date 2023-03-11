@@ -1,7 +1,7 @@
 import EnvVars from "../../config/EnvVars";
 import { TerrainMap } from "../../maps/terrain";
-import { Coordinate } from "../../utils/helpers";
-import { Block, BlockData, BlockFaceAO, BlockType } from "../block";
+import { BufferGeometryData, Coordinate } from "../../utils/helpers";
+import { Block, BlockFaceAO, BlockType } from "../block";
 import { BlockFace } from "../block/BlockGeometry";
 import World from "../World";
 import Chunk, { ChunkModel } from "./Chunk";
@@ -15,20 +15,26 @@ export default class ChunkGeometryBuilder {
     this.terrainMap = terrainMap;
   }
 
-  buildChunkGeometry(chunk: ChunkModel, chunkOrigin: Coordinate) {
+  buildChunkGeometry(
+    chunk: ChunkModel,
+    chunkOrigin: Coordinate
+  ): {
+    solid: BufferGeometryData;
+    transparent: BufferGeometryData;
+  } {
     const { x: startX, y: startY, z: startZ } = chunkOrigin;
 
     const soldidPositions: number[] = [];
     const solidNormals: number[] = [];
     const solidIndices: number[] = [];
     const solidUVs: number[] = [];
-    const solidAOs: number[] = [];
+    const solidColors: number[] = [];
 
     const transparentPositions: number[] = [];
     const transparentNormals: number[] = [];
     const transparentIndices: number[] = [];
     const transparentUVs: number[] = [];
-    const transparentAOs: number[] = [];
+    const transparentColors: number[] = [];
 
     // iterate over each block
     for (let y = 0; y < Chunk.HEIGHT; ++y) {
@@ -38,7 +44,9 @@ export default class ChunkGeometryBuilder {
         for (let x = 0; x < Chunk.WIDTH; ++x) {
           const blockX = startX + x;
 
-          const block = chunk.getBlock({ x: blockX, y: blockY, z: blockZ });
+          const blockCoords = { x: blockX, y: blockY, z: blockZ };
+          const block = chunk.getBlock(blockCoords);
+
           const isVisibleBlock = Block.isVisibleBlock(block?.type);
 
           if (block && isVisibleBlock) {
@@ -60,7 +68,7 @@ export default class ChunkGeometryBuilder {
               ? transparentIndices
               : solidIndices;
             const uvs = isTransparentBlock ? transparentUVs : solidUVs;
-            const aos = isTransparentBlock ? transparentAOs : solidAOs;
+            const colors = isTransparentBlock ? transparentColors : solidColors;
 
             // iterate over each face of this block
             for (const blockFace of Block.getBlockFaces()) {
@@ -73,30 +81,22 @@ export default class ChunkGeometryBuilder {
                 Block.getBlockFaceGeometry(blockFace);
 
               // let's check the block neighbour to this face of the block
-              const neighbourX = blockX + dir[0];
-              const neighbourY = blockY + dir[1];
-              const neighbourZ = blockZ + dir[2];
-
-              const neighbourBlock = chunk.getBlock({
-                x: neighbourX,
-                y: neighbourY,
-                z: neighbourZ,
-              });
-
-              const blockCoords = { x: blockX, y: blockY, z: blockZ };
               const neighCoords = {
-                x: neighbourX,
-                y: neighbourY,
-                z: neighbourZ,
+                x: blockX + dir[0],
+                y: blockY + dir[1],
+                z: blockZ + dir[2],
               };
+              const neighbourBlock = chunk.getBlock(neighCoords);
 
+              const terrainOptimization = EnvVars.TERRAIN_OPTIMIZATION_ENABLED;
+              const isEdgeBlock = !neighbourBlock;
+
+              // if the current block is an edge block and terrain optimization is enabled
+              // check if we can cull this block face
               if (
-                this.canCullBlockFace(
-                  blockCoords,
-                  blockFace,
-                  neighCoords,
-                  neighbourBlock
-                )
+                terrainOptimization &&
+                isEdgeBlock &&
+                this.canCullEdgeBlockFace(blockCoords, blockFace, neighCoords)
               ) {
                 continue;
               }
@@ -138,7 +138,7 @@ export default class ChunkGeometryBuilder {
                     chunk
                   );
 
-                  aos.push(...vertexAO);
+                  colors.push(...vertexAO);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -155,14 +155,14 @@ export default class ChunkGeometryBuilder {
         normals: solidNormals,
         indices: solidIndices,
         uvs: solidUVs,
-        aos: solidAOs,
+        colors: solidColors,
       },
       transparent: {
         positions: transparentPositions,
         normals: transparentNormals,
         indices: transparentIndices,
         uvs: transparentUVs,
-        aos: transparentAOs,
+        colors: transparentColors,
       },
     };
   }
@@ -170,41 +170,38 @@ export default class ChunkGeometryBuilder {
   /**
    * Check if the current block face can be culled by doing some checks on the neighbour block
    */
-  private canCullBlockFace(
+  private canCullEdgeBlockFace(
     blockCoord: Coordinate,
     blockFace: BlockFace,
-    neighbourCoords: Coordinate,
-    neighbourBlock: BlockData | null
+    neighbourCoords: Coordinate
   ) {
     const { terrainMap } = this;
     const { x: blockX, y: blockY, z: blockZ } = blockCoord;
     const { x: neighbourX, y: neighbourY, z: neighbourZ } = neighbourCoords;
-
-    if (!EnvVars.TERRAIN_OPTIMIZATION_ENABLED) {
-      return false;
-    }
-
-    const isEdgeBlock = !neighbourBlock;
-    const blockDensity = terrainMap.getDensityAt(blockX, blockY, blockZ);
 
     const neighbourSurfaceY = terrainMap.getSurfaceHeightAt(
       neighbourX,
       neighbourZ
     );
 
+    const isBelowNeighbourSurface =
+      blockY < neighbourSurfaceY - (blockFace === "top" ? 1 : 0);
+
+    if (!isBelowNeighbourSurface) {
+      return false;
+    }
+
+    const blockDensity = terrainMap.getDensityAt(blockX, blockY, blockZ);
     const neighbourDensity = terrainMap.getDensityAt(
       neighbourX,
       neighbourY,
       neighbourZ
     );
 
-    const isBelowNeighbourSurface =
-      blockY < neighbourSurfaceY - (blockFace === "top" ? 1 : 0);
-
-    const hasSameDensity =
+    const haveSameDensity =
       Math.sign(blockDensity) === Math.sign(neighbourDensity);
 
-    return isEdgeBlock && isBelowNeighbourSurface && hasSameDensity;
+    return haveSameDensity;
   }
 
   /**
@@ -287,5 +284,23 @@ export default class ChunkGeometryBuilder {
    */
   private canSkipWaterBlockRendering(y: number) {
     return y !== World.SEA_LEVEL - 1;
+  }
+
+  static extractBufferGeometryDataFromGeometry(
+    geometry: THREE.BufferGeometry
+  ): BufferGeometryData {
+    const positions = Array.from(geometry.getAttribute("position").array);
+    const normals = Array.from(geometry.getAttribute("normal").array);
+    const uvs = Array.from(geometry.getAttribute("uv").array);
+    const colors = Array.from(geometry.getAttribute("color")?.array ?? []);
+    const indices = Array.from(geometry.index?.array ?? []);
+
+    return {
+      positions,
+      normals,
+      uvs,
+      indices,
+      colors,
+    };
   }
 }
