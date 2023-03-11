@@ -15,20 +15,26 @@ export default class ChunkGeometryBuilder {
     this.terrainMap = terrainMap;
   }
 
-  buildChunkGeometry(chunk: ChunkModel, chunkOrigin: Coordinate) {
+  buildChunkGeometry(
+    chunk: ChunkModel,
+    chunkOrigin: Coordinate
+  ): {
+    solid: BufferGeometryData;
+    transparent: BufferGeometryData;
+  } {
     const { x: startX, y: startY, z: startZ } = chunkOrigin;
 
     const soldidPositions: number[] = [];
     const solidNormals: number[] = [];
     const solidIndices: number[] = [];
     const solidUVs: number[] = [];
-    const solidAOs: number[] = [];
+    const solidColors: number[] = [];
 
     const transparentPositions: number[] = [];
     const transparentNormals: number[] = [];
     const transparentIndices: number[] = [];
     const transparentUVs: number[] = [];
-    const transparentAOs: number[] = [];
+    const transparentColors: number[] = [];
 
     // iterate over each block
     for (let y = 0; y < Chunk.HEIGHT; ++y) {
@@ -62,7 +68,7 @@ export default class ChunkGeometryBuilder {
               ? transparentIndices
               : solidIndices;
             const uvs = isTransparentBlock ? transparentUVs : solidUVs;
-            const aos = isTransparentBlock ? transparentAOs : solidAOs;
+            const colors = isTransparentBlock ? transparentColors : solidColors;
 
             // iterate over each face of this block
             for (const blockFace of Block.getBlockFaces()) {
@@ -132,7 +138,7 @@ export default class ChunkGeometryBuilder {
                     chunk
                   );
 
-                  aos.push(...vertexAO);
+                  colors.push(...vertexAO);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -149,14 +155,14 @@ export default class ChunkGeometryBuilder {
         normals: solidNormals,
         indices: solidIndices,
         uvs: solidUVs,
-        aos: solidAOs,
+        colors: solidColors,
       },
       transparent: {
         positions: transparentPositions,
         normals: transparentNormals,
         indices: transparentIndices,
         uvs: transparentUVs,
-        aos: transparentAOs,
+        colors: transparentColors,
       },
     };
   }
@@ -286,7 +292,7 @@ export default class ChunkGeometryBuilder {
     const positions = Array.from(geometry.getAttribute("position").array);
     const normals = Array.from(geometry.getAttribute("normal").array);
     const uvs = Array.from(geometry.getAttribute("uv").array);
-    const aos = Array.from(geometry.getAttribute("color")?.array ?? []);
+    const colors = Array.from(geometry.getAttribute("color")?.array ?? []);
     const indices = Array.from(geometry.index?.array ?? []);
 
     return {
@@ -294,7 +300,7 @@ export default class ChunkGeometryBuilder {
       normals,
       uvs,
       indices,
-      aos,
+      colors,
     };
   }
 }

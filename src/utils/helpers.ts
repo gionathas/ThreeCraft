@@ -19,7 +19,7 @@ export type BufferGeometryData = {
   normals: number[];
   positions: number[];
   uvs: number[];
-  aos: number[];
+  colors: number[];
 };
 
 export function lerp(start: number, end: number, amount: number) {

@@ -97,19 +97,11 @@ export default class Terrain {
     return this.chunksManager.totalChunks;
   }
 
-  get _totalSolidMesh() {
-    return this.chunksManager.totalSolidChunksMesh;
+  get _solidMeshPoolSize() {
+    return this.chunksManager._solidMeshPoolSize;
   }
 
-  get _totalTransparentMesh() {
-    return this.chunksManager.totalTransparentChunksMesh;
-  }
-
-  get _poolSolidMeshSize() {
-    return this.chunksManager._poolSolidMeshSize;
-  }
-
-  get _poolTransparentMeshSize() {
-    return this.chunksManager._poolTransparentMeshSize;
+  get _transparentMeshPoolSize() {
+    return this.chunksManager._transparentMeshPoolSize;
   }
 }

@@ -9,16 +9,13 @@ import {
   Coordinate,
   isEmptyGeometry,
 } from "../../utils/helpers";
-import { Block, BlockMaterial } from "../block";
+import { Block } from "../block";
 import World from "../World";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { ChunkGeneratorWorkerType } from "./ChunkGeneratorWorker";
 import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";
 import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
-
-// WARN this value seems to affect the memory usage, keep it as low as possible
-const MAX_SOLID_MESH_POOL_SIZE = 200;
-const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
+import ChunkMeshManager from "./ChunkMeshManager";
 
 export default class ChunkManager implements ChunkModel {
   private globalMapManager: GlobalMapManager;
@@ -26,12 +23,9 @@ export default class ChunkManager implements ChunkModel {
   private treeMap: GlobalTreeMap;
 
   private loadedChunks: Map<ChunkID, Chunk>;
-  private solidMesh: Map<ChunkID, THREE.Mesh>;
-  private transparentMesh: Map<ChunkID, THREE.Mesh>;
-  private solidMeshPool: Array<THREE.Mesh>;
-  private transparentMeshPool: Array<THREE.Mesh>;
-
   private processingChunks: Set<ChunkID>;
+
+  private chunkMeshManager: ChunkMeshManager;
   private generatorsPool;
 
   private chunkGeometryBuilder: ChunkGeometryBuilder;
@@ -43,10 +37,8 @@ export default class ChunkManager implements ChunkModel {
     this.treeMap = this.globalMapManager.getTreeMap();
 
     this.loadedChunks = new Map();
-    this.solidMesh = new Map();
-    this.transparentMesh = new Map();
-    this.solidMeshPool = [];
-    this.transparentMeshPool = [];
+    this.chunkMeshManager = new ChunkMeshManager();
+
     this.processingChunks = new Set();
     this.generatorsPool = Pool(() =>
       spawn<ChunkGeneratorWorkerType>(new ChunkGeneratorWorker())
@@ -118,7 +110,10 @@ export default class ChunkManager implements ChunkModel {
       this.processingChunks.delete(chunkId);
 
       if (solidGeometry != null && !isEmptyGeometry(solidGeometry)) {
-        const solidMesh = this.generateChunkSolidMesh(chunkId, solidGeometry);
+        const solidMesh = this.chunkMeshManager.generateChunkSolidMesh(
+          chunkId,
+          solidGeometry
+        );
         chunkMeshes.push(solidMesh);
       }
 
@@ -126,10 +121,11 @@ export default class ChunkManager implements ChunkModel {
         transparentGeometry != null &&
         !isEmptyGeometry(transparentGeometry)
       ) {
-        const transparentMesh = this.generateChunkTransparentMesh(
-          chunkId,
-          transparentGeometry
-        );
+        const transparentMesh =
+          this.chunkMeshManager.generateChunkTransparentMesh(
+            chunkId,
+            transparentGeometry
+          );
         chunkMeshes.push(transparentMesh);
       }
 
@@ -138,10 +134,11 @@ export default class ChunkManager implements ChunkModel {
   }
 
   /**
-   * Update the chunk which contain the block in the specified position.
+   * Update the chunk which contains the block in the specified position.
    *
-   * This operation will update also the neighbours blocks of the current block.
-   * So if a neighbour block is positioned inside a different chunk rather than the original,
+   * This operation will also update the neighbours blocks of the specified position.
+   *
+   * So if a neighbour block is positioned within a different chunk rather than the original,
    * it will be updated as well.
    */
   updateChunkAt({ x, y, z }: Coordinate) {
@@ -180,39 +177,45 @@ export default class ChunkManager implements ChunkModel {
             chunkWorldOrigin
           );
 
-          const hasSolidMesh = !isEmptyGeometry(chunkSolidGeometry);
-          const hasTransparentMesh = !isEmptyGeometry(chunkTransparentGeometry);
+          const isSolidMeshVisible = !isEmptyGeometry(chunkSolidGeometry);
+          const isTransparentMeshVisible = !isEmptyGeometry(
+            chunkTransparentGeometry
+          );
 
           // update the chunk solid mesh
-          if (hasSolidMesh) {
-            const updatedSolidMesh = this.generateChunkSolidMesh(
-              chunkId,
-              chunkSolidGeometry
-            );
+          if (isSolidMeshVisible) {
+            const updatedSolidMesh =
+              this.chunkMeshManager.generateChunkSolidMesh(
+                chunkId,
+                chunkSolidGeometry
+              );
 
             // add to the list of updated chunks mesh
             updatedMesh.push(updatedSolidMesh);
           } else {
-            // remove the chunk solid mesh since is empty
-            const removedSolidMesh = this.removeChunkSolidMesh(chunkId);
+            // remove the chunk solid mesh since has become empty
+            const removedSolidMesh =
+              this.chunkMeshManager.removeChunkSolidMesh(chunkId);
+
             if (removedSolidMesh) {
               removedMesh.push(removedSolidMesh);
             }
           }
 
           // update the chunk transparent mesh
-          if (hasTransparentMesh) {
-            const updatedTransparentMesh = this.generateChunkTransparentMesh(
-              chunkId,
-              chunkTransparentGeometry
-            );
+          if (isTransparentMeshVisible) {
+            const updatedTransparentMesh =
+              this.chunkMeshManager.generateChunkTransparentMesh(
+                chunkId,
+                chunkTransparentGeometry
+              );
 
             // add to the list of updated chunks mesh
             updatedMesh.push(updatedTransparentMesh);
           } else {
-            // remove the chunk transparent mesh since is empty
+            // remove the chunk transparent mesh since has become empty
             const removedTransparentMesh =
-              this.removeChunkTransparentMesh(chunkId);
+              this.chunkMeshManager.removeChunkTransparentMesh(chunkId);
             removedMesh.push(removedTransparentMesh);
           }
         }
@@ -225,177 +228,11 @@ export default class ChunkManager implements ChunkModel {
   removeChunk(chunkId: ChunkID) {
     this.unloadChunk(chunkId);
 
-    const solidMesh = this.removeChunkSolidMesh(chunkId);
-    const transparentMesh = this.removeChunkTransparentMesh(chunkId);
+    const solidMesh = this.chunkMeshManager.removeChunkSolidMesh(chunkId);
+    const transparentMesh =
+      this.chunkMeshManager.removeChunkTransparentMesh(chunkId);
 
     return [solidMesh, transparentMesh];
-  }
-
-  private removeChunkSolidMesh(chunkId: ChunkID) {
-    const solidMesh = this.solidMesh.get(chunkId);
-
-    // remove chunk solid mesh
-    if (solidMesh) {
-      // remove from the chunks mesh map
-      this.solidMesh.delete(chunkId);
-
-      // let's reuse this mesh if the pool is not filled up
-      if (this.solidMeshPool.length <= MAX_SOLID_MESH_POOL_SIZE) {
-        this.solidMeshPool.push(solidMesh);
-      } else {
-        // dispose the mesh
-        solidMesh.geometry.dispose();
-      }
-    }
-
-    return solidMesh;
-  }
-
-  private removeChunkTransparentMesh(chunkId: ChunkID) {
-    const transparentMesh = this.transparentMesh.get(chunkId);
-
-    // remove chunk transparent mesh
-    if (transparentMesh) {
-      // remove from the chunks mesh map
-      this.transparentMesh.delete(chunkId);
-
-      // let's reuse this mesh if the pool is not filled up
-      if (this.transparentMeshPool.length <= MAX_TRANSPARENT_MESH_POOL_SIZE) {
-        this.transparentMeshPool.push(transparentMesh);
-      } else {
-        // dispose the mesh
-        transparentMesh.geometry.dispose();
-      }
-    }
-
-    return transparentMesh;
-  }
-
-  private generateChunkSolidMesh(
-    chunkId: ChunkID,
-    { positions, normals, uvs, indices, aos }: BufferGeometryData
-  ) {
-    const positionNumComponents = 3;
-    const normalNumComponents = 3;
-    const uvNumComponents = 2;
-    const aoNumComponents = 3;
-
-    const chunkMesh = this.getNewSolidMesh(chunkId);
-    const chunkGeometry = chunkMesh.geometry;
-
-    // update chunk geometry attributes
-    chunkGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(
-        new Float32Array(positions),
-        positionNumComponents
-      )
-    );
-    chunkGeometry.setAttribute(
-      "normal",
-      new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents)
-    );
-    chunkGeometry.setAttribute(
-      "uv",
-      new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents)
-    );
-    chunkGeometry.setAttribute(
-      "color",
-      new THREE.BufferAttribute(new Float32Array(aos), aoNumComponents)
-    );
-
-    chunkGeometry.setIndex(indices);
-    chunkGeometry.computeBoundingSphere();
-
-    // update the chunk mesh name and add it to chunks mesh map
-    chunkMesh.name = this.getChunkSolidMeshId(chunkId);
-    this.solidMesh.set(chunkId, chunkMesh);
-
-    return chunkMesh;
-  }
-
-  private generateChunkTransparentMesh(
-    chunkId: ChunkID,
-    { positions, normals, uvs, indices }: BufferGeometryData
-  ) {
-    const positionNumComponents = 3;
-    const normalNumComponents = 3;
-    const uvNumComponents = 2;
-
-    const transparentMesh = this.getNewTransparentMesh(chunkId);
-    const chunkGeometry = transparentMesh.geometry;
-
-    // update chunk geometry attributes
-    chunkGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(
-        new Float32Array(positions),
-        positionNumComponents
-      )
-    );
-    chunkGeometry.setAttribute(
-      "normal",
-      new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents)
-    );
-    chunkGeometry.setAttribute(
-      "uv",
-      new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents)
-    );
-
-    chunkGeometry.setIndex(indices);
-    chunkGeometry.computeBoundingSphere();
-
-    // update the chunk mesh name and add it to chunks mesh map
-    transparentMesh.name = this.getChunkTransparentMeshId(chunkId);
-    this.transparentMesh.set(chunkId, transparentMesh);
-
-    return transparentMesh;
-  }
-
-  /**
-   * Return the chunk mesh associated to the chunkID.
-   *
-   * If the mesh does not exist it will try either to extract one from the mesh pool,
-   * or it will creates a new one
-   */
-  private getNewSolidMesh(chunkID: ChunkID): THREE.Mesh {
-    const prevSolidMesh = this.solidMesh.get(chunkID);
-
-    // if the mesh for the chunkId already exist return it
-    if (prevSolidMesh) {
-      return prevSolidMesh;
-    }
-
-    // extract the mesh from the pool
-    let newMesh = this.solidMeshPool.pop();
-
-    // pool is empty create a new mesh
-    if (!newMesh) {
-      const solidMaterial = BlockMaterial.getInstance().getSolidBlockMaterial();
-      newMesh = new THREE.Mesh(new THREE.BufferGeometry(), solidMaterial);
-    }
-
-    return newMesh;
-  }
-
-  private getNewTransparentMesh(chunkID: ChunkID): THREE.Mesh {
-    const prevTransparentMesh = this.transparentMesh.get(chunkID);
-
-    // if the mesh for the chunkId already exist return it
-    if (prevTransparentMesh) {
-      return prevTransparentMesh;
-    }
-
-    // extract the mesh from the pool
-    let newMesh = this.transparentMeshPool.pop();
-
-    if (!newMesh) {
-      const transparentMaterial =
-        BlockMaterial.getInstance().getBlockTransparentMaterial();
-      newMesh = new THREE.Mesh(new THREE.BufferGeometry(), transparentMaterial);
-    }
-
-    return newMesh;
   }
 
   /**
@@ -423,8 +260,10 @@ export default class ChunkManager implements ChunkModel {
 
       // persist chunk data if it's dirty
       if (chunk.isDirty()) {
-        const solidGeometry = this.solidMesh.get(chunkId)?.geometry;
-        const transparentGeometry = this.transparentMesh.get(chunkId)?.geometry;
+        const solidGeometry =
+          this.chunkMeshManager.getSolidChunkMesh(chunkId)?.geometry;
+        const transparentGeometry =
+          this.chunkMeshManager.getTransparentChunkMesh(chunkId)?.geometry;
 
         const solid =
           solidGeometry &&
@@ -462,18 +301,6 @@ export default class ChunkManager implements ChunkModel {
     return this.loadedChunks.get(chunkId);
   }
 
-  getSolidChunkMesh(chunkId: ChunkID) {
-    return this.solidMesh.get(chunkId);
-  }
-
-  private getChunkSolidMeshId(chunkId: ChunkID) {
-    return chunkId.concat("-solid");
-  }
-
-  private getChunkTransparentMeshId(chunkId: ChunkID) {
-    return chunkId.concat("-transparent");
-  }
-
   getLoadedChunks() {
     return this.loadedChunks.values();
   }
@@ -482,23 +309,15 @@ export default class ChunkManager implements ChunkModel {
     return this.loadedChunks.size;
   }
 
-  get totalSolidChunksMesh() {
-    return this.solidMesh.size;
-  }
-
-  get totalTransparentChunksMesh() {
-    return this.transparentMesh.size;
-  }
-
-  get _poolSolidMeshSize() {
-    return this.solidMeshPool.length;
-  }
-
-  get _poolTransparentMeshSize() {
-    return this.transparentMeshPool.length;
-  }
-
   get _processedChunksQueueSize() {
     return this.processingChunks.size;
+  }
+
+  get _solidMeshPoolSize() {
+    return this.chunkMeshManager._solidMeshPoolSize;
+  }
+
+  get _transparentMeshPoolSize() {
+    return this.chunkMeshManager._transparentMeshPoolSize;
   }
 }
