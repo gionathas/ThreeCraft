@@ -1,5 +1,6 @@
 import { Pool, spawn, Transfer } from "threads";
 import * as THREE from "three";
+import GameDataManager from "../../io/GameDataManager";
 import GlobalMapManager from "../../maps/GlobalMapManager";
 import { TerrainMap } from "../../maps/terrain";
 import { GlobalTreeMap } from "../../maps/tree";
@@ -19,7 +20,6 @@ import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
 const MAX_SOLID_MESH_POOL_SIZE = 200;
 const MAX_TRANSPARENT_MESH_POOL_SIZE = 50;
 
-//TODO rename into terrain
 export default class ChunkManager implements ChunkModel {
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
@@ -35,6 +35,7 @@ export default class ChunkManager implements ChunkModel {
   private generatorsPool;
 
   private chunkGeometryBuilder: ChunkGeometryBuilder;
+  private dataManager: GameDataManager;
 
   constructor(globalMapManager: GlobalMapManager) {
     this.globalMapManager = globalMapManager;
@@ -52,6 +53,7 @@ export default class ChunkManager implements ChunkModel {
     );
 
     this.chunkGeometryBuilder = new ChunkGeometryBuilder(this.terrainMap);
+    this.dataManager = GameDataManager.getInstance();
   }
 
   generateChunkAt(
@@ -73,29 +75,57 @@ export default class ChunkManager implements ChunkModel {
 
     // enqueue the creation of this new chunk
     this.generatorsPool.queue(async (generateChunk) => {
-      const chunkTreeMap = this.treeMap.loadChunkTreeMapData(chunkId);
+      let solidGeometry: BufferGeometryData | undefined;
+      let transparentGeometry: BufferGeometryData | undefined;
+      const chunkMeshes = [];
 
-      const seed = this.globalMapManager.getSeed();
-      const { solidGeometry, transparentGeometry, blocksBuffer, time } =
-        await generateChunk(chunkId, seed, Transfer(chunkTreeMap.buffer));
+      const savedChunk = await this.dataManager.getChunk(chunkId);
 
-      // @ts-ignore retrieve the chunk blocks
-      const blocks = new Uint8Array(...blocksBuffer.transferables);
-      this.loadChunk(chunkId, blocks);
+      // if the chunk was previously saved, load it from the data storage
+      if (savedChunk) {
+        // load the saved chunk
+        this.loadedChunks.set(chunkId, savedChunk);
+
+        // retrieve the saved chunk geometries
+        const persistedChunkGeometry = await this.dataManager.getChunkGeometry(
+          chunkId
+        );
+
+        solidGeometry = persistedChunkGeometry!.solidGeometry;
+        transparentGeometry = persistedChunkGeometry!.transparentGeometry;
+      } else {
+        const seed = this.globalMapManager.getSeed();
+
+        // load the chunk tree map data
+        const chunkTreeMap = this.treeMap.loadChunkTreeMapData(chunkId);
+
+        // generate the new chunk
+        const newChunk = await generateChunk(
+          chunkId,
+          seed,
+          Transfer(chunkTreeMap.buffer)
+        );
+
+        // @ts-ignore retrieve the chunk blocks
+        const blocks = new Uint8Array(...newChunk.blocksBuffer.transferables);
+        this.loadChunk(chunkId, blocks);
+
+        solidGeometry = newChunk.solidGeometry;
+        transparentGeometry = newChunk.transparentGeometry;
+      }
 
       // mark this chunk as processed
       this.processingChunks.delete(chunkId);
 
-      const chunkMeshes = [];
-      const hasSolidMesh = !isEmptyGeometry(solidGeometry);
-      const hasTransparentMesh = !isEmptyGeometry(transparentGeometry);
-
-      if (hasSolidMesh) {
+      if (solidGeometry != null && !isEmptyGeometry(solidGeometry)) {
         const solidMesh = this.generateChunkSolidMesh(chunkId, solidGeometry);
         chunkMeshes.push(solidMesh);
       }
 
-      if (hasTransparentMesh) {
+      if (
+        transparentGeometry != null &&
+        !isEmptyGeometry(transparentGeometry)
+      ) {
         const transparentMesh = this.generateChunkTransparentMesh(
           chunkId,
           transparentGeometry
@@ -137,6 +167,9 @@ export default class ChunkManager implements ChunkModel {
         if (chunkToUpdate) {
           // get the chunk origin position
           const chunkWorldOrigin = chunkToUpdate.getWorldOriginPosition();
+
+          // mark this chunk as dirty, so it will be saved when the chunk is unloaded
+          chunkToUpdate.markAsDirt();
 
           // update the chunk geometry
           const {
@@ -376,11 +409,38 @@ export default class ChunkManager implements ChunkModel {
   }
 
   unloadChunk(chunkId: ChunkID) {
-    const { x, y, z } = World.getChunkOriginPosition(chunkId);
+    const chunk = this.loadedChunks.get(chunkId);
 
-    this.loadedChunks.delete(chunkId);
-    this.globalMapManager.unloadMapsRegionAt(x, y, z);
-    this.treeMap.unloadChunkTreeMapData(chunkId);
+    if (chunk) {
+      const { x, y, z } = chunk.getWorldOriginPosition();
+
+      // remove chunk from the loaded chunks
+      this.loadedChunks.delete(chunkId);
+
+      // unload map data related to this chunk
+      this.globalMapManager.unloadMapsRegionAt(x, y, z);
+      this.treeMap.unloadChunkTreeMapData(chunkId);
+
+      // persist chunk data if it's dirty
+      if (chunk.isDirty()) {
+        const solidGeometry = this.solidMesh.get(chunkId)?.geometry;
+        const transparentGeometry = this.transparentMesh.get(chunkId)?.geometry;
+
+        const solid =
+          solidGeometry &&
+          ChunkGeometryBuilder.extractBufferGeometryDataFromGeometry(
+            solidGeometry
+          );
+
+        const transparent =
+          transparentGeometry &&
+          ChunkGeometryBuilder.extractBufferGeometryDataFromGeometry(
+            transparentGeometry
+          );
+
+        this.dataManager.saveChunkData(chunk, solid, transparent);
+      }
+    }
   }
 
   getBlock(blockCoord: Coordinate) {
