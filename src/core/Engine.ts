@@ -38,7 +38,7 @@ export default class Engine {
   private initCamera() {
     const fov = 75;
     const aspect = window.innerWidth / window.innerHeight;
-    const near = 0.001;
+    const near = 0.1;
     const far = 1000;
 
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
