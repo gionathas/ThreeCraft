@@ -8,15 +8,34 @@
     <title>ThreeCraft</title>
   </head>
   <body>
+    <!-- CrossHair -->
     <div id="target">
       <div class="box">
         <div class="vbar"></div>
         <div class="hbar"></div>
       </div>
     </div>
+    <!-- Debug Panel UI -->
     <div id="debugPanel"></div>
+    <!-- Inventory UI -->
+    <div id="inventory">
+      <div class="inventory-crafting">
+        <div id="crafting-slots"></div>
+        <div class="arrow">
+          <div class="tail"></div>
+          <div class="tip"></div>
+        </div>
+        <div id="result-slot" class="slot"></div>
+      </div>
+      <h2 id="inventory-label">Inventory</h2>
+      <div id="inventory-slots"></div>
+      <div id="inventory-hotbar-slots"></div>
+    </div>
+    <!-- Game Paused Menu -->
     <div id="game-paused-menu">
-      <h2>Game Paused</h2>
+      <h3 class="title">Game Menu</h3>
+      <button id="resume-btn">Back to Game</button>
+      <button id="quit-btn">Save and Exit</button>
     </div>
 
     <script type="module" src="src/main.ts"></script>

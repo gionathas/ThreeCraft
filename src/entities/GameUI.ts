@@ -1,15 +1,18 @@
-import DebugUI from "../ui/DebugUI";
+import DebugInfo from "../ui/DebugInfo";
+import Inventory from "../ui/Inventory";
 import Player from "./Player";
 import Terrain from "./Terrain";
 
 export default class GameUI {
-  private debugUI: DebugUI;
+  private debugInfo: DebugInfo;
+  private inventory: Inventory;
 
   constructor(player: Player, terrain: Terrain) {
-    this.debugUI = new DebugUI(player, terrain);
+    this.debugInfo = new DebugInfo(player, terrain);
+    this.inventory = new Inventory(player.getInventoryManager());
   }
 
   update(dt: number) {
-    this.debugUI.update(dt);
+    this.debugInfo.update(dt);
   }
 }

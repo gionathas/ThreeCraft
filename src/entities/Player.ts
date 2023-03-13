@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import EditingControls from "../player/EditingControls";
+import InventoryManager from "../player/InventoryManager";
 import PlayerControls from "../player/PlayerControls";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
@@ -11,11 +12,13 @@ export default class Player {
   private terrain: Terrain;
   private playerControls: PlayerControls;
   private editingControls: EditingControls;
+  private inventoryManager: InventoryManager;
 
   constructor(terrain: Terrain, mode: PlayerMode) {
     this.terrain = terrain;
     this.playerControls = new PlayerControls(terrain, mode);
     this.editingControls = new EditingControls(this, terrain);
+    this.inventoryManager = new InventoryManager(this);
   }
 
   update(dt: number) {
@@ -36,11 +39,15 @@ export default class Player {
     return this.playerControls.lock();
   }
 
-  setOnControlsEnabled(func: () => void) {
+  disableControls() {
+    this.playerControls.unlock();
+  }
+
+  setOnLockControls(func: () => void) {
     return this.playerControls.addEventListener("lock", func);
   }
 
-  setOnControlsDisabled(func: () => void) {
+  setOnUnlockControls(func: () => void) {
     return this.playerControls.addEventListener("unlock", func);
   }
 
@@ -74,6 +81,10 @@ export default class Player {
       .getWorldDirection(new THREE.Vector3());
     const angle = Math.atan2(lookDirection.x, lookDirection.z);
     return getOrientationFromAngle(angle);
+  }
+
+  getInventoryManager() {
+    return this.inventoryManager;
   }
 
   get _currentChunkId() {

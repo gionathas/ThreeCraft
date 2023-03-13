@@ -7,7 +7,7 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
 
-export default class DebugUI {
+export default class DebugInfo {
   private player: Player;
   private terrain: Terrain;
 

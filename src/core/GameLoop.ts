@@ -104,19 +104,22 @@ export default class GameLoop {
   }
 
   private initEventListeners(player: Player) {
-    window.addEventListener("pointerdown", (evt) => {
-      /**
-       * //TODO replace pointerdown with Resume click, Start Game click
-       * here we want to lock the controls in 2 cases:
-       * 1. After starting a new game and the world has been loaded
-       * 2. After resuming the game from the pause menu
-       */
+    window.addEventListener("keydown", (evt) => {
+      // if is right click
+      if (evt.code === "Space") {
+        /**
+         * //TODO replace pointerdown with Resume click, Start Game click
+         * here we want to lock the controls in 2 cases:
+         * 1. After starting a new game and the world has been loaded
+         * 2. After resuming the game from the pause menu
+         */
 
-      this.player.enableControls();
+        this.player.enableControls();
+      }
     });
 
     // game started or resumed
-    player.setOnControlsEnabled(() => {
+    player.setOnLockControls(() => {
       this.gameState = "running";
 
       // enable input listeners
@@ -128,7 +131,7 @@ export default class GameLoop {
     });
 
     // pausing game or exiting from game
-    player.setOnControlsDisabled(() => {
+    player.setOnUnlockControls(() => {
       this.gameState = "paused";
 
       // disable input listeners
