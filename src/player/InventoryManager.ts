@@ -1,48 +1,95 @@
 import { BlockType } from "../terrain/block";
 
-type Item = {
+export type Item = {
   block: BlockType;
   amount: number;
 };
 
-type Slot = Item | null;
+export type Slot = Item | null;
 
 export default class InventoryManager {
   static readonly INVENTORY_SLOTS = 27;
   static readonly HOTBAR_SLOTS = 9;
   static readonly CRAFTING_SLOTS = 9;
 
+  private crafting: Slot[];
   private inventory: Slot[];
   private hotbar: Slot[];
-  private selectedItem: Item | null;
+
+  private draggingItem: Item | null;
 
   constructor() {
-    this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
+    this.inventory = new Array(InventoryManager.INVENTORY_SLOTS)
+      .fill(null)
+      .map((_, idx) => {
+        if (idx < 5) {
+          return { block: BlockType.DIRT, amount: 10 };
+        }
+
+        return null;
+      });
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
-    this.selectedItem = null;
+    this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
+    this.draggingItem = null;
   }
 
-  hasSelectedItem() {
-    return this.selectedItem !== null;
+  isDragging() {
+    return this.draggingItem !== null;
   }
 
-  getSelectedItem() {
-    return this.selectedItem;
+  getDraggingItem() {
+    return this.draggingItem;
   }
 
-  isHotbarSlotEmpty(index: number) {
-    return this.hotbar[index] === null;
+  isSlotEmpty(slot: Slot) {
+    return slot === null;
   }
 
-  getHotbarItem(index: number) {
-    return this.hotbar[index];
+  beginDrag(items: Slot[], index: number) {
+    const item = this.getItem(items, index);
+
+    if (item) {
+      this.setDraggingItem(item);
+      this.removeItem(items, index);
+    }
+
+    return item;
   }
 
-  isInventorySlotEmpty(index: number) {
-    return this.inventory[index] === null;
+  endDrag(items: Slot[], index: number) {
+    const item = this.getDraggingItem();
+
+    if (item) {
+      this.setItem(items, index, item);
+      this.setDraggingItem(null);
+    }
   }
 
-  getInventoryItem(index: number) {
-    return this.inventory[index];
+  getItem(items: Slot[], index: number): Item | null {
+    return items[index];
+  }
+
+  setItem(items: Slot[], index: number, item: Item) {
+    items[index] = item;
+  }
+
+  removeItem(items: Slot[], index: number) {
+    items[index] = null;
+  }
+
+  private setDraggingItem(item: Item | null) {
+    this.draggingItem = item;
+  }
+
+  getInventoryItems(): Slot[] {
+    return this.inventory;
+  }
+
+  getHotbarItems(): Slot[] {
+    return this.hotbar;
+  }
+
+  getCraftingSlots(): Slot[] {
+    return this.crafting;
   }
 }

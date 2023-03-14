@@ -6,6 +6,10 @@
   --shadow-background: rgb(51, 51, 51);
   --inventory-background: #c6c6c6;
   --inventory-slot-background: #979494;
+  --block-icon-width: 32px;
+  --block-icon-height: 32px;
+  --inventory-slot-width: 44px;
+  --inventory-slot-height: 44px;
 }
 
 * {
@@ -148,13 +152,38 @@ button:hover {
 }
 
 .slot {
-  width: 44px;
-  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--inventory-slot-width);
+  height: var(--inventory-slot-height);
   background-color: var(--inventory-slot-background);
   border: 1px solid #e3e3e3;
   border-radius: 2px;
   box-shadow: inset 1px 1px 0 0 var(--shadow-background);
   cursor: pointer;
+}
+
+#inventory-drag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.item {
+  position: relative;
+  width: var(--block-icon-width);
+  height: var(--block-icon-height);
+  background: url("./assets/textures/css_sprites.png") -10px -10px;
+}
+
+.item .amount {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 16px;
 }
 
 /* Game Pause Menu */
