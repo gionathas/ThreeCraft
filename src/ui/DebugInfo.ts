@@ -74,6 +74,8 @@ export default class DebugInfo {
     const erosion = this.terrain._getErosion(px, pz);
     const pv = this.terrain._getPV(px, pz);
 
+    //FIXME this will run every frame
+    // it's not ideal since it's a DOM operation
     this.debugPanel.innerHTML = `
     <p>Orientation: ${orientation}</p>
     <p>x: ${px.toFixed(2)} y: ${py.toFixed(2)} z: ${pz.toFixed(2)}</p>

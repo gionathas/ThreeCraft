@@ -18,7 +18,7 @@ export default class Player {
     this.terrain = terrain;
     this.playerControls = new PlayerControls(terrain, mode);
     this.editingControls = new EditingControls(this, terrain);
-    this.inventoryManager = new InventoryManager(this);
+    this.inventoryManager = new InventoryManager();
   }
 
   update(dt: number) {
@@ -35,12 +35,16 @@ export default class Player {
     this.playerControls.position.set(x, y, z);
   }
 
-  enableControls() {
-    return this.playerControls.lock();
+  lockControls() {
+    this.playerControls.lock();
   }
 
-  disableControls() {
+  unlockControls() {
     this.playerControls.unlock();
+  }
+
+  isControlsLocked() {
+    return this.playerControls.isLocked;
   }
 
   setOnLockControls(func: () => void) {

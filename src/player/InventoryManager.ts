@@ -1,4 +1,3 @@
-import Player from "../entities/Player";
 import { BlockType } from "../terrain/block";
 
 type Item = {
@@ -13,24 +12,14 @@ export default class InventoryManager {
   static readonly HOTBAR_SLOTS = 9;
   static readonly CRAFTING_SLOTS = 9;
 
-  private player: Player;
   private inventory: Slot[];
   private hotbar: Slot[];
   private selectedItem: Item | null;
 
-  constructor(player: Player) {
-    this.player = player;
+  constructor() {
     this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
     this.selectedItem = null;
-  }
-
-  openInventory() {
-    this.player.disableControls();
-  }
-
-  closeInventory() {
-    this.player.enableControls();
   }
 
   hasSelectedItem() {

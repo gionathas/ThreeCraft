@@ -75,10 +75,10 @@ button:hover {
   position: absolute;
   padding: 4px;
   font-size: 18px;
-  line-height: 16px;
+  line-height: 28px;
   left: 10px;
   bottom: 10px;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* Inventory */

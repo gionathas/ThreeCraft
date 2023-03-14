@@ -77,6 +77,7 @@ export default class PlayerControls extends PointerLockControls {
       mode === "sim" ? simPlayerProperties : devPlayerProperties;
 
     this.state = "falling";
+
     this.initHitBox();
   }
 

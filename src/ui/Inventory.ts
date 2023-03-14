@@ -5,7 +5,7 @@ const dataSlotIndexAttr = "data-slot-index";
 export default class Inventory {
   private inventoryManager: InventoryManager;
 
-  private isOpen: boolean;
+  public isOpen: boolean;
 
   // parent html element
   private inventoryElement!: HTMLElement;
@@ -22,31 +22,18 @@ export default class Inventory {
     this.initCraftingSlots();
     this.initInventorySlots();
     this.initHotbarSlots();
-    this.initEventListeners();
   }
 
-  private initEventListeners() {
-    // on key press T open inventory
-    window.addEventListener("keydown", (e) => {
-      switch (e.code) {
-        case "KeyT":
-          this.isOpen ? this.closeInventory() : this.openInventory();
-          this.isOpen = !this.isOpen;
-          break;
-      }
-    });
-  }
-
-  openInventory() {
-    this.inventoryManager.openInventory();
+  showInventory() {
     // set display to flex
     this.inventoryElement.style.display = "flex";
+    this.isOpen = true;
   }
 
-  closeInventory() {
-    this.inventoryManager.closeInventory();
+  hideInventory() {
     // set display to none
     this.inventoryElement.style.display = "none";
+    this.isOpen = false;
   }
 
   private initInventoryElement() {
@@ -57,7 +44,6 @@ export default class Inventory {
     }
 
     this.inventoryElement = inventoryElement;
-    this.inventoryElement.style.display = "none";
   }
 
   private initCraftingSlots() {
@@ -151,10 +137,5 @@ export default class Inventory {
         }
       }
     });
-  }
-
-  private clear() {
-    // TODO remove all event listeners
-    // TODO remove all slots html elements
   }
 }
