@@ -27,7 +27,8 @@ button {
   font-size: 20px;
   cursor: pointer;
   border-radius: 2px;
-  box-shadow: inset 1px -1px 0 0 var(--shadow-background);
+  border: 2px outset black;
+  box-shadow: inset 2px 0 0 0 rgb(205, 205, 205);
 }
 
 button:hover {
