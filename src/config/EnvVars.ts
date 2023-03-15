@@ -71,7 +71,23 @@ export default class EnvVars {
     import.meta.env.VITE_TESTING_MAP_PV
   );
 
+  /** Inventory */
+  static readonly DEV_INVENTORY_ENABLED = this.getBoolean(
+    import.meta.env.VITE_DEV_INVENTORY_ENABLED
+  );
+  static readonly DEV_INVENTORY_ITEMS = this.getList(
+    import.meta.env.VITE_DEV_INVENTORY_ITEMS
+  ).map((item) => Number(item));
+
+  static readonly DEV_HOTBAR_ITEMS = this.getList(
+    import.meta.env.VITE_DEV_HOTBAR_ITEMS
+  ).map((item) => Number(item));
+
   /** Utilities */
+  private static getList(key: keyof ImportMetaEnv): string[] {
+    return (key as string).split(",").map((item) => item.trim());
+  }
+
   private static getBoolean(key: keyof ImportMetaEnv): boolean {
     return key === "true";
   }

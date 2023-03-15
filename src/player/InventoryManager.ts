@@ -1,3 +1,4 @@
+import EnvVars from "../config/EnvVars";
 import { BlockType } from "../terrain/block";
 
 export type Item = {
@@ -22,35 +23,41 @@ export default class InventoryManager {
   public isDirty: boolean;
 
   constructor() {
-    this.inventory = new Array(InventoryManager.INVENTORY_SLOTS)
-      .fill(null)
-      .map((_, idx) => {
-        if (idx < 2) {
-          return { block: BlockType.DIRT, amount: 10 };
-        }
-
-        if (idx < 4) {
-          return { block: BlockType.COBBLESTONE, amount: 1 };
-        }
-
-        if (idx < 6) {
-          return { block: BlockType.SAND, amount: 44 };
-        }
-
-        if (idx < 8) {
-          return { block: BlockType.COAL_ORE, amount: 3 };
-        }
-
-        return null;
-      });
+    this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
     this.draggingItem = null;
     this.isDirty = false;
+
+    this.load();
   }
 
-  //TODO
-  load() {}
+  private load() {
+    if (EnvVars.DEV_INVENTORY_ENABLED) {
+      this.loadDevInventory();
+    }
+
+    //TODO load inventory from indexedDB
+  }
+
+  private loadDevInventory() {
+    const devInventory = EnvVars.DEV_INVENTORY_ITEMS;
+    const devHotbar = EnvVars.DEV_HOTBAR_ITEMS;
+
+    for (let i = 0; i < devInventory.length; i++) {
+      this.addItemToInventory({
+        block: devInventory[i],
+        amount: InventoryManager.MAX_STACK_SIZE,
+      });
+    }
+
+    for (let i = 0; i < devHotbar.length; i++) {
+      this.addItemToHotbar({
+        block: devHotbar[i],
+        amount: InventoryManager.MAX_STACK_SIZE,
+      });
+    }
+  }
 
   isDragging() {
     return this.draggingItem !== null;
@@ -177,6 +184,22 @@ export default class InventoryManager {
     let remainingAmount = item.amount;
 
     // first try to add the item to the hotbar
+    remainingAmount = this.addItemToHotbar(item);
+
+    // if there are still items left, try to add them to the inventory
+    if (remainingAmount > 0) {
+      remainingAmount = this.addItemToInventory({
+        block: item.block,
+        amount: remainingAmount,
+      });
+    }
+
+    return remainingAmount === 0;
+  }
+
+  private addItemToHotbar(item: Item): number {
+    let remainingAmount = item.amount;
+
     for (let i = 0; i < this.hotbar.length; i++) {
       remainingAmount = this.addItemToSlot(this.hotbar, i, {
         block: item.block,
@@ -184,11 +207,16 @@ export default class InventoryManager {
       });
 
       if (remainingAmount === 0) {
-        return true;
+        return 0;
       }
     }
 
-    // then try to add the item to the inventory
+    return remainingAmount;
+  }
+
+  private addItemToInventory(item: Item): number {
+    let remainingAmount = item.amount;
+
     for (let i = 0; i < this.inventory.length; i++) {
       remainingAmount = this.addItemToSlot(this.inventory, i, {
         block: item.block,
@@ -196,11 +224,11 @@ export default class InventoryManager {
       });
 
       if (remainingAmount === 0) {
-        return true;
+        return 0;
       }
     }
 
-    return false;
+    return remainingAmount;
   }
 
   /**
