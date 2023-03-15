@@ -129,13 +129,7 @@ export default class Inventory {
     this.createSlots(
       craftingSlotsEl,
       InventoryManager.CRAFTING_SLOTS,
-      this.inventoryManager.getCraftingSlots(),
-      (index) => {
-        console.log("left click on crafting slot", index);
-      },
-      (index) => {
-        console.log("right click on crafting slot", index);
-      }
+      this.inventoryManager.getCraftingSlots()
     );
   }
 
@@ -152,11 +146,7 @@ export default class Inventory {
     this.createSlots(
       inventorySlotsEl,
       InventoryManager.INVENTORY_SLOTS,
-      inventoryItems,
-      (slotEl, index) => {},
-      (index) => {
-        console.log("right click on inventory slot", index);
-      }
+      inventoryItems
     );
   }
 
@@ -173,22 +163,14 @@ export default class Inventory {
     this.createSlots(
       hotbarSlotsEl,
       InventoryManager.HOTBAR_SLOTS,
-      this.inventoryManager.getHotbarItems(),
-      (index) => {
-        console.log("left click on hotbar slot", index);
-      },
-      (index) => {
-        console.log("right click on hotbar slot", index);
-      }
+      this.inventoryManager.getHotbarItems()
     );
   }
 
   private createSlots(
     parentElement: HTMLElement,
     amount: number,
-    items: Slot[],
-    onLeftClick: (slotElement: HTMLElement, index: number) => void,
-    onRightClick: (slotElement: HTMLElement, index: number) => void
+    items: Slot[]
   ) {
     // create the slots
     for (let i = 0; i < amount; i++) {
