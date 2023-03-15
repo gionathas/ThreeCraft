@@ -10,7 +10,6 @@ export default class Inventory {
 
   // parent html element
   private inventoryElement!: HTMLElement;
-
   private dragItemElement!: HTMLDivElement;
 
   private craftingSlotsEl!: HTMLElement;
@@ -19,7 +18,6 @@ export default class Inventory {
 
   constructor(inventoryManager: InventoryManager) {
     this.inventoryManager = inventoryManager;
-
     this.isOpen = false;
 
     this.initInventoryElement();
@@ -31,27 +29,58 @@ export default class Inventory {
   }
 
   showInventory() {
-    // set display to flex
+    if (this.inventoryManager.isDirty) {
+      this.syncInventory();
+    }
+
     this.inventoryElement.style.display = "flex";
     this.isOpen = true;
   }
 
   hideInventory() {
-    // undo draggin if it was active
-    // this.endDrag();
+    // safe stop dragging
+    this.inventoryManager.endDrag();
 
     // hide the inventory
     this.inventoryElement.style.display = "none";
+    this.dragItemElement.style.display = "none";
     this.isOpen = false;
   }
 
-  private initDragListener() {
-    window.addEventListener("mousemove", (evt) => {
-      if (this.inventoryManager.isDragging()) {
-        this.dragItemElement.style.left = `${evt.pageX}px`;
-        this.dragItemElement.style.top = `${evt.pageY}px`;
-      }
-    });
+  private syncInventory() {
+    this.inventoryManager.isDirty = false;
+
+    // sync crafting slots
+    this.syncSlots(
+      this.craftingSlotsEl,
+      InventoryManager.CRAFTING_SLOTS,
+      this.inventoryManager.getCraftingSlots()
+    );
+
+    // sync inventory slots
+    this.syncSlots(
+      this.inventorySlotsEl,
+      InventoryManager.INVENTORY_SLOTS,
+      this.inventoryManager.getInventoryItems()
+    );
+
+    // sync hotbar slots
+    this.syncSlots(
+      this.hotbarSlotsEl,
+      InventoryManager.HOTBAR_SLOTS,
+      this.inventoryManager.getHotbarItems()
+    );
+  }
+
+  private syncSlots(parentElement: HTMLElement, amount: number, items: Slot[]) {
+    for (let i = 0; i < amount; i++) {
+      const item = this.inventoryManager.getItem(items, i);
+      const slotElement = parentElement.querySelector(
+        `[${dataSlotIndexAttr}="${i}"]`
+      ) as HTMLElement;
+
+      this.drawSlot(slotElement, item);
+    }
   }
 
   private initInventoryElement() {
@@ -62,6 +91,15 @@ export default class Inventory {
     }
 
     this.inventoryElement = inventoryElement;
+  }
+
+  private initDragListener() {
+    window.addEventListener("mousemove", (evt) => {
+      if (this.inventoryManager.isDragging()) {
+        this.dragItemElement.style.left = `${evt.pageX}px`;
+        this.dragItemElement.style.top = `${evt.pageY}px`;
+      }
+    });
   }
 
   private createDragItemElement() {
@@ -215,19 +253,23 @@ export default class Inventory {
     const isDragging = this.inventoryManager.isDragging();
 
     if (isDragging) {
-      // stop the item dragging by dropping it in this slot
-      const dragginItem = this.inventoryManager.getDraggingItem();
-      this.endDrag(items, index);
-      // draw the dragged item in the selected slot
-      this.drawSlot(slotElement, dragginItem);
-    } else {
-      // if the slot is not empty begin dragging the item
-      const dragItem = this.inventoryManager.getItem(items, index);
+      this.inventoryManager.placeDragItem(items, index);
+      this.drawDraggingItem(cursor);
 
-      if (dragItem) {
-        // remove the dragged item from the slot
+      // re draw the slot
+      const item = this.inventoryManager.getItem(items, index);
+      this.drawSlot(slotElement, item);
+    } else {
+      // if the selected slot is not empty, we begin dragging the item
+      const hasItem = this.inventoryManager.getItem(items, index);
+
+      if (hasItem) {
+        // remove the selected item from the slot
         this.drawSlot(slotElement, null);
-        this.beginDrag(items, index, slotElement, cursor);
+
+        // start dragging the item
+        this.inventoryManager.beginDrag(items, index);
+        this.drawDraggingItem(cursor);
       }
     }
   }
@@ -247,15 +289,12 @@ export default class Inventory {
     }
   }
 
-  private beginDrag(
-    items: Slot[],
-    index: number,
-    slotElement: HTMLElement,
-    { x, y }: THREE.Vector2
-  ) {
-    const draggedItem = this.inventoryManager.beginDrag(items, index);
+  private drawDraggingItem({ x, y }: THREE.Vector2) {
+    const isDragging = this.inventoryManager.isDragging();
 
-    if (draggedItem) {
+    if (isDragging) {
+      const draggedItem = this.inventoryManager.getDraggingItem()!;
+
       // show up the dragged item element
       this.dragItemElement.style.display = "block";
 
@@ -268,11 +307,9 @@ export default class Inventory {
         ".amount"
       ) as HTMLElement;
       amountText.innerText = draggedItem.amount.toString();
+    } else {
+      // hide the dragged item element
+      this.dragItemElement.style.display = "none";
     }
-  }
-
-  private endDrag(items: Slot[], index: number) {
-    this.inventoryManager.endDrag(items, index);
-    this.dragItemElement.style.display = "none";
   }
 }
