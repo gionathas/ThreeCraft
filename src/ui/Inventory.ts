@@ -216,8 +216,6 @@ export default class Inventory {
     parentElement.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       const target = e.target as HTMLElement;
-      const isLeft = e.button === 0;
-      const isRight = e.button === 2;
 
       let slotElement: HTMLElement | null = null;
 
@@ -237,23 +235,45 @@ export default class Inventory {
         const cursor = new THREE.Vector2(e.pageX, e.pageY);
         const slotIndex = slotElement.getAttribute(dataSlotIndexAttr)!;
 
-        if (isLeft) {
-          this.handleLeftClick(slotElement, items, parseInt(slotIndex), cursor);
+        switch (e.button) {
+          // left click
+          case 0: {
+            this.handleDragAndDrop(
+              slotElement,
+              items,
+              parseInt(slotIndex),
+              cursor,
+              true
+            );
+            break;
+          }
+          // right click
+          case 2: {
+            this.handleDragAndDrop(
+              slotElement,
+              items,
+              parseInt(slotIndex),
+              cursor,
+              false
+            );
+            break;
+          }
         }
       }
     });
   }
 
-  private handleLeftClick(
+  private handleDragAndDrop(
     slotElement: HTMLElement,
     items: Slot[],
     index: number,
-    cursor: THREE.Vector2
+    cursor: THREE.Vector2,
+    isM1: boolean
   ) {
     const isDragging = this.inventoryManager.isDragging();
 
     if (isDragging) {
-      this.inventoryManager.placeDraggedItem(items, index);
+      this.inventoryManager.placeDraggedItem(items, index, isM1 ? false : true);
       this.drawDraggingItem(cursor);
 
       // re draw the slot
@@ -281,7 +301,9 @@ export default class Inventory {
     if (item) {
       //FIXME
       itemEl.style.visibility = "visible";
-      amountText.innerText = item.amount.toString();
+      if (item.amount > 1) {
+        amountText.innerText = item.amount.toString();
+      }
     } else {
       //FIXME
       itemEl.style.visibility = "hidden";
@@ -302,11 +324,13 @@ export default class Inventory {
       this.dragItemElement.style.left = `${x}px`;
       this.dragItemElement.style.top = `${y}px`;
 
-      //get the amount text element
-      const amountText = this.dragItemElement.querySelector(
-        ".amount"
-      ) as HTMLElement;
-      amountText.innerText = draggedItem.amount.toString();
+      //draw the amount text element
+      if (draggedItem.amount > 1) {
+        const amountText = this.dragItemElement.querySelector(
+          ".amount"
+        ) as HTMLElement;
+        amountText.innerText = draggedItem.amount.toString();
+      }
     } else {
       // hide the dragged item element
       this.dragItemElement.style.display = "none";

@@ -85,7 +85,11 @@ export default class InventoryManager {
     }
   }
 
-  placeDraggedItem(items: Slot[], index: number): Item | null {
+  placeDraggedItem(
+    items: Slot[],
+    index: number,
+    singleUnit = false
+  ): Item | null {
     const dragItem = this.getDraggingItem();
 
     // no item is being dragged
@@ -94,30 +98,40 @@ export default class InventoryManager {
     }
 
     const targetSlot = this.getItem(items, index);
+    const unitsToPlace = singleUnit ? 1 : dragItem.amount;
+    const unitsRemaining = dragItem.amount - unitsToPlace;
+
+    const nextDraggedItem =
+      unitsRemaining > 0 ? { ...dragItem, amount: unitsRemaining } : null;
 
     // empty slot, place the item and stop dragging it
     if (targetSlot == null) {
-      this.setItem(items, index, dragItem);
-      return this.setDraggingItem(null);
+      this.setItem(items, index, {
+        ...dragItem,
+        amount: unitsToPlace,
+      });
+
+      return this.setDraggingItem(nextDraggedItem);
     }
 
     // slot is not empty and items are the same, try to stack them
     if (targetSlot.block === dragItem.block) {
-      // item is already filled up, perform a swap
-      if (targetSlot.amount == InventoryManager.MAX_STACK_SIZE) {
+      // item is already maxed out, perform a swap
+      if (targetSlot.amount === InventoryManager.MAX_STACK_SIZE) {
         this.setItem(items, index, dragItem);
         return this.setDraggingItem(targetSlot);
       }
 
-      const newAmount = targetSlot.amount + dragItem.amount;
+      const newAmount = targetSlot.amount + unitsToPlace;
 
       // item stack is not full, add the item to the stack
       if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
         targetSlot.amount = newAmount;
-        return this.setDraggingItem(null);
+        return this.setDraggingItem(nextDraggedItem);
       }
 
-      // item stack is full, place the item in the slot and keep dragging the rest
+      // item stack will overcome its limit, so place the item in the slot
+      // and keep dragging the remaining amount
       if (newAmount > InventoryManager.MAX_STACK_SIZE) {
         const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
 
