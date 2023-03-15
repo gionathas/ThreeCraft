@@ -80,46 +80,137 @@ export default class InventoryManager {
       const emptySlotIdx = this.inventory.findIndex((slot) =>
         this.isSlotEmpty(slot)
       );
-      this.placeDragItem(this.inventory, emptySlotIdx);
+      this.placeDraggedItem(this.inventory, emptySlotIdx);
       this.setDraggingItem(null);
     }
   }
 
-  placeDragItem(items: Slot[], index: number): boolean {
-    const item = this.getDraggingItem();
+  placeDraggedItem(items: Slot[], index: number): Item | null {
+    const dragItem = this.getDraggingItem();
 
-    if (item) {
-      const endSlot = this.getItem(items, index);
+    // no item is being dragged
+    if (!dragItem) {
+      return null;
+    }
 
-      // empty slot, place the item and stop dragging it
-      if (endSlot == null) {
-        this.setItem(items, index, item);
-        this.setDraggingItem(null);
-        return false;
+    const targetSlot = this.getItem(items, index);
+
+    // empty slot, place the item and stop dragging it
+    if (targetSlot == null) {
+      this.setItem(items, index, dragItem);
+      return this.setDraggingItem(null);
+    }
+
+    // slot is not empty and items are the same, try to stack them
+    if (targetSlot.block === dragItem.block) {
+      // item is already filled up, perform a swap
+      if (targetSlot.amount == InventoryManager.MAX_STACK_SIZE) {
+        this.setItem(items, index, dragItem);
+        return this.setDraggingItem(targetSlot);
       }
 
-      // slot is not empty, check if the item is the same
-      if (endSlot.block === item.block) {
-        const newAmount = endSlot.amount + item.amount;
+      const newAmount = targetSlot.amount + dragItem.amount;
 
-        // if the item is the same and the stack is not full, add the item to the stack
-        if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
-          endSlot.amount = newAmount;
-          this.setDraggingItem(null);
-          return false;
-        }
+      // item stack is not full, add the item to the stack
+      if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
+        targetSlot.amount = newAmount;
+        return this.setDraggingItem(null);
+      }
 
-        // if the item is the same and the stack is full, place the item in the slot and keep dragging the rest
-        if (newAmount > InventoryManager.MAX_STACK_SIZE) {
-          const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
-          endSlot.amount = InventoryManager.MAX_STACK_SIZE;
-          this.setDraggingItem({ block: item.block, amount: remainingAmount });
-          return true;
-        }
+      // item stack is full, place the item in the slot and keep dragging the rest
+      if (newAmount > InventoryManager.MAX_STACK_SIZE) {
+        const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
+
+        // fill the current slot
+        targetSlot.amount = InventoryManager.MAX_STACK_SIZE;
+
+        // set the dragging item to the remaining amount
+        return this.setDraggingItem({
+          block: dragItem.block,
+          amount: remainingAmount,
+        });
+      }
+    }
+
+    // slot is not empty and items are different, perform a swap
+    this.setItem(items, index, dragItem);
+    return this.setDraggingItem(targetSlot);
+  }
+
+  /**
+   * Add the item to the inventory, if the inventory is not full
+   */
+  addItem(item: Item): boolean {
+    let remainingAmount = item.amount;
+
+    // first try to add the item to the hotbar
+    for (let i = 0; i < this.hotbar.length; i++) {
+      remainingAmount = this.addItemToSlot(this.hotbar, i, {
+        block: item.block,
+        amount: remainingAmount,
+      });
+
+      if (remainingAmount === 0) {
+        return true;
+      }
+    }
+
+    // then try to add the item to the inventory
+    for (let i = 0; i < this.inventory.length; i++) {
+      remainingAmount = this.addItemToSlot(this.inventory, i, {
+        block: item.block,
+        amount: remainingAmount,
+      });
+
+      if (remainingAmount === 0) {
+        return true;
       }
     }
 
     return false;
+  }
+
+  /**
+   * Add the item to the slot, if the slot is full, return the remaining amount
+   */
+  private addItemToSlot(items: Slot[], index: number, item: Item): number {
+    const targetSlot = this.getItem(items, index);
+
+    // empty slot, place the item
+    if (targetSlot == null) {
+      this.setItem(items, index, item);
+      return 0;
+    }
+
+    // slot is not empty and items are the same, try to stack them
+    if (targetSlot.block === item.block) {
+      // item is already filled up, we can't add the item
+      if (targetSlot.amount === InventoryManager.MAX_STACK_SIZE) {
+        return item.amount;
+      }
+
+      const newAmount = targetSlot.amount + item.amount;
+
+      // the slot can be filled up without overflowing
+      if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
+        targetSlot.amount = newAmount;
+        return 0;
+      }
+
+      // item stack is full, place the item in the slot and keep dragging the rest
+      if (newAmount > InventoryManager.MAX_STACK_SIZE) {
+        const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
+
+        // fill the current slot
+        targetSlot.amount = InventoryManager.MAX_STACK_SIZE;
+
+        // set the dragging item to the remaining amount
+        return remainingAmount;
+      }
+    }
+
+    // slot is not empty and items are different, we can't add the item
+    return item.amount;
   }
 
   getItem(items: Slot[], index: number): Item | null {
@@ -136,6 +227,7 @@ export default class InventoryManager {
 
   private setDraggingItem(item: Item | null) {
     this.draggingItem = item;
+    return item;
   }
 
   getInventoryItems(): Slot[] {

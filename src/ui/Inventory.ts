@@ -253,7 +253,7 @@ export default class Inventory {
     const isDragging = this.inventoryManager.isDragging();
 
     if (isDragging) {
-      this.inventoryManager.placeDragItem(items, index);
+      this.inventoryManager.placeDraggedItem(items, index);
       this.drawDraggingItem(cursor);
 
       // re draw the slot
