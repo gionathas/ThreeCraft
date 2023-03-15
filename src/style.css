@@ -180,14 +180,14 @@ button:hover {
   position: relative;
   width: var(--block-icon-width);
   height: var(--block-icon-height);
-  background: url("./assets/textures/css_sprites.png") -10px -10px;
+  image-rendering: pixelated;
 }
 
 .item .amount {
   position: absolute;
   bottom: -4px;
   right: -4px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 /* Game Pause Menu */

@@ -30,11 +30,15 @@ export default class InventoryManager {
         }
 
         if (idx < 4) {
-          return { block: BlockType.DIRT, amount: 1 };
+          return { block: BlockType.COBBLESTONE, amount: 1 };
         }
 
         if (idx < 6) {
-          return { block: BlockType.DIRT, amount: 44 };
+          return { block: BlockType.SAND, amount: 44 };
+        }
+
+        if (idx < 8) {
+          return { block: BlockType.COAL_ORE, amount: 3 };
         }
 
         return null;

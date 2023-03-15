@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import InventoryManager, { Item, Slot } from "../player/InventoryManager";
+import Icons from "./Icons";
 
 const dataSlotIndexAttr = "data-slot-index";
 
@@ -279,8 +280,7 @@ export default class Inventory {
 
   private drawSlot(slotElem: HTMLElement, slot: Slot) {
     const itemEl = slotElem.querySelector(".item") as HTMLElement;
-
-    itemEl.style.visibility = slot ? "visible" : "hidden";
+    this.drawItemIcon(itemEl, slot);
     this.drawItemAmount(slotElem, slot);
   }
 
@@ -297,12 +297,27 @@ export default class Inventory {
       this.dragItemElement.style.left = `${x}px`;
       this.dragItemElement.style.top = `${y}px`;
 
-      //draw the amount text element
+      // draw the amount text element
+      this.drawItemIcon(this.dragItemElement, draggedItem);
       this.drawItemAmount(this.dragItemElement, draggedItem);
     } else {
       // hide the dragged item element
       this.dragItemElement.style.display = "none";
     }
+  }
+
+  private drawItemIcon(itemElement: HTMLElement, item: Item | null) {
+    if (!item) {
+      itemElement.style.background = "";
+      itemElement.style.backgroundPosition = "";
+      return;
+    }
+
+    const urlPath = Icons.getBlockIconUrlPath(item.block);
+    const { x, y } = Icons.getBlockIconPosition(item.block);
+
+    itemElement.style.background = `url(${urlPath})`;
+    itemElement.style.backgroundPosition = `-${x}px -${y}px`;
   }
 
   private drawItemAmount(itemElement: HTMLElement, item: Item | null) {
