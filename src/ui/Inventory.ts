@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import InventoryManager, { Slot } from "../player/InventoryManager";
+import InventoryManager, { Item, Slot } from "../player/InventoryManager";
 
 const dataSlotIndexAttr = "data-slot-index";
 
@@ -266,31 +266,26 @@ export default class Inventory {
       const hasItem = this.inventoryManager.getItem(items, index);
 
       if (hasItem) {
-        // remove the selected item from the slot
-        this.drawSlot(slotElement, null);
-
         // start dragging the item
-        this.inventoryManager.beginDrag(items, index);
+        const slot = this.inventoryManager.beginDrag(
+          items,
+          index,
+          isM1 ? false : true
+        );
+
+        // re draw the slot
+        this.drawSlot(slotElement, slot);
+        // draw the dragged item
         this.drawDraggingItem(cursor);
       }
     }
   }
 
-  private drawSlot(slot: HTMLElement, item: Slot) {
-    const itemEl = slot.querySelector(".item") as HTMLElement;
-    const amountText = slot.querySelector(".amount") as HTMLElement;
+  private drawSlot(slotElem: HTMLElement, slot: Slot) {
+    const itemEl = slotElem.querySelector(".item") as HTMLElement;
 
-    if (item) {
-      //FIXME
-      itemEl.style.visibility = "visible";
-      if (item.amount > 1) {
-        amountText.innerText = item.amount.toString();
-      }
-    } else {
-      //FIXME
-      itemEl.style.visibility = "hidden";
-      amountText.innerText = "";
-    }
+    itemEl.style.visibility = slot ? "visible" : "hidden";
+    this.drawItemAmount(slotElem, slot);
   }
 
   private drawDraggingItem({ x, y }: THREE.Vector2) {
@@ -307,15 +302,20 @@ export default class Inventory {
       this.dragItemElement.style.top = `${y}px`;
 
       //draw the amount text element
-      if (draggedItem.amount > 1) {
-        const amountText = this.dragItemElement.querySelector(
-          ".amount"
-        ) as HTMLElement;
-        amountText.innerText = draggedItem.amount.toString();
-      }
+      this.drawItemAmount(this.dragItemElement, draggedItem);
     } else {
       // hide the dragged item element
       this.dragItemElement.style.display = "none";
+    }
+  }
+
+  private drawItemAmount(itemElement: HTMLElement, item: Item | null) {
+    const amountText = itemElement.querySelector(".amount") as HTMLElement;
+
+    if (!item) {
+      amountText.innerText = "";
+    } else {
+      amountText.innerText = item.amount > 1 ? item.amount.toString() : "";
     }
   }
 }

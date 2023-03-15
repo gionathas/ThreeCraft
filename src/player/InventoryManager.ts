@@ -60,15 +60,30 @@ export default class InventoryManager {
     return slot === null;
   }
 
-  beginDrag(items: Slot[], index: number) {
+  beginDrag(items: Slot[], index: number, split: boolean): Item | null {
     const item = this.getItem(items, index);
 
-    if (item) {
-      this.setDraggingItem(item);
-      this.removeItem(items, index);
+    if (!item) {
+      return null;
     }
 
-    return item;
+    const unitsToPick = split ? Math.floor(item.amount / 2) : item.amount;
+    const isSingleUnit = item.amount === 1;
+    const pickAllUnits = unitsToPick === item.amount;
+
+    if (isSingleUnit || pickAllUnits) {
+      // pick the whole item
+      this.setDraggingItem(item);
+      // and clear the slot
+      return this.removeItem(items, index);
+    } else {
+      const unitsRemaining = item.amount - unitsToPick;
+
+      // pick half of the item
+      this.setDraggingItem({ ...item, amount: unitsToPick });
+      // and leave the other half in the slot
+      return this.setItem(items, index, { ...item, amount: unitsRemaining });
+    }
   }
 
   endDrag() {
@@ -233,10 +248,12 @@ export default class InventoryManager {
 
   private setItem(items: Slot[], index: number, item: Item) {
     items[index] = item;
+    return item;
   }
 
   private removeItem(items: Slot[], index: number) {
     items[index] = null;
+    return null;
   }
 
   private setDraggingItem(item: Item | null) {
