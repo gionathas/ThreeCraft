@@ -72,10 +72,10 @@ export default class Inventory {
     );
   }
 
-  private syncSlots(parentElement: HTMLElement, amount: number, items: Slot[]) {
+  private syncSlots(slotsArea: HTMLElement, amount: number, items: Slot[]) {
     for (let i = 0; i < amount; i++) {
       const item = this.inventoryManager.getItem(items, i);
-      const slotElement = parentElement.querySelector(
+      const slotElement = slotsArea.querySelector(
         `[${dataSlotIndexAttr}="${i}"]`
       ) as HTMLElement;
 
@@ -167,11 +167,7 @@ export default class Inventory {
     );
   }
 
-  private createSlots(
-    parentElement: HTMLElement,
-    amount: number,
-    items: Slot[]
-  ) {
+  private createSlots(slotsArea: HTMLElement, amount: number, items: Slot[]) {
     // create the slots
     for (let i = 0; i < amount; i++) {
       const slot = document.createElement("div");
@@ -189,13 +185,13 @@ export default class Inventory {
       amountText.classList.add("amount");
       itemEl.appendChild(amountText);
 
-      parentElement.appendChild(slot);
+      slotsArea.appendChild(slot);
 
       const item = this.inventoryManager.getItem(items, i);
       this.drawSlot(slot, item);
     }
 
-    parentElement.addEventListener("pointerdown", (e) => {
+    slotsArea.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       const target = e.target as HTMLElement;
 
