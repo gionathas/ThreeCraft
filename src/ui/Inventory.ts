@@ -10,6 +10,7 @@ export default class Inventory {
   public isOpen: boolean;
 
   // parent html element
+  private overlayElement!: HTMLElement;
   private inventoryElement!: HTMLElement;
   private dragItemElement!: HTMLDivElement;
 
@@ -34,6 +35,7 @@ export default class Inventory {
       this.syncInventory();
     }
 
+    this.overlayElement.style.display = "block";
     this.inventoryElement.style.display = "flex";
     this.isOpen = true;
   }
@@ -43,8 +45,9 @@ export default class Inventory {
     this.inventoryManager.endDrag();
 
     // hide the inventory
-    this.inventoryElement.style.display = "none";
+    this.overlayElement.style.display = "none";
     this.dragItemElement.style.display = "none";
+    this.inventoryElement.style.display = "none";
     this.isOpen = false;
   }
 
@@ -86,11 +89,13 @@ export default class Inventory {
 
   private initInventoryElement() {
     const inventoryElement = document.getElementById("inventory");
+    const overlayElement = document.getElementById("overlay");
 
-    if (!inventoryElement) {
-      throw new Error("Inventory not found");
+    if (!inventoryElement || !overlayElement) {
+      throw new Error("Invalid inventory");
     }
 
+    this.overlayElement = overlayElement;
     this.inventoryElement = inventoryElement;
   }
 
@@ -127,7 +132,7 @@ export default class Inventory {
     this.craftingSlotsEl = craftingSlotsEl;
 
     // add crafting slots
-    this.createSlots(
+    this.createSlotGrid(
       craftingSlotsEl,
       InventoryManager.CRAFTING_SLOTS,
       this.inventoryManager.getCraftingSlots()
@@ -144,7 +149,7 @@ export default class Inventory {
     this.inventorySlotsEl = inventorySlotsEl;
 
     const inventoryItems = this.inventoryManager.getInventoryItems();
-    this.createSlots(
+    this.createSlotGrid(
       inventorySlotsEl,
       InventoryManager.INVENTORY_SLOTS,
       inventoryItems
@@ -161,14 +166,14 @@ export default class Inventory {
     this.hotbarSlotsEl = hotbarSlotsEl;
 
     // add hotbar slots
-    this.createSlots(
+    this.createSlotGrid(
       hotbarSlotsEl,
       InventoryManager.HOTBAR_SLOTS,
       this.inventoryManager.getHotbarItems()
     );
   }
 
-  private createSlots(slotsArea: HTMLElement, amount: number, items: Slot[]) {
+  private createSlotGrid(slotGrid: HTMLElement, amount: number, items: Slot[]) {
     // create the slots
     for (let i = 0; i < amount; i++) {
       const slot = document.createElement("div");
@@ -186,13 +191,13 @@ export default class Inventory {
       amountText.classList.add("amount");
       itemEl.appendChild(amountText);
 
-      slotsArea.appendChild(slot);
+      slotGrid.appendChild(slot);
 
       const item = this.inventoryManager.getItem(items, i);
       this.drawSlot(slot, item);
     }
 
-    slotsArea.addEventListener("pointerdown", (e) => {
+    slotGrid.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       const target = e.target as HTMLElement;
 

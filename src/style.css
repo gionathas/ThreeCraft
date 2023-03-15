@@ -6,6 +6,7 @@
   --shadow-background: rgb(51, 51, 51);
   --inventory-background: #c6c6c6;
   --inventory-slot-background: #979494;
+  --hotbar-slot-background: #ababab;
   --block-icon-width: 32px;
   --block-icon-height: 32px;
   --inventory-slot-width: 44px;
@@ -37,6 +38,17 @@ button {
 
 button:hover {
   background-color: var(--button-hover-background);
+}
+
+#overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(3px);
+  z-index: 2;
 }
 
 /* Crosshair */
@@ -103,6 +115,16 @@ button:hover {
   z-index: 3;
 }
 
+#hotbar {
+  display: flex;
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px outset var(--hotbar-slot-background);
+  z-index: 1;
+}
+
 .inventory-crafting {
   display: flex;
   align-items: center;
@@ -166,6 +188,11 @@ button:hover {
 
 .slot:hover {
   background-color: #bebebe;
+}
+
+#hotbar .slot {
+  border: 3px solid var(--hotbar-slot-background);
+  background-color: rgb(150, 150, 150, 0.5);
 }
 
 #inventory-drag {

@@ -3,6 +3,7 @@ import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import DebugInfo from "./DebugInfo";
+import Hotbar from "./Hotbar";
 import Inventory from "./Inventory";
 import PausedMenu from "./PausedMenu";
 
@@ -12,6 +13,7 @@ export default class UI {
   private player: Player;
 
   // UI's
+  private hotbar: Hotbar;
   private inventory: Inventory;
   private pausedMenu: PausedMenu;
   private debugInfo: DebugInfo;
@@ -25,8 +27,10 @@ export default class UI {
 
     this.isFirstTime = true;
 
+    const playerInventory = player.getInventoryManager();
     this.pausedMenu = new PausedMenu();
-    this.inventory = new Inventory(player.getInventoryManager());
+    this.inventory = new Inventory(playerInventory);
+    this.hotbar = new Hotbar(playerInventory);
     this.debugInfo = new DebugInfo(player, terrain);
   }
 
