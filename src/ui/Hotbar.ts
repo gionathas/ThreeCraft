@@ -39,8 +39,8 @@ export default class Hotbar {
       (index) => this.inventoryManager.getItem(this.hotbarSlots, index)
     );
 
-    // draw the selected slot
-    this.drawSelectedSlot();
+    // draw the selected slot marker
+    this.drawSelectedSlotMarker();
   }
 
   private initSelectionListener() {
@@ -48,7 +48,7 @@ export default class Hotbar {
       const numPressed = parseInt(event.key);
 
       if (!isNaN(numPressed)) {
-        this.updateSelectedSlot(numPressed - 1);
+        this.updateSelectedSlotMarker(numPressed - 1);
       }
     });
 
@@ -59,16 +59,16 @@ export default class Hotbar {
       const selectedIndex = this.inventoryManager.getSelectedIndex();
 
       if (isScrollingUp) {
-        this.updateSelectedSlot(selectedIndex + 1);
+        this.updateSelectedSlotMarker(selectedIndex + 1);
       }
 
       if (isScrollingDown) {
-        this.updateSelectedSlot(selectedIndex - 1);
+        this.updateSelectedSlotMarker(selectedIndex - 1);
       }
     });
   }
 
-  private updateSelectedSlot(newIndex: number) {
+  private updateSelectedSlotMarker(newIndex: number) {
     const currentSelectedSlot = SlotGrid.getSlot(
       this.hotbarGrid,
       this.inventoryManager.getSelectedIndex()
@@ -76,10 +76,10 @@ export default class Hotbar {
     currentSelectedSlot?.classList.remove("selected");
 
     this.inventoryManager.setSelectedIndex(newIndex);
-    this.drawSelectedSlot();
+    this.drawSelectedSlotMarker();
   }
 
-  private drawSelectedSlot() {
+  private drawSelectedSlotMarker() {
     const selectedSlotEl = SlotGrid.getSlot(
       this.hotbarGrid,
       this.inventoryManager.getSelectedIndex()
