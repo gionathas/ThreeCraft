@@ -42,7 +42,7 @@ export default class Inventory {
 
   hideInventory() {
     // perform a safe drop if it was dragging
-    this.inventoryManager.safeDrop();
+    this.inventoryManager.safeEndDrag();
 
     // hide the inventory
     this.overlayElement.style.display = "none";
@@ -198,7 +198,7 @@ export default class Inventory {
     const isDragging = this.inventoryManager.isDragging();
 
     if (isDragging) {
-      this.inventoryManager.drop(items, index, isM1 ? false : true);
+      this.inventoryManager.endDrag(items, index, isM1 ? false : true);
       this.drawDraggingItem(cursor);
 
       // re draw the slot

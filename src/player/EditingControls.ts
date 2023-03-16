@@ -4,23 +4,30 @@ import Engine from "../core/Engine";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
-import { Block, BlockMarker, BlockType } from "../terrain/block";
+import { Block, BlockData, BlockMarker, BlockType } from "../terrain/block";
+import InventoryManager from "./InventoryManager";
 
 export default class EditingControls {
   static readonly EDITING_DISTANCE = 7;
 
   private scene: THREE.Scene;
   private inputController: InputController;
+
   private terrain: Terrain;
-  private blockMarker: BlockMarker | null;
   private player: Player;
+  private blockMarker: BlockMarker | null;
+
+  private inventory: InventoryManager;
 
   constructor(player: Player, terrain: Terrain) {
     this.inputController = InputController.getInstance();
     this.scene = Engine.getInstance().getScene();
+
     this.player = player;
     this.terrain = terrain;
     this.blockMarker = null;
+
+    this.inventory = player.getInventoryManager();
   }
 
   update() {
@@ -28,16 +35,57 @@ export default class EditingControls {
     this.updateBlockPlacement();
   }
 
-  //TODO optimization: to not permit to add a block in the current player position
+  //TODO do not permit to add a block in the current player position
   private updateBlockPlacement() {
     const leftButton = this.inputController.isLeftButtonJustPressed;
     const rightButton = this.inputController.isRightButtonJustPressed;
 
+    // erasing a block
     if (leftButton) {
-      this.placeBlock(BlockType.AIR); // erasing
-    } else if (rightButton) {
-      this.placeBlock(BlockType.SAND); //FIXME
+      const erasedBlock = this.eraseTargetBlock();
+
+      // if the block was erased and it drops something
+      // add it to the inventory
+      if (erasedBlock && erasedBlock.drop) {
+        this.inventory.addItem({
+          block: erasedBlock.drop,
+          amount: 1,
+        });
+      }
     }
+
+    // placing a block
+    if (rightButton) {
+      const selectedItem = this.inventory.getSelectedItem();
+
+      if (selectedItem) {
+        this.placeBlock(selectedItem.block);
+        this.inventory.decrementSelectedItemAmount();
+      }
+    }
+  }
+
+  private eraseTargetBlock(): BlockData | null {
+    const { terrain } = this;
+
+    if (!EnvVars.EDITING_ENABLED) return null;
+
+    const targetBlock = this.getTargetBlock();
+
+    if (targetBlock) {
+      // the intersection point is on the face. That means
+      // the math imprecision could put us on either side of the face.
+      // so go half a normal into the voxel if removing (currentVoxel = 0)
+      // our out of the voxel if adding (currentVoxel  > 0)
+      const [x, y, z] = targetBlock.position.map((v, ndx) => {
+        return v + targetBlock.normal[ndx] * -0.5;
+      });
+
+      terrain.setBlock({ x, y, z }, BlockType.AIR);
+      return targetBlock.block;
+    }
+
+    return null;
   }
 
   private placeBlock(block: BlockType) {

@@ -96,18 +96,18 @@ export default class InventoryManager {
       // pick the whole item
       this.setDraggingItem(item);
       // and clear the slot
-      return this.removeItem(items, index);
+      return this.clearSlot(items, index);
     } else {
       const unitsRemaining = item.amount - unitsToPick;
 
       // pick half of the item
       this.setDraggingItem({ ...item, amount: unitsToPick });
       // and leave the other half in the slot
-      return this.setItem(items, index, { ...item, amount: unitsRemaining });
+      return this.setSlot(items, index, { ...item, amount: unitsRemaining });
     }
   }
 
-  drop(items: Slot[], index: number, singleUnit = false): Item | null {
+  endDrag(items: Slot[], index: number, singleUnit = false): Item | null {
     const dragItem = this.getDraggingItem();
 
     // no item is being dragged
@@ -124,7 +124,7 @@ export default class InventoryManager {
 
     // empty slot, place the item and stop dragging it
     if (targetSlot == null) {
-      this.setItem(items, index, {
+      this.setSlot(items, index, {
         ...dragItem,
         amount: unitsToPlace,
       });
@@ -136,7 +136,7 @@ export default class InventoryManager {
     if (targetSlot.block === dragItem.block) {
       // item is already maxed out, perform a swap
       if (targetSlot.amount === InventoryManager.MAX_STACK_SIZE) {
-        this.setItem(items, index, dragItem);
+        this.setSlot(items, index, dragItem);
         return this.setDraggingItem(targetSlot);
       }
 
@@ -165,11 +165,11 @@ export default class InventoryManager {
     }
 
     // slot is not empty and items are different, perform a swap
-    this.setItem(items, index, dragItem);
+    this.setSlot(items, index, dragItem);
     return this.setDraggingItem(targetSlot);
   }
 
-  safeDrop() {
+  safeEndDrag() {
     if (this.isDragging()) {
       // mark the inventory as dirty
       this.isDirty = true;
@@ -178,15 +178,17 @@ export default class InventoryManager {
       const emptySlotIdx = this.inventory.findIndex((slot) =>
         this.isSlotEmpty(slot)
       );
-      this.drop(this.inventory, emptySlotIdx);
+      this.endDrag(this.inventory, emptySlotIdx);
       this.setDraggingItem(null);
     }
   }
 
   /**
-   * Add the item to the inventory, if the inventory is not full
+   * Add an item to the inventory, if the inventory is not full
    */
   addItem(item: Item): boolean {
+    this.isDirty = true;
+
     let remainingAmount = item.amount;
 
     // first try to add the item to the hotbar
@@ -203,10 +205,31 @@ export default class InventoryManager {
     return remainingAmount === 0;
   }
 
+  decrementSelectedItemAmount() {
+    const selectedItem = this.getSelectedItem();
+
+    if (selectedItem) {
+      const newAmount = selectedItem.amount - 1;
+
+      // still items left, update the slot
+      if (newAmount > 0) {
+        this.setSlot(this.hotbar, this.selectedHotbarIndex, {
+          ...selectedItem,
+          amount: newAmount,
+        });
+      }
+
+      // no more items left, clear the slot
+      if (newAmount === 0) {
+        this.clearSlot(this.hotbar, this.selectedHotbarIndex);
+      }
+    }
+  }
+
   private addItemToHotbar(item: Item): number {
     let remainingAmount = item.amount;
 
-    for (let i = 0; i < this.hotbar.length; i++) {
+    for (let i = 0; i < InventoryManager.HOTBAR_SLOTS; i++) {
       remainingAmount = this.addItemToSlot(this.hotbar, i, {
         block: item.block,
         amount: remainingAmount,
@@ -223,7 +246,7 @@ export default class InventoryManager {
   private addItemToInventory(item: Item): number {
     let remainingAmount = item.amount;
 
-    for (let i = 0; i < this.inventory.length; i++) {
+    for (let i = 0; i < InventoryManager.INVENTORY_SLOTS; i++) {
       remainingAmount = this.addItemToSlot(this.inventory, i, {
         block: item.block,
         amount: remainingAmount,
@@ -241,26 +264,29 @@ export default class InventoryManager {
    * Add the item to the slot, if the slot is full, return the remaining amount
    */
   private addItemToSlot(items: Slot[], index: number, item: Item): number {
-    const targetSlot = this.getItem(items, index);
+    const slotItem = this.getItem(items, index);
 
     // empty slot, place the item
-    if (targetSlot == null) {
-      this.setItem(items, index, item);
+    if (slotItem == null) {
+      this.setSlot(items, index, item);
       return 0;
     }
 
     // slot is not empty and items are the same, try to stack them
-    if (targetSlot.block === item.block) {
+    if (slotItem.block === item.block) {
       // item is already filled up, we can't add the item
-      if (targetSlot.amount === InventoryManager.MAX_STACK_SIZE) {
+      if (slotItem.amount === InventoryManager.MAX_STACK_SIZE) {
         return item.amount;
       }
 
-      const newAmount = targetSlot.amount + item.amount;
+      const newAmount = slotItem.amount + item.amount;
 
       // the slot can be filled up without overflowing
       if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
-        targetSlot.amount = newAmount;
+        // update the amount and update it
+        slotItem.amount = newAmount;
+        this.setSlot(items, index, slotItem);
+
         return 0;
       }
 
@@ -268,8 +294,9 @@ export default class InventoryManager {
       if (newAmount > InventoryManager.MAX_STACK_SIZE) {
         const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
 
-        // fill the current slot
-        targetSlot.amount = InventoryManager.MAX_STACK_SIZE;
+        // fill the current slot and update it
+        slotItem.amount = InventoryManager.MAX_STACK_SIZE;
+        this.setSlot(items, index, slotItem);
 
         // set the dragging item to the remaining amount
         return remainingAmount;
@@ -307,14 +334,14 @@ export default class InventoryManager {
     });
   }
 
-  private setItem(items: Slot[], index: number, item: Item) {
+  private setSlot(items: Slot[], index: number, item: Item) {
     items[index] = item;
 
     this.eventEmitter.emit("change", items, index, item);
     return item;
   }
 
-  private removeItem(items: Slot[], index: number) {
+  private clearSlot(items: Slot[], index: number) {
     items[index] = null;
 
     this.eventEmitter.emit("change", items, index, null);
