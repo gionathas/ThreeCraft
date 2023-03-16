@@ -19,7 +19,6 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.AIR]: {
     isTransparent: true,
     isSolid: false,
-    drop: BlockType.AIR,
     icon: {
       row: -1,
       col: -1,
@@ -180,7 +179,6 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.OAK_LEAVES]: {
     isTransparent: true,
     isSolid: true,
-    drop: BlockType.AIR,
     icon: {
       row: 0,
       col: 0,
@@ -226,7 +224,6 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.WATER]: {
     isTransparent: true,
     isSolid: false,
-    drop: BlockType.AIR,
     icon: {
       row: 0,
       col: 0,
@@ -249,7 +246,6 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.GLASS]: {
     isTransparent: true,
     isSolid: true,
-    drop: BlockType.AIR,
     icon: {
       row: 0,
       col: 0,

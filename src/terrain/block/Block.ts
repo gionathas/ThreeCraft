@@ -17,7 +17,7 @@ export type BlockTextureFace = "top" | "bottom" | "side";
 export type BlockMetadata = {
   isTransparent: boolean;
   isSolid: boolean;
-  drop: BlockType;
+  drop?: BlockType;
   icon: {
     row: number;
     col: number;
