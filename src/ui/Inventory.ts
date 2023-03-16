@@ -42,7 +42,7 @@ export default class Inventory {
 
   hideInventory() {
     // perform a safe drop if it was dragging
-    this.inventoryManager.safeEndDrag();
+    this.inventoryManager.forceEndDrag();
 
     // hide the inventory
     this.overlayElement.style.display = "none";
@@ -242,7 +242,7 @@ export default class Inventory {
     const isDragging = this.inventoryManager.isDragging();
 
     if (isDragging) {
-      const draggedItem = this.inventoryManager.getDraggingItem()!;
+      const draggedItem = this.inventoryManager.getDraggedItem()!;
 
       // show up the dragged item element
       this.dragItemElement.style.display = "block";
