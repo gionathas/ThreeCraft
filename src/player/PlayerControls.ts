@@ -17,7 +17,7 @@ export interface PlayerControlsProperties {
   verticalSpeed: number;
   dampingCoefficient: number;
   physicsEnabled: boolean;
-  showHitbox: boolean;
+  showBoundingBox: boolean;
 }
 
 export const devPlayerProperties: PlayerControlsProperties = {
@@ -27,7 +27,7 @@ export const devPlayerProperties: PlayerControlsProperties = {
   verticalSpeed: 2,
   dampingCoefficient: 10,
   physicsEnabled: false,
-  showHitbox: false,
+  showBoundingBox: true,
 };
 
 export const simPlayerProperties: PlayerControlsProperties = {
@@ -37,7 +37,7 @@ export const simPlayerProperties: PlayerControlsProperties = {
   verticalSpeed: 6,
   dampingCoefficient: 10,
   physicsEnabled: true,
-  showHitbox: false,
+  showBoundingBox: true,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
@@ -53,17 +53,17 @@ const MIN_VELOCITY = 0.001;
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerControls extends PointerLockControls {
+  private inputController: InputController;
   private terrain: Terrain;
 
   private velocity: THREE.Vector3;
   private controlsDirection: THREE.Vector3;
 
-  private hitBox?: THREE.LineSegments;
-  private inputController: InputController;
-
   private properties: PlayerControlsProperties;
-  private state: "onGround" | "falling" | "jumping";
   private mode: PlayerMode;
+  private state: "onGround" | "falling" | "jumping";
+
+  private hitbox!: THREE.LineSegments;
 
   constructor(terrain: Terrain, mode: PlayerMode) {
     super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
@@ -78,28 +78,34 @@ export default class PlayerControls extends PointerLockControls {
 
     this.state = "falling";
 
-    this.initHitBox();
+    this.initBoundingBox();
   }
 
-  private initHitBox() {
-    const { showHitbox } = this.properties;
+  private initBoundingBox() {
+    const { showBoundingBox, width, height } = this.properties;
     const scene = Engine.getInstance().getScene();
 
-    if (showHitbox) {
-      const boxGeom = new THREE.BoxGeometry(
-        this.width,
-        this.height,
-        this.width
-      );
-      const mat = new THREE.LineBasicMaterial({ color: "white" });
-      const edges = new THREE.EdgesGeometry(boxGeom);
-      const axesHelpers = new THREE.AxesHelper();
+    const boxGeom = new THREE.BoxGeometry(width, height, width);
+    const mat = new THREE.LineBasicMaterial({ color: "white" });
+    const edges = new THREE.EdgesGeometry(boxGeom);
+    const axesHelpers = new THREE.AxesHelper();
 
-      this.hitBox = new THREE.LineSegments(edges, mat);
-      this.hitBox.add(axesHelpers);
+    this.hitbox = new THREE.LineSegments(edges, mat);
+    this.hitbox.add(axesHelpers);
 
-      scene.add(this.hitBox);
+    if (showBoundingBox) {
+      scene.add(this.hitbox);
     }
+  }
+
+  intersectsBlock(blockBoundingBox: THREE.Box3) {
+    this.hitbox.geometry.computeBoundingBox();
+
+    // transform the hitbox bounding box to world space
+    const boundingBox = this.hitbox.geometry.boundingBox;
+    boundingBox?.applyMatrix4(this.hitbox.matrixWorld);
+
+    return boundingBox?.intersectsBox(blockBoundingBox) ?? false;
   }
 
   moveUp(distance: number) {
@@ -134,6 +140,7 @@ export default class PlayerControls extends PointerLockControls {
 
   private updateMode() {
     const currentMode = this.mode;
+
     if (this.hasSwitchedMode()) {
       if (currentMode === "sim") {
         this.mode = "dev";
@@ -146,15 +153,11 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private updateHitBox() {
-    const { showHitbox } = this.properties;
-
-    if (showHitbox) {
-      this.hitBox?.position.set(
-        this.position.x,
-        this.position.y - this.height / 2,
-        this.position.z
-      );
-    }
+    this.hitbox?.position.set(
+      this.position.x,
+      this.position.y - this.height / 2,
+      this.position.z
+    );
   }
 
   private updateHorizontalVelocity() {

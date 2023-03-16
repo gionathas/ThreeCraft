@@ -40,11 +40,11 @@ export default class EditingControls {
     const isM1 = this.inputController.isLeftButtonJustPressed;
     const isM2 = this.inputController.isRightButtonJustPressed;
 
-    // erasing a block
+    // erase block
     if (isM1) {
       const erasedBlock = this.eraseTargetBlock();
 
-      // if the block was erased and it drops something
+      // if a block was erased and it drops something
       // add it to the inventory
       if (erasedBlock && erasedBlock.drop) {
         this.inventory.addItem({
@@ -54,17 +54,25 @@ export default class EditingControls {
       }
     }
 
-    // placing a block
+    // place block
     if (isM2) {
       const selectedItem = this.inventory.getSelectedItem();
 
       if (selectedItem) {
-        this.placeBlock(selectedItem.block);
-        this.inventory.decrementSelectedItemAmount();
+        const isPlaced = this.placeBlock(selectedItem.block);
+
+        if (isPlaced) {
+          this.inventory.decrementSelectedItemAmount();
+        }
       }
     }
   }
 
+  /**
+   * Erase the block targeted by the player
+   *
+   * @returns the block that was erased or null if no block was erased
+   */
   private eraseTargetBlock(): BlockData | null {
     const { terrain } = this;
 
@@ -75,8 +83,8 @@ export default class EditingControls {
     if (targetBlock) {
       // the intersection point is on the face. That means
       // the math imprecision could put us on either side of the face.
-      // so go half a normal into the voxel if removing (currentVoxel = 0)
-      // our out of the voxel if adding (currentVoxel  > 0)
+      // so go half a normal into the voxel if removing or
+      // out of the voxel if placing
       const [x, y, z] = targetBlock.position.map((v, ndx) => {
         return v + targetBlock.normal[ndx] * -0.5;
       });
@@ -88,26 +96,45 @@ export default class EditingControls {
     return null;
   }
 
-  private placeBlock(block: BlockType) {
+  /**
+   * Place a block in the targeted position
+   *
+   * If the block position will collide with the player or
+   * no block is reachable, the block will not be placed
+   *
+   * @returns true if the block was placed, false otherwise
+   */
+  private placeBlock(block: BlockType): boolean {
     const { terrain } = this;
 
-    if (!EnvVars.EDITING_ENABLED) return;
+    if (!EnvVars.EDITING_ENABLED) return false;
 
     const targetBlock = this.getTargetBlock();
 
     if (targetBlock) {
       // the intersection point is on the face. That means
       // the math imprecision could put us on either side of the face.
-      // so go half a normal into the voxel if removing (currentVoxel = 0)
-      // our out of the voxel if adding (currentVoxel  > 0)
+      // so go half a normal into the voxel if removing or
+      // out of the voxel if placing
       const [x, y, z] = targetBlock.position.map((v, ndx) => {
         return (
           v + targetBlock.normal[ndx] * (block != BlockType.AIR ? 0.5 : -0.5)
         );
       });
 
-      terrain.setBlock({ x, y, z }, block);
+      const blockBoundingBox = Block.getBlockBoundingBoxFromPosition(
+        new THREE.Vector3(x, y, z)
+      );
+
+      const willBlockCollide = this.player.intersectBlock(blockBoundingBox);
+
+      if (!willBlockCollide) {
+        terrain.setBlock({ x, y, z }, block);
+        return true;
+      }
     }
+
+    return false;
   }
 
   private updateBlockMarker() {

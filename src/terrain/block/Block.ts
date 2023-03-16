@@ -119,6 +119,27 @@ export default class Block {
     return null;
   }
 
+  static getBlockBoundingBoxFromPosition(position: THREE.Vector3) {
+    return Block.getBlockBoundingBox(
+      Block.getBlockOriginFromPosition(position)
+    );
+  }
+
+  static getBlockBoundingBox(blockOrigin: THREE.Vector3) {
+    return new THREE.Box3(
+      blockOrigin,
+      blockOrigin.clone().addScalar(Block.SIZE)
+    );
+  }
+
+  static getBlockOriginFromPosition(position: THREE.Vector3) {
+    return new THREE.Vector3(
+      Math.floor(position.x),
+      Math.floor(position.y),
+      Math.floor(position.z)
+    );
+  }
+
   static toBlockCenterCoord = (val: number) =>
     Math.floor(val / Block.SIZE) * Block.SIZE + Block.SIZE / 2;
 

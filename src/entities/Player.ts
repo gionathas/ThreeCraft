@@ -80,6 +80,10 @@ export default class Player {
     return this.editingControls.getTargetBlock();
   }
 
+  intersectBlock(blockBB: THREE.Box3) {
+    return this.playerControls.intersectsBlock(blockBB);
+  }
+
   getOrientation() {
     const lookDirection = this.playerControls
       .getCamera()
