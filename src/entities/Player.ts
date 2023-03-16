@@ -16,9 +16,10 @@ export default class Player {
 
   constructor(terrain: Terrain, mode: PlayerMode) {
     this.terrain = terrain;
+    this.inventoryManager = new InventoryManager();
+
     this.playerControls = new PlayerControls(terrain, mode);
     this.editingControls = new EditingControls(this, terrain);
-    this.inventoryManager = new InventoryManager();
   }
 
   update(dt: number) {
