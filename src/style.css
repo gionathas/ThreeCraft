@@ -158,17 +158,17 @@ button:hover {
   margin-top: 8px;
 }
 
-#crafting-slots {
+#crafting-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
 
-#inventory-slots {
+#inventory-grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
 }
 
-#inventory-hotbar-slots {
+#inventory-hotbar-grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
 }
@@ -193,6 +193,10 @@ button:hover {
 #hotbar .slot {
   border: 3px solid var(--hotbar-slot-background);
   background-color: rgb(150, 150, 150, 0.5);
+}
+
+#hotbar .slot.selected {
+  border: 3px solid #e2e2e2;
 }
 
 #inventory-drag {

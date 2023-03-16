@@ -2,8 +2,6 @@ import * as THREE from "three";
 import InventoryManager, { Slot } from "../player/InventoryManager";
 import SlotGrid from "./SlotGrid";
 
-const dataSlotIndexAttr = "data-slot-index";
-
 export default class Inventory {
   private inventoryManager: InventoryManager;
 
@@ -11,22 +9,24 @@ export default class Inventory {
 
   // parent html element
   private overlayElement!: HTMLElement;
-  private inventoryElement!: HTMLElement;
-  private dragItemElement!: HTMLDivElement;
+  private inventoryPanel!: HTMLElement;
+  private dragItemElement!: HTMLElement;
 
-  private craftingSlotsEl!: HTMLElement;
-  private inventorySlotsEl!: HTMLElement;
-  private hotbarSlotsEl!: HTMLElement;
+  private craftingGrid!: HTMLElement;
+  private inventoryGrid!: HTMLElement;
+  private hotbarGrid!: HTMLElement;
 
   constructor(inventoryManager: InventoryManager) {
     this.inventoryManager = inventoryManager;
     this.isOpen = false;
 
-    this.initInventoryElement();
-    this.createCraftingSlots();
-    this.createInventorySlots();
-    this.createHotbarSlots();
+    this.initInventoryPanel();
+
+    this.createCraftingGrid();
+    this.createInventoryGrid();
+    this.createHotbarGrid();
     this.createDragItemElement();
+
     this.initDragListener();
   }
 
@@ -36,7 +36,7 @@ export default class Inventory {
     }
 
     this.overlayElement.style.display = "block";
-    this.inventoryElement.style.display = "flex";
+    this.inventoryPanel.style.display = "flex";
     this.isOpen = true;
   }
 
@@ -47,7 +47,7 @@ export default class Inventory {
     // hide the inventory
     this.overlayElement.style.display = "none";
     this.dragItemElement.style.display = "none";
-    this.inventoryElement.style.display = "none";
+    this.inventoryPanel.style.display = "none";
     this.isOpen = false;
   }
 
@@ -56,30 +56,28 @@ export default class Inventory {
 
     // sync crafting slots
     const craftingSlots = this.inventoryManager.getCraftingSlots();
-    SlotGrid.drawSlots(
-      this.craftingSlotsEl,
+    SlotGrid.drawGrid(
+      this.craftingGrid,
       InventoryManager.CRAFTING_SLOTS,
       (idx) => this.inventoryManager.getItem(craftingSlots, idx)
     );
 
     // sync inventory slots
     const inventorySlots = this.inventoryManager.getInventorySlots();
-    SlotGrid.drawSlots(
-      this.inventorySlotsEl,
+    SlotGrid.drawGrid(
+      this.inventoryGrid,
       InventoryManager.INVENTORY_SLOTS,
       (idx) => this.inventoryManager.getItem(inventorySlots, idx)
     );
 
     // sync hotbar slots
     const hotbarSlots = this.inventoryManager.getHotbarSlots();
-    SlotGrid.drawSlots(
-      this.hotbarSlotsEl,
-      InventoryManager.HOTBAR_SLOTS,
-      (idx) => this.inventoryManager.getItem(hotbarSlots, idx)
+    SlotGrid.drawGrid(this.hotbarGrid, InventoryManager.HOTBAR_SLOTS, (idx) =>
+      this.inventoryManager.getItem(hotbarSlots, idx)
     );
   }
 
-  private initInventoryElement() {
+  private initInventoryPanel() {
     const inventoryElement = document.getElementById("inventory");
     const overlayElement = document.getElementById("overlay");
 
@@ -88,7 +86,7 @@ export default class Inventory {
     }
 
     this.overlayElement = overlayElement;
-    this.inventoryElement = inventoryElement;
+    this.inventoryPanel = inventoryElement;
   }
 
   private initDragListener() {
@@ -100,57 +98,55 @@ export default class Inventory {
     });
   }
 
-  private createCraftingSlots() {
-    const craftingSlotsEl = document.getElementById("crafting-slots");
+  private createCraftingGrid() {
+    const craftingGrid = document.getElementById("crafting-grid");
 
-    if (!craftingSlotsEl) {
+    if (!craftingGrid) {
       throw new Error("Inventory markup not found");
     }
 
-    this.craftingSlotsEl = craftingSlotsEl;
+    this.craftingGrid = craftingGrid;
 
     const craftingSlots = this.inventoryManager.getCraftingSlots();
-    SlotGrid.createSlots(
-      craftingSlotsEl,
-      InventoryManager.CRAFTING_SLOTS,
-      (idx) => this.inventoryManager.getItem(craftingSlots, idx)
+    SlotGrid.createSlots(craftingGrid, InventoryManager.CRAFTING_SLOTS, (idx) =>
+      this.inventoryManager.getItem(craftingSlots, idx)
     );
-    this.addSlotGridClickListener(craftingSlotsEl, craftingSlots);
+    this.addSlotGridClickListener(craftingGrid, craftingSlots);
   }
 
-  private createInventorySlots() {
-    const inventorySlotsEl = document.getElementById("inventory-slots");
+  private createInventoryGrid() {
+    const inventoryGrid = document.getElementById("inventory-grid");
 
-    if (!inventorySlotsEl) {
+    if (!inventoryGrid) {
       throw new Error("Inventory slots markup not found");
     }
 
-    this.inventorySlotsEl = inventorySlotsEl;
+    this.inventoryGrid = inventoryGrid;
 
     const inventorySlots = this.inventoryManager.getInventorySlots();
     SlotGrid.createSlots(
-      inventorySlotsEl,
+      inventoryGrid,
       InventoryManager.INVENTORY_SLOTS,
       (idx) => this.inventoryManager.getItem(inventorySlots, idx)
     );
-    this.addSlotGridClickListener(inventorySlotsEl, inventorySlots);
+    this.addSlotGridClickListener(inventoryGrid, inventorySlots);
   }
 
-  private createHotbarSlots() {
-    const hotbarSlotsEl = document.getElementById("inventory-hotbar-slots");
+  private createHotbarGrid() {
+    const hotbarGrid = document.getElementById("inventory-hotbar-grid");
 
-    if (!hotbarSlotsEl) {
+    if (!hotbarGrid) {
       throw new Error("Inventory markup not found");
     }
 
-    this.hotbarSlotsEl = hotbarSlotsEl;
+    this.hotbarGrid = hotbarGrid;
 
     const hotbarSlots = this.inventoryManager.getHotbarSlots();
-    SlotGrid.createSlots(hotbarSlotsEl, InventoryManager.HOTBAR_SLOTS, (idx) =>
+    SlotGrid.createSlots(hotbarGrid, InventoryManager.HOTBAR_SLOTS, (idx) =>
       this.inventoryManager.getItem(hotbarSlots, idx)
     );
 
-    this.addSlotGridClickListener(hotbarSlotsEl, hotbarSlots);
+    this.addSlotGridClickListener(hotbarGrid, hotbarSlots);
   }
 
   private addSlotGridClickListener(slotGrid: HTMLElement, items: Slot[]) {
@@ -158,45 +154,33 @@ export default class Inventory {
       e.preventDefault();
       const target = e.target as HTMLElement;
 
-      let slotElement: HTMLElement | null = null;
+      let slotElem: HTMLElement | null = null;
 
       if (target.classList.contains("amount")) {
-        slotElement = target.parentElement!.parentElement;
+        slotElem = target.parentElement!.parentElement;
       }
 
       if (target.classList.contains("item")) {
-        slotElement = target.parentElement;
+        slotElem = target.parentElement;
       }
 
       if (target.classList.contains("slot")) {
-        slotElement = target;
+        slotElem = target;
       }
 
-      if (slotElement) {
+      if (slotElem) {
         const cursor = new THREE.Vector2(e.pageX, e.pageY);
-        const slotIndex = slotElement.getAttribute(dataSlotIndexAttr)!;
+        const slotIndex = SlotGrid.getSlotIndex(slotElem);
 
         switch (e.button) {
           // left click
           case 0: {
-            this.handleDragAndDrop(
-              slotElement,
-              items,
-              parseInt(slotIndex),
-              cursor,
-              true
-            );
+            this.handleDragAndDrop(slotElem, items, slotIndex, cursor, true);
             break;
           }
           // right click
           case 2: {
-            this.handleDragAndDrop(
-              slotElement,
-              items,
-              parseInt(slotIndex),
-              cursor,
-              false
-            );
+            this.handleDragAndDrop(slotElem, items, slotIndex, cursor, false);
             break;
           }
         }

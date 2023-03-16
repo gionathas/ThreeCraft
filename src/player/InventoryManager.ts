@@ -1,4 +1,5 @@
 import EventEmitter from "events";
+import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 import { BlockType } from "../terrain/block";
 
@@ -21,6 +22,8 @@ export default class InventoryManager {
   private hotbar: Slot[];
 
   private draggingItem: Item | null;
+  private selectedHotbarIndex: number;
+
   public isDirty: boolean;
 
   private eventEmitter: EventEmitter;
@@ -31,6 +34,8 @@ export default class InventoryManager {
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
 
     this.eventEmitter = new EventEmitter();
+
+    this.selectedHotbarIndex = 0;
     this.draggingItem = null;
     this.isDirty = false;
 
@@ -277,6 +282,21 @@ export default class InventoryManager {
 
   getItem(items: Slot[], index: number): Item | null {
     return items[index];
+  }
+
+  setSelectedIndex(index: number) {
+    this.selectedHotbarIndex = THREE.MathUtils.euclideanModulo(
+      index,
+      InventoryManager.HOTBAR_SLOTS
+    );
+  }
+
+  getSelectedIndex(): number {
+    return this.selectedHotbarIndex;
+  }
+
+  getSelectedItem(): Item | null {
+    return this.hotbar[this.selectedHotbarIndex];
   }
 
   onHotbarChange(callback: (items: Slot[], index: number, item: Item) => void) {

@@ -6,50 +6,94 @@ export default class Hotbar {
 
   private hotbarSlots: Slot[];
 
-  private hotbarElement!: HTMLElement;
+  private hotbarGrid!: HTMLElement;
 
   constructor(inventoryManager: InventoryManager) {
     this.inventoryManager = inventoryManager;
     this.hotbarSlots = this.inventoryManager.getHotbarSlots();
 
     // ui
-    this.initHotbarElement();
+    this.initHotbarGrid();
     this.createHotbarSlots();
 
     // listeners
-    this.initItemChangeListener();
+    this.initHotbarChangeListener();
     this.initSelectionListener();
   }
 
-  private initHotbarElement() {
+  private initHotbarGrid() {
     const hotbarElement = document.getElementById("hotbar");
 
     if (!hotbarElement) {
       throw new Error("Hotbar markup not found");
     }
 
-    this.hotbarElement = hotbarElement;
+    this.hotbarGrid = hotbarElement;
   }
 
   private createHotbarSlots() {
     // creating the slots
     SlotGrid.createSlots(
-      this.hotbarElement,
+      this.hotbarGrid,
       InventoryManager.HOTBAR_SLOTS,
       (index) => this.inventoryManager.getItem(this.hotbarSlots, index)
     );
+
+    // draw the selected slot
+    this.drawSelectedSlot();
   }
 
   private initSelectionListener() {
+    window.addEventListener("keydown", (event) => {
+      const numPressed = parseInt(event.key);
+
+      if (!isNaN(numPressed)) {
+        this.updateSelectedSlot(numPressed - 1);
+      }
+    });
+
     window.addEventListener("wheel", (event) => {
-      //TODO
+      event.preventDefault();
+      const isScrollingUp = event.deltaY < 0;
+      const isScrollingDown = event.deltaY > 0;
+      const selectedIndex = this.inventoryManager.getSelectedIndex();
+
+      if (isScrollingUp) {
+        this.updateSelectedSlot(selectedIndex + 1);
+      }
+
+      if (isScrollingDown) {
+        this.updateSelectedSlot(selectedIndex - 1);
+      }
     });
   }
 
-  private initItemChangeListener() {
+  private updateSelectedSlot(newIndex: number) {
+    const currentSelectedSlot = SlotGrid.getSlot(
+      this.hotbarGrid,
+      this.inventoryManager.getSelectedIndex()
+    );
+    currentSelectedSlot?.classList.remove("selected");
+
+    this.inventoryManager.setSelectedIndex(newIndex);
+    this.drawSelectedSlot();
+  }
+
+  private drawSelectedSlot() {
+    const selectedSlotEl = SlotGrid.getSlot(
+      this.hotbarGrid,
+      this.inventoryManager.getSelectedIndex()
+    );
+
+    if (selectedSlotEl) {
+      selectedSlotEl.classList.add("selected");
+    }
+  }
+
+  private initHotbarChangeListener() {
     this.inventoryManager.onHotbarChange((items) => {
-      SlotGrid.drawSlots(
-        this.hotbarElement,
+      SlotGrid.drawGrid(
+        this.hotbarGrid,
         InventoryManager.HOTBAR_SLOTS,
         (index) => this.inventoryManager.getItem(items, index)
       );

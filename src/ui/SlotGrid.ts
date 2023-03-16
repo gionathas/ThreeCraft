@@ -4,15 +4,15 @@ import Icons from "./Icons";
 const dataSlotIndexAttr = "data-slot-index";
 
 export default class SlotGrid {
-  static drawSlots(
-    slotsGrid: HTMLElement,
+  static drawGrid(
+    grid: HTMLElement,
     amount: number,
     getItem: (index: number) => Slot
   ) {
     for (let i = 0; i < amount; i++) {
       const item = getItem(i);
 
-      const slotElement = slotsGrid.querySelector(
+      const slotElement = grid.querySelector(
         `[${dataSlotIndexAttr}="${i}"]`
       ) as HTMLElement;
 
@@ -21,7 +21,7 @@ export default class SlotGrid {
   }
 
   static createSlots(
-    parentContainer: HTMLElement,
+    gridContainer: HTMLElement,
     amount: number,
     getSlot: (index: number) => Slot
   ) {
@@ -42,11 +42,21 @@ export default class SlotGrid {
       amountText.classList.add("amount");
       itemEl.appendChild(amountText);
 
-      parentContainer.appendChild(slotEl);
+      gridContainer.appendChild(slotEl);
 
       const slot = getSlot(i);
       this.drawSlot(slotEl, slot);
     }
+  }
+
+  static getSlot(slotsGrid: HTMLElement, index: number): HTMLElement | null {
+    return slotsGrid.querySelector(
+      `[${dataSlotIndexAttr}="${index}"]`
+    ) as HTMLElement | null;
+  }
+
+  static getSlotIndex(slotElement: HTMLElement) {
+    return parseInt(slotElement.getAttribute(dataSlotIndexAttr) as string);
   }
 
   static drawSlot(slotElem: HTMLElement, slot: Slot) {
