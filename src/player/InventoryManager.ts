@@ -293,11 +293,11 @@ export default class InventoryManager {
     return item;
   }
 
-  getInventoryItems(): Slot[] {
+  getInventorySlots(): Slot[] {
     return this.inventory;
   }
 
-  getHotbarItems(): Slot[] {
+  getHotbarSlots(): Slot[] {
     return this.hotbar;
   }
 

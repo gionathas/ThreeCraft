@@ -4,8 +4,24 @@ import Icons from "./Icons";
 const dataSlotIndexAttr = "data-slot-index";
 
 export default class SlotGrid {
-  static createSlotGrid(
-    parentElement: HTMLElement,
+  static drawSlots(
+    slotsGrid: HTMLElement,
+    amount: number,
+    getItem: (index: number) => Slot
+  ) {
+    for (let i = 0; i < amount; i++) {
+      const item = getItem(i);
+
+      const slotElement = slotsGrid.querySelector(
+        `[${dataSlotIndexAttr}="${i}"]`
+      ) as HTMLElement;
+
+      SlotGrid.drawSlot(slotElement, item);
+    }
+  }
+
+  static createSlots(
+    parentContainer: HTMLElement,
     amount: number,
     getSlot: (index: number) => Slot
   ) {
@@ -26,7 +42,7 @@ export default class SlotGrid {
       amountText.classList.add("amount");
       itemEl.appendChild(amountText);
 
-      parentElement.appendChild(slotEl);
+      parentContainer.appendChild(slotEl);
 
       const slot = getSlot(i);
       this.drawSlot(slotEl, slot);
@@ -35,8 +51,12 @@ export default class SlotGrid {
 
   static drawSlot(slotElem: HTMLElement, slot: Slot) {
     const itemEl = slotElem.querySelector(".item") as HTMLElement;
-    this.drawItemIcon(itemEl, slot);
-    this.drawItemAmount(slotElem, slot);
+    this.drawItem(itemEl, slot);
+  }
+
+  static drawItem(itemElement: HTMLElement, item: Item | null) {
+    this.drawItemIcon(itemElement, item);
+    this.drawItemAmount(itemElement, item);
   }
 
   private static drawItemIcon(itemElement: HTMLElement, item: Item | null) {

@@ -2,8 +2,6 @@ import InventoryManager, { Slot } from "../player/InventoryManager";
 import SlotGrid from "./SlotGrid";
 
 export default class Hotbar {
-  static readonly HOTBAR_SLOTS = 9;
-
   private inventoryManager: InventoryManager;
 
   private hotbarSlots: Slot[];
@@ -12,7 +10,7 @@ export default class Hotbar {
 
   constructor(inventoryManager: InventoryManager) {
     this.inventoryManager = inventoryManager;
-    this.hotbarSlots = this.inventoryManager.getHotbarItems();
+    this.hotbarSlots = this.inventoryManager.getHotbarSlots();
 
     this.initHotbarElement();
     this.createHotbarSlots();
@@ -31,8 +29,10 @@ export default class Hotbar {
 
   private createHotbarSlots() {
     // creating the slots
-    SlotGrid.createSlotGrid(this.hotbarElement, Hotbar.HOTBAR_SLOTS, (index) =>
-      this.inventoryManager.getItem(this.hotbarSlots, index)
+    SlotGrid.createSlots(
+      this.hotbarElement,
+      InventoryManager.HOTBAR_SLOTS,
+      (index) => this.inventoryManager.getItem(this.hotbarSlots, index)
     );
   }
 
