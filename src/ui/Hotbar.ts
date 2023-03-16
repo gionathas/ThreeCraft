@@ -53,7 +53,6 @@ export default class Hotbar {
     });
 
     window.addEventListener("wheel", (event) => {
-      event.preventDefault();
       const isScrollingUp = event.deltaY < 0;
       const isScrollingDown = event.deltaY > 0;
       const selectedIndex = this.inventoryManager.getSelectedIndex();

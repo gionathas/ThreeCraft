@@ -206,6 +206,8 @@ export default class InventoryManager {
   }
 
   decrementSelectedItemAmount() {
+    this.isDirty = true;
+
     const selectedItem = this.getSelectedItem();
 
     if (selectedItem) {

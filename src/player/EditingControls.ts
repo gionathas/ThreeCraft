@@ -37,11 +37,11 @@ export default class EditingControls {
 
   //TODO do not permit to add a block in the current player position
   private updateBlockPlacement() {
-    const leftButton = this.inputController.isLeftButtonJustPressed;
-    const rightButton = this.inputController.isRightButtonJustPressed;
+    const isM1 = this.inputController.isLeftButtonJustPressed;
+    const isM2 = this.inputController.isRightButtonJustPressed;
 
     // erasing a block
-    if (leftButton) {
+    if (isM1) {
       const erasedBlock = this.eraseTargetBlock();
 
       // if the block was erased and it drops something
@@ -55,7 +55,7 @@ export default class EditingControls {
     }
 
     // placing a block
-    if (rightButton) {
+    if (isM2) {
       const selectedItem = this.inventory.getSelectedItem();
 
       if (selectedItem) {
