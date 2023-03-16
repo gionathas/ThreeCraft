@@ -1,3 +1,4 @@
+import EventEmitter from "events";
 import EnvVars from "../config/EnvVars";
 import { BlockType } from "../terrain/block";
 
@@ -22,10 +23,14 @@ export default class InventoryManager {
   private draggingItem: Item | null;
   public isDirty: boolean;
 
+  private eventEmitter: EventEmitter;
+
   constructor() {
     this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
+
+    this.eventEmitter = new EventEmitter();
     this.draggingItem = null;
     this.isDirty = false;
 
@@ -97,25 +102,7 @@ export default class InventoryManager {
     }
   }
 
-  endDrag() {
-    if (this.isDragging()) {
-      // mark the inventory as dirty
-      this.isDirty = true;
-
-      // find an empty slot to place the dragged item
-      const emptySlotIdx = this.inventory.findIndex((slot) =>
-        this.isSlotEmpty(slot)
-      );
-      this.placeDraggedItem(this.inventory, emptySlotIdx);
-      this.setDraggingItem(null);
-    }
-  }
-
-  placeDraggedItem(
-    items: Slot[],
-    index: number,
-    singleUnit = false
-  ): Item | null {
+  drop(items: Slot[], index: number, singleUnit = false): Item | null {
     const dragItem = this.getDraggingItem();
 
     // no item is being dragged
@@ -175,6 +162,20 @@ export default class InventoryManager {
     // slot is not empty and items are different, perform a swap
     this.setItem(items, index, dragItem);
     return this.setDraggingItem(targetSlot);
+  }
+
+  safeDrop() {
+    if (this.isDragging()) {
+      // mark the inventory as dirty
+      this.isDirty = true;
+
+      // find an empty slot to place the dragged item
+      const emptySlotIdx = this.inventory.findIndex((slot) =>
+        this.isSlotEmpty(slot)
+      );
+      this.drop(this.inventory, emptySlotIdx);
+      this.setDraggingItem(null);
+    }
   }
 
   /**
@@ -278,13 +279,25 @@ export default class InventoryManager {
     return items[index];
   }
 
+  onHotbarChange(callback: (items: Slot[], index: number, item: Item) => void) {
+    this.eventEmitter.on("change", (items, index, item) => {
+      if (items === this.hotbar) {
+        callback(items, index, item);
+      }
+    });
+  }
+
   private setItem(items: Slot[], index: number, item: Item) {
     items[index] = item;
+
+    this.eventEmitter.emit("change", items, index, item);
     return item;
   }
 
   private removeItem(items: Slot[], index: number) {
     items[index] = null;
+
+    this.eventEmitter.emit("change", items, index, null);
     return null;
   }
 

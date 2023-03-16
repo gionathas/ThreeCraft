@@ -12,8 +12,12 @@ export default class Hotbar {
     this.inventoryManager = inventoryManager;
     this.hotbarSlots = this.inventoryManager.getHotbarSlots();
 
+    // ui
     this.initHotbarElement();
     this.createHotbarSlots();
+
+    // listeners
+    this.initItemChangeListener();
     this.initSelectionListener();
   }
 
@@ -39,6 +43,16 @@ export default class Hotbar {
   private initSelectionListener() {
     window.addEventListener("wheel", (event) => {
       //TODO
+    });
+  }
+
+  private initItemChangeListener() {
+    this.inventoryManager.onHotbarChange((items) => {
+      SlotGrid.drawSlots(
+        this.hotbarElement,
+        InventoryManager.HOTBAR_SLOTS,
+        (index) => this.inventoryManager.getItem(items, index)
+      );
     });
   }
 }
