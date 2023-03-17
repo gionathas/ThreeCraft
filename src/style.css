@@ -118,7 +118,7 @@ button:hover {
 #hotbar {
   display: flex;
   position: absolute;
-  bottom: 6%;
+  bottom: 1%;
   left: 50%;
   transform: translateX(-50%);
   border: 4px outset var(--hotbar-slot-background);
