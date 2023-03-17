@@ -1,9 +1,11 @@
 import * as THREE from "three";
+import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
+import { randomString } from "../utils/helpers";
 import GameLoop, { GameData } from "./GameLoop";
 
 const newGameData: GameData = {
-  seed: "seed",
+  seed: EnvVars.CUSTOM_SEED ? EnvVars.CUSTOM_SEED : randomString(10),
   spawnPosition: new THREE.Vector3(0, 0, 0),
   inventory: {
     hotbar: [],
@@ -30,11 +32,12 @@ export default class GameManager {
   }
 
   private async loadGameData() {
+    const worldData = await this.dataManager.getSavedWorldData();
     const playerData = await this.dataManager.getSavedPlayerData();
     const inventory = await this.dataManager.getSavedInventory();
 
     return {
-      seed: "seed",
+      seed: worldData?.seed ?? newGameData.seed,
       spawnPosition: playerData?.position
         ? new THREE.Vector3().fromArray(playerData.position)
         : newGameData.spawnPosition,

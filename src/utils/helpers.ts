@@ -22,6 +22,16 @@ export type BufferGeometryData = {
   colors: number[];
 };
 
+export function randomString(length: number) {
+  const chars =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  for (let i = length; i > 0; --i) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+}
+
 export function lerp(start: number, end: number, amount: number) {
   return Math.round(start + (end - start) * amount);
 }

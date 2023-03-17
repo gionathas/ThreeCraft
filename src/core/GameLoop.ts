@@ -32,7 +32,7 @@ export default class GameLoop {
   }
 
   start(gameData: GameData) {
-    const { spawnPosition, inventory } = gameData;
+    const { seed, spawnPosition, inventory } = gameData;
 
     this.gameState.setState("loading");
 
@@ -42,7 +42,7 @@ export default class GameLoop {
     this.inputController = InputController.getInstance();
     this.initLights();
 
-    this.terrain = this.initTerrain(spawnPosition);
+    this.terrain = this.initTerrain(seed, spawnPosition);
     this.player = this.initPlayer(this.terrain, spawnPosition, inventory);
     this.UI = this.initGameUI(this.player, this.terrain);
 
@@ -98,12 +98,12 @@ export default class GameLoop {
     this.scene.background = new THREE.Color("#87CEEB");
   }
 
-  private initTerrain(spawn: THREE.Vector3) {
+  private initTerrain(seed: string, spawn: THREE.Vector3) {
     if (this.terrain) {
       return this.terrain;
     }
 
-    const terrain = new Terrain(spawn);
+    const terrain = new Terrain(seed, spawn);
     terrain.update(spawn, true);
 
     return terrain;

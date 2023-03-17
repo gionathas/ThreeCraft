@@ -10,11 +10,11 @@ import PausedMenu from "./PausedMenu";
 
 export default class UI {
   private gameState: GameState;
+  private dataManager: GameDataManager;
 
   private inputController: InputController;
   private player: Player;
-
-  private dataManager: GameDataManager;
+  private terrain: Terrain;
 
   // UI's
   private pausedMenu: PausedMenu;
@@ -27,6 +27,8 @@ export default class UI {
   constructor(player: Player, terrain: Terrain) {
     this.gameState = GameState.getInstance();
     this.player = player;
+    this.terrain = terrain;
+
     this.inputController = InputController.getInstance();
     this.dataManager = GameDataManager.getInstance();
 
@@ -75,23 +77,8 @@ export default class UI {
     });
 
     this.pausedMenu.setOnQuitClick(async () => {
-      const inventory = this.player.getInventory();
-
       try {
-        console.log("Saving game...");
-
-        //TODO unload all the terrain chunks
-
-        // save player info
-        const playerPosition = this.player.getPosition().toArray();
-        await this.dataManager.savePlayerData(playerPosition);
-
-        // save inventory
-        await this.dataManager.saveInventory(
-          inventory.getHotbarSlots(),
-          inventory.getInventorySlots()
-        );
-        console.log("Game saved!");
+        await this.saveGame();
       } catch (err) {
         console.error(err);
       }
@@ -118,6 +105,30 @@ export default class UI {
         this.pauseGame();
       }
     });
+  }
+
+  private async saveGame() {
+    console.log("Saving game...");
+
+    const seed = this.terrain.getSeed();
+    const inventory = this.player.getInventory();
+
+    //TODO unload all the terrain chunks
+
+    // save player info
+    const playerPosition = this.player.getPosition().toArray();
+    await this.dataManager.savePlayerData(playerPosition);
+
+    // save inventory
+    await this.dataManager.saveInventory(
+      inventory.getHotbarSlots(),
+      inventory.getInventorySlots()
+    );
+
+    // save world info's
+    this.dataManager.saveWorldData(seed);
+
+    console.log("Game saved!");
   }
 
   private pauseGame() {

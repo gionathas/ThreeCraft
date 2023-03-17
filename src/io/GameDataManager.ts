@@ -20,6 +20,11 @@ interface PlayerDataTable {
   position: [number, number, number];
 }
 
+interface WorldDataTable {
+  worldId: string;
+  seed: string;
+}
+
 export default class GameDataManager extends Dexie {
   private static instance: GameDataManager | null;
 
@@ -32,6 +37,9 @@ export default class GameDataManager extends Dexie {
 
   // Player
   private player!: Dexie.Table<PlayerDataTable, string>;
+
+  // World
+  private world!: Dexie.Table<WorldDataTable, string>;
 
   private constructor() {
     super("GameDataManager");
@@ -46,6 +54,7 @@ export default class GameDataManager extends Dexie {
       chunksGeometries: "&chunkId",
       inventory: "&inventoryId",
       player: "&playerId",
+      world: "&worldId",
     });
 
     this.chunks.mapToClass(Chunk);
@@ -58,8 +67,15 @@ export default class GameDataManager extends Dexie {
     return this.instance;
   }
 
-  getSavedInventory() {
-    return this.inventory.get("default");
+  getSavedWorldData() {
+    return this.world.get("default");
+  }
+
+  async saveWorldData(seed: string) {
+    return this.world.put({
+      worldId: "default",
+      seed,
+    });
   }
 
   getSavedPlayerData() {
@@ -71,6 +87,10 @@ export default class GameDataManager extends Dexie {
       playerId: "default",
       position,
     });
+  }
+
+  getSavedInventory() {
+    return this.inventory.get("default");
   }
 
   async saveInventory(hotbar: Slot[], inventory: Slot[]) {

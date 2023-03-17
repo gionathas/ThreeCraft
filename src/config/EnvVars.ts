@@ -63,6 +63,7 @@ export default class EnvVars {
   /**
    * Terrain Generation
    */
+  static readonly CUSTOM_SEED = import.meta.env.VITE_CUSTOM_SEED;
   static readonly TERRAIN_GENERATION_ENABLED = this.getBoolean(
     import.meta.env.VITE_TERRAIN_GENERATION_ENABLED
   );

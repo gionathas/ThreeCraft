@@ -11,17 +11,18 @@ import { Coordinate } from "../utils/helpers";
 export default class Terrain {
   private scene: THREE.Scene;
 
+  private seed: string;
+
   private chunksManager: ChunkManager;
   private terrainLoader: TerrainLoader;
 
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
 
-  constructor(centerPosition: THREE.Vector3) {
+  constructor(seed: string, centerPosition: THREE.Vector3) {
     this.scene = Engine.getInstance().getScene();
+    this.seed = seed;
 
-    //FIXME
-    const seed = "seed";
     this.globalMapManager = GlobalMapManager.getInstance(seed);
     this.terrainMap = this.globalMapManager.getTerrainMap();
 
@@ -79,6 +80,10 @@ export default class Terrain {
 
   getSurfaceHeight(x: number, z: number) {
     return this.terrainMap.getSurfaceHeightAt(x, z);
+  }
+
+  getSeed() {
+    return this.seed;
   }
 
   _getContinentalness(x: number, z: number) {
