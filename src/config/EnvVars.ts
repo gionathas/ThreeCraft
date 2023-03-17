@@ -5,7 +5,36 @@ export default class EnvVars {
    * Game Settings
    */
   static readonly TARGET_FRAME_RATE = 1 / 60;
-  static readonly DEFAULT_PLAYER_MODE: PlayerMode = "dev";
+
+  /** Player */
+  static readonly DEFAULT_PLAYER_MODE: PlayerMode = "fly";
+  static readonly VITE_PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
+    import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
+  );
+  static readonly VITE_PLAYER_WIDTH = this.getNumber(
+    import.meta.env.VITE_PLAYER_WIDTH
+  );
+  static readonly VITE_PLAYER_HEIGHT = this.getNumber(
+    import.meta.env.VITE_PLAYER_HEIGHT
+  );
+  static readonly VITE_PLAYER_HORIZONTAL_SPEED = this.getNumber(
+    import.meta.env.VITE_PLAYER_HORIZONTAL_SPEED
+  );
+  static readonly VITE_PLAYER_VERTICAL_SPEED = this.getNumber(
+    import.meta.env.VITE_PLAYER_VERTICAL_SPEED
+  );
+  static readonly VITE_PLAYER_DAMPING_FACTOR = this.getNumber(
+    import.meta.env.VITE_PLAYER_DAMPING_FACTOR
+  );
+  static readonly VITE_FLY_HORIZONTAL_SPEED = this.getNumber(
+    import.meta.env.VITE_FLY_HORIZONTAL_SPEED
+  );
+  static readonly VITE_FLY_VERTICAL_SPEED = this.getNumber(
+    import.meta.env.VITE_FLY_VERTICAL_SPEED
+  );
+  static readonly VITE_FLY_DAMPING_FACTOR = this.getNumber(
+    import.meta.env.VITE_FLY_DAMPING_FACTOR
+  );
 
   /**
    * UI Settings

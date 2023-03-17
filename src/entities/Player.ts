@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
 import InventoryManager from "../player/InventoryManager";
 import PlayerControls from "../player/PlayerControls";
@@ -6,16 +7,20 @@ import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
-export type PlayerMode = "sim" | "dev";
+export type PlayerMode = "sim" | "fly";
 
 export default class Player {
+  private mode: PlayerMode;
+
   private terrain: Terrain;
+
   private playerControls: PlayerControls;
   private editingControls: EditingControls;
   private inventoryManager: InventoryManager;
 
   constructor(terrain: Terrain, mode: PlayerMode) {
     this.terrain = terrain;
+    this.mode = mode;
     this.inventoryManager = new InventoryManager();
 
     this.playerControls = new PlayerControls(terrain, mode);
@@ -56,12 +61,16 @@ export default class Player {
     return this.playerControls.addEventListener("unlock", func);
   }
 
+  getMode() {
+    return this.mode;
+  }
+
   getWidth() {
-    return this.playerControls.width;
+    return EnvVars.VITE_PLAYER_WIDTH;
   }
 
   getHeight() {
-    return this.playerControls.height;
+    return EnvVars.VITE_PLAYER_HEIGHT;
   }
 
   getPosition() {

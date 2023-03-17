@@ -31,6 +31,20 @@ interface ImportMetaEnv {
   readonly VITE_DEV_INVENTORY_ENABLED: string;
   readonly VITE_DEV_INVENTORY_ITEMS: string;
   readonly VITE_DEV_HOTBAR_ITEMS: number;
+
+  // Player
+  readonly VITE_PLAYER_SHOW_BOUNDING_BOX: string;
+
+  readonly VITE_PLAYER_WIDTH: number;
+  readonly VITE_PLAYER_HEIGHT: number;
+
+  readonly VITE_PLAYER_HORIZONTAL_SPEED: number;
+  readonly VITE_PLAYER_VERTICAL_SPEED: number;
+  readonly VITE_PLAYER_DAMPING_FACTOR: number;
+
+  readonly VITE_FLY_HORIZONTAL_SPEED: number;
+  readonly VITE_FLY_VERTICAL_SPEED: number;
+  readonly VITE_FLY_DAMPING_FACTOR: number;
 }
 
 interface ImportMeta {
