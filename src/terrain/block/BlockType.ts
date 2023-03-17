@@ -159,7 +159,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     drop: BlockType.OAK_LOG,
     icon: {
       row: 0,
-      col: 0,
+      col: 5,
     },
     texture: {
       top: {
@@ -248,7 +248,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     icon: {
       row: 0,
-      col: 0,
+      col: 6,
     },
     texture: {
       side: {

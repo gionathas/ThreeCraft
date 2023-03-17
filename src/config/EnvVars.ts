@@ -114,6 +114,10 @@ export default class EnvVars {
 
   /** Utilities */
   private static getList(key: keyof ImportMetaEnv): string[] {
+    if (!key) {
+      return [];
+    }
+
     return (key as string).split(",").map((item) => item.trim());
   }
 
