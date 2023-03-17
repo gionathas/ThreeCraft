@@ -27,7 +27,7 @@ export default class EditingControls {
     this.terrain = terrain;
     this.blockMarker = null;
 
-    this.inventory = player.getInventoryManager();
+    this.inventory = player.getInventory();
   }
 
   update() {

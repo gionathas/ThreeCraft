@@ -27,7 +27,7 @@ export default class UI {
 
     this.isFirstTime = true;
 
-    const playerInventory = player.getInventoryManager();
+    const playerInventory = player.getInventory();
     this.pausedMenu = new PausedMenu();
     this.inventory = new Inventory(playerInventory);
     this.hotbar = new Hotbar(playerInventory);

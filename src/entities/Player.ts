@@ -101,7 +101,7 @@ export default class Player {
     return getOrientationFromAngle(angle);
   }
 
-  getInventoryManager() {
+  getInventory() {
     return this.inventoryManager;
   }
 
