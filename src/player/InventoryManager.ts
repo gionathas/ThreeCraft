@@ -1,6 +1,7 @@
 import EventEmitter from "events";
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
+import GameDataManager from "../io/GameDataManager";
 import { BlockType } from "../terrain/block";
 
 export type Item = {
@@ -17,6 +18,10 @@ export default class InventoryManager {
   static readonly HOTBAR_SLOTS = 9;
   static readonly CRAFTING_SLOTS = 9;
 
+  private dataManager: GameDataManager;
+  public isDirty: boolean;
+  public isLoading: boolean;
+
   private crafting: Slot[];
   private inventory: Slot[];
   private hotbar: Slot[];
@@ -24,11 +29,11 @@ export default class InventoryManager {
   private draggedItem: Item | null;
   private selectedHotbarIndex: number;
 
-  public isDirty: boolean;
-
   private eventEmitter: EventEmitter;
 
   constructor() {
+    this.dataManager = GameDataManager.getInstance();
+
     this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
@@ -39,15 +44,28 @@ export default class InventoryManager {
     this.draggedItem = null;
     this.isDirty = false;
 
+    this.isLoading = true;
     this.loadInventory();
   }
 
-  private loadInventory() {
+  async saveInventory() {
+    this.dataManager.saveInventory(this.hotbar, this.inventory);
+  }
+
+  private async loadInventory() {
+    const savedInventory = await this.dataManager.getSavedInventory();
+
+    if (savedInventory) {
+      this.inventory = savedInventory.inventory;
+      this.hotbar = savedInventory.hotbar;
+    }
+
     if (EnvVars.DEV_INVENTORY_ENABLED) {
       this.loadDevInventory();
     }
 
-    //TODO load inventory from indexedDB
+    this.isLoading = false;
+    this.eventEmitter.emit("load");
   }
 
   private loadDevInventory() {
@@ -357,6 +375,10 @@ export default class InventoryManager {
         callback(items, index, item);
       }
     });
+  }
+
+  onLoad(callback: () => void) {
+    this.eventEmitter.on("load", callback);
   }
 
   isDragging() {

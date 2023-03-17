@@ -21,12 +21,10 @@ export default class Inventory {
     this.isOpen = false;
 
     this.initInventoryPanel();
-
     this.createCraftingGrid();
     this.createInventoryGrid();
     this.createHotbarGrid();
     this.createDragItemElement();
-
     this.initDragListener();
   }
 

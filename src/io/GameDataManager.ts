@@ -1,4 +1,5 @@
 import Dexie from "dexie";
+import { Slot } from "../player/InventoryManager";
 import { Chunk, ChunkID } from "../terrain/chunk";
 import { BufferGeometryData } from "../utils/helpers";
 
@@ -8,11 +9,21 @@ interface ChunkGeometryTable {
   transparentGeometry?: BufferGeometryData;
 }
 
+interface InventoryTable {
+  inventoryId: string;
+  hotbar: Slot[];
+  inventory: Slot[];
+}
+
 export default class GameDataManager extends Dexie {
   private static instance: GameDataManager | null;
 
+  // Chunks
   private chunks!: Dexie.Table<Chunk, ChunkID>;
   private chunksGeometries!: Dexie.Table<ChunkGeometryTable, ChunkID>;
+
+  // Inventory
+  private inventory!: Dexie.Table<InventoryTable, string>;
 
   private constructor() {
     super("GameDataManager");
@@ -25,6 +36,7 @@ export default class GameDataManager extends Dexie {
     this.version(1).stores({
       chunks: "&chunkId",
       chunksGeometries: "&chunkId",
+      inventory: "&inventoryId",
     });
 
     this.chunks.mapToClass(Chunk);
@@ -37,11 +49,23 @@ export default class GameDataManager extends Dexie {
     return this.instance;
   }
 
-  getChunk(chunkId: ChunkID) {
+  getSavedInventory() {
+    return this.inventory.get("default");
+  }
+
+  async saveInventory(hotbar: Slot[], inventory: Slot[]) {
+    return this.inventory.put({
+      inventoryId: "default",
+      hotbar,
+      inventory,
+    });
+  }
+
+  getSavedChunk(chunkId: ChunkID) {
     return this.chunks.get({ chunkId });
   }
 
-  getChunkGeometry(chunkId: ChunkID) {
+  getSavedChunkGeometry(chunkId: ChunkID) {
     return this.chunksGeometries.get({ chunkId });
   }
 

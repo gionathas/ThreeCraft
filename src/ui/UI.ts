@@ -1,6 +1,7 @@
 import GameState from "../core/GameState";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
+import GameDataManager from "../io/GameDataManager";
 import InputController from "../io/InputController";
 import DebugInfo from "./DebugInfo";
 import Hotbar from "./Hotbar";
@@ -9,14 +10,17 @@ import PausedMenu from "./PausedMenu";
 
 export default class UI {
   private gameState: GameState;
+
   private inputController: InputController;
   private player: Player;
 
+  private dataManager: GameDataManager;
+
   // UI's
-  private hotbar: Hotbar;
-  private inventory: Inventory;
   private pausedMenu: PausedMenu;
   private debugInfo: DebugInfo;
+  private hotbar!: Hotbar;
+  private inventory!: Inventory;
 
   private isFirstTime: boolean;
 
@@ -24,14 +28,27 @@ export default class UI {
     this.gameState = GameState.getInstance();
     this.player = player;
     this.inputController = InputController.getInstance();
+    this.dataManager = GameDataManager.getInstance();
 
     this.isFirstTime = true;
 
-    const playerInventory = player.getInventory();
     this.pausedMenu = new PausedMenu();
-    this.inventory = new Inventory(playerInventory);
-    this.hotbar = new Hotbar(playerInventory);
     this.debugInfo = new DebugInfo(player, terrain);
+    this.initInventoryUI();
+  }
+
+  private initInventoryUI() {
+    const playerInventory = this.player.getInventory();
+
+    if (playerInventory.isLoading) {
+      playerInventory.onLoad(() => {
+        this.inventory = new Inventory(playerInventory);
+        this.hotbar = new Hotbar(playerInventory);
+      });
+    } else {
+      this.inventory = new Inventory(playerInventory);
+      this.hotbar = new Hotbar(playerInventory);
+    }
   }
 
   update(dt: number) {
@@ -66,6 +83,22 @@ export default class UI {
 
     this.pausedMenu.setOnResumeClick(() => {
       this.player.lockControls();
+    });
+
+    //TODO save the game
+    this.pausedMenu.setOnQuitClick(async () => {
+      const inventory = this.player.getInventory();
+
+      try {
+        console.log("Saving game...");
+        await this.dataManager.saveInventory(
+          inventory.getHotbarSlots(),
+          inventory.getInventorySlots()
+        );
+      } catch (err) {
+        console.error(err);
+      }
+      console.log("Game saved!");
     });
 
     this.player.setOnLockControls(() => {
