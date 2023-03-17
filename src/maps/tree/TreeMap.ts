@@ -1,3 +1,4 @@
+import EnvVars from "../../config/EnvVars";
 import { Chunk } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
@@ -24,11 +25,18 @@ export default class TreeMap extends Local2DMap implements Map2D {
    */
   static readonly MAP_SIZE = Chunk.WIDTH + Tree.RADIUS * 2;
 
+  private enabled: boolean;
+
   constructor(seed: string) {
     super(seed);
+    this.enabled = EnvVars.TREE_GENERATION_ENABLED;
   }
 
   shouldSpawnTreeLeafAt(x: number, y: number, z: number) {
+    if (!this.enabled) {
+      return false;
+    }
+
     const value = this.getTreeMapValueAt(x, z);
 
     if (value == null) {
@@ -70,6 +78,10 @@ export default class TreeMap extends Local2DMap implements Map2D {
   }
 
   shouldSpawnTreeTrunkAt(x: number, y: number, z: number, surfaceY: number) {
+    if (!this.enabled) {
+      return false;
+    }
+
     const type = this.getTreeMapTypeAt(x, z);
 
     if (y < surfaceY || y > surfaceY + Tree.TRUNK_HEIGHT || type == null) {
