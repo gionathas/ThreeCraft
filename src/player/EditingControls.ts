@@ -35,7 +35,6 @@ export default class EditingControls {
     this.updateBlockPlacement();
   }
 
-  //TODO do not permit to add a block in the current player position
   private updateBlockPlacement() {
     const isM1 = this.inputController.isLeftButtonJustPressed;
     const isM2 = this.inputController.isRightButtonJustPressed;
