@@ -71,7 +71,7 @@ export default class ChunkManager implements ChunkModel {
       let transparentGeometry: BufferGeometryData | undefined;
       const chunkMeshes = [];
 
-      const savedChunk = await this.dataManager.getChunk(chunkId);
+      const savedChunk = await this.dataManager.getSavedChunk(chunkId);
 
       // if the chunk was previously saved, load it from the data storage
       if (savedChunk) {
@@ -79,9 +79,8 @@ export default class ChunkManager implements ChunkModel {
         this.loadedChunks.set(chunkId, savedChunk);
 
         // retrieve the saved chunk geometries
-        const persistedChunkGeometry = await this.dataManager.getChunkGeometry(
-          chunkId
-        );
+        const persistedChunkGeometry =
+          await this.dataManager.getSavedChunkGeometry(chunkId);
 
         solidGeometry = persistedChunkGeometry!.solidGeometry;
         transparentGeometry = persistedChunkGeometry!.transparentGeometry;

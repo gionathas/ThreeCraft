@@ -1,19 +1,28 @@
 import * as THREE from "three";
+import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
+import InventoryManager from "../player/InventoryManager";
 import PlayerControls from "../player/PlayerControls";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
-export type PlayerMode = "sim" | "dev";
+export type PlayerMode = "sim" | "fly";
 
 export default class Player {
+  private mode: PlayerMode;
+
   private terrain: Terrain;
+
   private playerControls: PlayerControls;
   private editingControls: EditingControls;
+  private inventoryManager: InventoryManager;
 
   constructor(terrain: Terrain, mode: PlayerMode) {
     this.terrain = terrain;
+    this.mode = mode;
+    this.inventoryManager = new InventoryManager();
+
     this.playerControls = new PlayerControls(terrain, mode);
     this.editingControls = new EditingControls(this, terrain);
   }
@@ -32,24 +41,36 @@ export default class Player {
     this.playerControls.position.set(x, y, z);
   }
 
-  enableControls() {
-    return this.playerControls.lock();
+  lockControls() {
+    this.playerControls.lock();
   }
 
-  setOnControlsEnabled(func: () => void) {
+  unlockControls() {
+    this.playerControls.unlock();
+  }
+
+  isControlsLocked() {
+    return this.playerControls.isLocked;
+  }
+
+  setOnLockControls(func: () => void) {
     return this.playerControls.addEventListener("lock", func);
   }
 
-  setOnControlsDisabled(func: () => void) {
+  setOnUnlockControls(func: () => void) {
     return this.playerControls.addEventListener("unlock", func);
   }
 
+  getMode() {
+    return this.mode;
+  }
+
   getWidth() {
-    return this.playerControls.width;
+    return EnvVars.VITE_PLAYER_WIDTH;
   }
 
   getHeight() {
-    return this.playerControls.height;
+    return EnvVars.VITE_PLAYER_HEIGHT;
   }
 
   getPosition() {
@@ -68,12 +89,20 @@ export default class Player {
     return this.editingControls.getTargetBlock();
   }
 
+  intersectBlock(blockBB: THREE.Box3) {
+    return this.playerControls.intersectsBlock(blockBB);
+  }
+
   getOrientation() {
     const lookDirection = this.playerControls
       .getCamera()
       .getWorldDirection(new THREE.Vector3());
     const angle = Math.atan2(lookDirection.x, lookDirection.z);
     return getOrientationFromAngle(angle);
+  }
+
+  getInventory() {
+    return this.inventoryManager;
   }
 
   get _currentChunkId() {

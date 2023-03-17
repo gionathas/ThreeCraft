@@ -7,7 +7,7 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
 
-export default class DebugUI {
+export default class DebugInfo {
   private player: Player;
   private terrain: Terrain;
 
@@ -74,6 +74,8 @@ export default class DebugUI {
     const erosion = this.terrain._getErosion(px, pz);
     const pv = this.terrain._getPV(px, pz);
 
+    //FIXME this will run every frame
+    // it's not ideal since it's a DOM operation
     this.debugPanel.innerHTML = `
     <p>Orientation: ${orientation}</p>
     <p>x: ${px.toFixed(2)} y: ${py.toFixed(2)} z: ${pz.toFixed(2)}</p>

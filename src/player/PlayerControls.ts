@@ -15,29 +15,24 @@ export interface PlayerControlsProperties {
   height: number;
   horizontalSpeed: number;
   verticalSpeed: number;
-  dampingCoefficient: number;
+  dampingFactor: number;
   physicsEnabled: boolean;
-  showHitbox: boolean;
 }
 
-export const devPlayerProperties: PlayerControlsProperties = {
-  width: 0.5,
-  height: 2,
-  horizontalSpeed: 5,
-  verticalSpeed: 2,
-  dampingCoefficient: 10,
-  physicsEnabled: false,
-  showHitbox: false,
+const simProps: PlayerControlsProperties = {
+  width: EnvVars.VITE_PLAYER_WIDTH,
+  height: EnvVars.VITE_PLAYER_HEIGHT,
+  horizontalSpeed: EnvVars.VITE_PLAYER_HORIZONTAL_SPEED,
+  verticalSpeed: EnvVars.VITE_PLAYER_VERTICAL_SPEED,
+  dampingFactor: EnvVars.VITE_PLAYER_DAMPING_FACTOR,
+  physicsEnabled: true,
 };
 
-export const simPlayerProperties: PlayerControlsProperties = {
-  width: 0.4,
-  height: 1.8,
-  horizontalSpeed: 0.8,
-  verticalSpeed: 6,
-  dampingCoefficient: 10,
-  physicsEnabled: true,
-  showHitbox: false,
+const flyProps: PlayerControlsProperties = {
+  ...simProps,
+  physicsEnabled: false,
+  horizontalSpeed: EnvVars.VITE_FLY_HORIZONTAL_SPEED,
+  verticalSpeed: EnvVars.VITE_FLY_VERTICAL_SPEED,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
@@ -53,52 +48,59 @@ const MIN_VELOCITY = 0.001;
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerControls extends PointerLockControls {
+  private inputController: InputController;
   private terrain: Terrain;
 
   private velocity: THREE.Vector3;
   private controlsDirection: THREE.Vector3;
 
-  private hitBox?: THREE.LineSegments;
-  private inputController: InputController;
-
+  private mode: PlayerMode;
   private properties: PlayerControlsProperties;
   private state: "onGround" | "falling" | "jumping";
-  private mode: PlayerMode;
+
+  private hitbox: THREE.LineSegments;
 
   constructor(terrain: Terrain, mode: PlayerMode) {
     super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
     this.terrain = terrain;
+    this.inputController = InputController.getInstance();
+
+    this.mode = mode;
+    this.state = "falling";
+    this.properties = this.getPlayerProps(mode);
+
     this.velocity = new THREE.Vector3();
     this.controlsDirection = new THREE.Vector3();
-
-    this.inputController = InputController.getInstance();
-    this.mode = mode;
-    this.properties =
-      mode === "sim" ? simPlayerProperties : devPlayerProperties;
-
-    this.state = "falling";
-    this.initHitBox();
+    this.hitbox = this.initBoundingBox();
   }
 
-  private initHitBox() {
-    const { showHitbox } = this.properties;
+  private initBoundingBox() {
+    const { width, height } = this.properties;
     const scene = Engine.getInstance().getScene();
 
-    if (showHitbox) {
-      const boxGeom = new THREE.BoxGeometry(
-        this.width,
-        this.height,
-        this.width
-      );
-      const mat = new THREE.LineBasicMaterial({ color: "white" });
-      const edges = new THREE.EdgesGeometry(boxGeom);
-      const axesHelpers = new THREE.AxesHelper();
+    const boxGeom = new THREE.BoxGeometry(width, height, width);
+    const mat = new THREE.LineBasicMaterial({ color: "white" });
+    const edges = new THREE.EdgesGeometry(boxGeom);
+    const axesHelpers = new THREE.AxesHelper();
 
-      this.hitBox = new THREE.LineSegments(edges, mat);
-      this.hitBox.add(axesHelpers);
+    const hitbox = new THREE.LineSegments(edges, mat);
+    hitbox.add(axesHelpers);
 
-      scene.add(this.hitBox);
+    if (EnvVars.VITE_PLAYER_SHOW_BOUNDING_BOX) {
+      scene.add(hitbox);
     }
+
+    return hitbox;
+  }
+
+  intersectsBlock(blockBoundingBox: THREE.Box3) {
+    this.hitbox.geometry.computeBoundingBox();
+
+    // transform the hitbox bounding box to world space
+    const boundingBox = this.hitbox.geometry.boundingBox;
+    boundingBox?.applyMatrix4(this.hitbox.matrixWorld);
+
+    return boundingBox?.intersectsBox(blockBoundingBox) ?? false;
   }
 
   moveUp(distance: number) {
@@ -133,27 +135,19 @@ export default class PlayerControls extends PointerLockControls {
 
   private updateMode() {
     const currentMode = this.mode;
+
     if (this.hasSwitchedMode()) {
-      if (currentMode === "sim") {
-        this.mode = "dev";
-        this.properties = devPlayerProperties;
-      } else {
-        this.mode = "sim";
-        this.properties = simPlayerProperties;
-      }
+      this.mode = currentMode === "sim" ? "fly" : "sim";
+      this.properties = this.getPlayerProps(this.mode);
     }
   }
 
   private updateHitBox() {
-    const { showHitbox } = this.properties;
-
-    if (showHitbox) {
-      this.hitBox?.position.set(
-        this.position.x,
-        this.position.y - this.height / 2,
-        this.position.z
-      );
-    }
+    this.hitbox?.position.set(
+      this.position.x,
+      this.position.y - this.height / 2,
+      this.position.z
+    );
   }
 
   private updateHorizontalVelocity() {
@@ -177,7 +171,7 @@ export default class PlayerControls extends PointerLockControls {
           this.velocity.y += verticalSpeed;
         }
         break;
-      case "dev":
+      case "fly":
         const upDirection =
           (this.inputController.getKey(KeyBindings.JUMP_KEY) ? 1 : 0) +
           (this.inputController.getKey(KeyBindings.SPRINT_KEY) ? -1 : 0);
@@ -1351,7 +1345,8 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private applyVelocityDamping(dt: number) {
-    const { dampingCoefficient, physicsEnabled } = this.properties;
+    const { dampingFactor: dampingCoefficient, physicsEnabled } =
+      this.properties;
 
     this.velocity.x -= this.velocity.x * dampingCoefficient * dt;
     this.velocity.z -= this.velocity.z * dampingCoefficient * dt;
@@ -1397,6 +1392,10 @@ export default class PlayerControls extends PointerLockControls {
       (this.inputController.getKey(KeyBindings.MOVE_RIGHT_KEY) ? 1 : 0) +
       (this.inputController.getKey(KeyBindings.MOVE_LEFT_KEY) ? -1 : 0)
     );
+  }
+
+  private getPlayerProps(mode: PlayerMode) {
+    return this.mode === "sim" ? simProps : flyProps;
   }
 
   getCamera() {

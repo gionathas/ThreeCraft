@@ -1,12 +1,54 @@
 :root {
   --cross-width: 20px;
   --cross-thickness: 4px;
+  --button-background: #9b9b9b;
+  --button-hover-background: #62a8e5;
+  --shadow-background: rgb(51, 51, 51);
+  --inventory-background: #c6c6c6;
+  --inventory-slot-background: #979494;
+  --hotbar-slot-background: #ababab;
+  --block-icon-width: 32px;
+  --block-icon-height: 32px;
+  --inventory-slot-width: 44px;
+  --inventory-slot-height: 44px;
 }
 
-body {
+* {
   padding: 0;
   margin: 0;
+  color: #fff;
   font-family: monospace;
+  font-weight: lighter;
+}
+
+/* Button style */
+button {
+  width: 400px;
+  background-color: var(--button-background);
+  display: inline-block;
+  padding: 10px 16px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 2px;
+  border: 2px outset black;
+  box-shadow: inset 2px 0 0 0 rgb(205, 205, 205);
+}
+
+button:hover {
+  background-color: var(--button-hover-background);
+}
+
+#overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(3px);
+  z-index: 2;
 }
 
 /* Crosshair */
@@ -45,29 +87,154 @@ body {
   transform: translate(0, -50%);
 }
 
-/* UI */
+/* Debug Panel */
 #debugPanel {
   position: absolute;
   padding: 4px;
-  color: white;
   font-size: 18px;
-  line-height: 16px;
+  line-height: 28px;
   left: 10px;
   bottom: 10px;
-  /* background-color: rgb(255, 255, 255, 0.3); */
+  z-index: 2;
 }
 
-#game-paused-menu {
+/* Inventory */
+#inventory {
+  display: none;
+  flex-direction: column;
   position: absolute;
-  backdrop-filter: blur(1px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  gap: 8px;
+  background-color: var(--inventory-background);
+  padding: 14px;
+  border: 2px outset #e3e3e3;
+  border-radius: 5px;
+  box-shadow: inset 1px -1px 0 0 var(--shadow-background);
+  z-index: 3;
+}
+
+#hotbar {
+  display: flex;
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px outset var(--hotbar-slot-background);
+  z-index: 1;
+}
+
+.inventory-crafting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inventory-crafting .arrow {
+  display: flex;
+  align-items: center;
+}
+
+.inventory-crafting .arrow .tail {
+  width: 40px;
+  height: 12px;
+  background-color: var(--inventory-slot-background);
+}
+
+.inventory-crafting .arrow .tip {
+  width: 0;
+  height: 0;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+  border-left: 20px solid var(--inventory-slot-background);
+}
+
+#inventory-label {
+  color: #fefefe;
+  margin: 0;
+  font-size: 16px;
+  font-weight: lighter;
+  margin-top: 8px;
+}
+
+#crafting-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+#inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+#inventory-hotbar-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--inventory-slot-width);
+  height: var(--inventory-slot-height);
+  background-color: var(--inventory-slot-background);
+  border: 1px solid #e3e3e3;
+  border-radius: 2px;
+  box-shadow: inset 1px 1px 0 0 var(--shadow-background);
+  cursor: pointer;
+}
+
+.slot:hover {
+  background-color: #bebebe;
+}
+
+#hotbar .slot {
+  border: 3px solid var(--hotbar-slot-background);
+  background-color: rgb(150, 150, 150, 0.5);
+}
+
+#hotbar .slot.selected {
+  border: 3px solid #e2e2e2;
+}
+
+#inventory-drag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.item {
+  position: relative;
+  width: var(--block-icon-width);
+  height: var(--block-icon-height);
+  image-rendering: pixelated;
+}
+
+.item .amount {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 18px;
+}
+
+/* Game Pause Menu */
+#game-paused-menu {
+  display: none;
+  position: absolute;
   width: 100vw;
   height: 100vh;
-  display: none;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(8px);
   justify-content: center;
-  align-content: center;
+  align-items: center;
+  z-index: 1;
 }
 
-#game-paused-menu h2 {
-  color: #fff;
-  font-size: 60px;
+#game-paused-menu .title {
+  font-size: 18px;
 }

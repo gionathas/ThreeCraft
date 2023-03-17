@@ -1,12 +1,11 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
-import GameUI from "../entities/GameUI";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
+import UI from "../ui/UI";
 import Engine from "./Engine";
-
-type GameState = "ready" | "loading" | "running" | "paused";
+import GameState from "./GameState";
 
 export default class GameLoop {
   private engine!: Engine;
@@ -17,14 +16,14 @@ export default class GameLoop {
   private inputController!: InputController;
   private player!: Player;
   private terrain!: Terrain;
-  private gameUI!: GameUI;
+  private UI!: UI;
 
   constructor() {
-    this.setGameState("ready");
+    this.gameState = GameState.getInstance();
   }
 
   start() {
-    this.setGameState("loading");
+    this.gameState.setState("loading");
 
     this.engine = Engine.getInstance();
     this.scene = this.engine.getScene();
@@ -33,10 +32,9 @@ export default class GameLoop {
     this.initLights();
     this.initTerrain();
     this.initPlayer(this.terrain);
-    this.initEventListeners(this.player);
     this.initGameUI();
 
-    this.setGameState("running");
+    this.gameState.setState("running");
 
     this.engine.start((dt) => {
       this.loop(dt);
@@ -44,8 +42,8 @@ export default class GameLoop {
   }
 
   stop() {
-    const canBeStopped =
-      this.gameState === "running" || this.gameState === "paused";
+    const state = this.gameState.getState();
+    const canBeStopped = state === "running" || state === "paused";
 
     if (!canBeStopped) {
       throw new Error("Game is not running!");
@@ -56,12 +54,13 @@ export default class GameLoop {
   }
 
   private loop(dt: number) {
-    const { inputController, player, terrain, gameUI, gameState } = this;
+    const { inputController, player, terrain, UI } = this;
+    const state = this.gameState.getState();
 
-    if (gameState === "running") {
+    if (state === "running") {
       terrain.update(player.getPosition());
       player.update(dt);
-      gameUI.update(dt);
+      UI.update(dt);
       inputController.update(); // this must come lastly
     }
   }
@@ -103,54 +102,8 @@ export default class GameLoop {
     }
   }
 
-  private initEventListeners(player: Player) {
-    window.addEventListener("pointerdown", (evt) => {
-      /**
-       * //TODO replace pointerdown with Resume click, Start Game click
-       * here we want to lock the controls in 2 cases:
-       * 1. After starting a new game and the world has been loaded
-       * 2. After resuming the game from the pause menu
-       */
-
-      this.player.enableControls();
-    });
-
-    // game started or resumed
-    player.setOnControlsEnabled(() => {
-      this.gameState = "running";
-
-      // enable input listeners
-      this.inputController.enable();
-
-      // hide start or pause menu
-      const pauseMenu = document.getElementById("game-paused-menu");
-      pauseMenu!.style.display = "none";
-    });
-
-    // pausing game or exiting from game
-    player.setOnControlsDisabled(() => {
-      this.gameState = "paused";
-
-      // disable input listeners
-      this.inputController.disable();
-
-      // show pause menu
-      const pauseMenu = document.getElementById("game-paused-menu");
-      pauseMenu!.style.display = "flex";
-    });
-  }
-
   private initGameUI() {
-    if (!this.gameUI) {
-      this.gameUI = new GameUI(this.player, this.terrain);
-    }
-  }
-
-  private setGameState(state: GameState) {
-    this.gameState = state;
-  }
-
-  getGameState() {
-    return this.gameState;
+    this.UI = new UI(this.player, this.terrain);
+    this.UI.attachEventListeners();
   }
 }

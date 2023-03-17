@@ -19,6 +19,10 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.AIR]: {
     isTransparent: true,
     isSolid: false,
+    icon: {
+      row: -1,
+      col: -1,
+    },
     texture: {
       top: {
         row: -1,
@@ -37,6 +41,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.STONE]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.COBBLESTONE,
+    icon: {
+      row: 0,
+      col: 2,
+    },
     texture: {
       top: {
         row: 0,
@@ -55,6 +64,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.COBBLESTONE]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.COBBLESTONE,
+    icon: {
+      row: 0,
+      col: 2,
+    },
     texture: {
       top: {
         row: 0,
@@ -73,6 +87,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.GRASS]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.DIRT,
+    icon: {
+      row: 0,
+      col: 0,
+    },
     texture: {
       top: {
         row: 0,
@@ -91,6 +110,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.GRASS_SNOW]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.DIRT,
+    icon: {
+      row: -1,
+      col: -1,
+    },
     texture: {
       top: {
         row: 2,
@@ -109,6 +133,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.DIRT]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.DIRT,
+    icon: {
+      row: 0,
+      col: 1,
+    },
     texture: {
       top: {
         row: 0,
@@ -127,6 +156,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.OAK_LOG]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.OAK_LOG,
+    icon: {
+      row: 0,
+      col: 5,
+    },
     texture: {
       top: {
         row: 1,
@@ -145,6 +179,10 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.OAK_LEAVES]: {
     isTransparent: true,
     isSolid: true,
+    icon: {
+      row: 0,
+      col: 0,
+    },
     texture: {
       top: {
         row: 1,
@@ -163,6 +201,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.SAND]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.SAND,
+    icon: {
+      row: 0,
+      col: 3,
+    },
     texture: {
       top: {
         row: 1,
@@ -181,6 +224,10 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.WATER]: {
     isTransparent: true,
     isSolid: false,
+    icon: {
+      row: 0,
+      col: 0,
+    },
     texture: {
       side: {
         row: 1,
@@ -199,6 +246,10 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.GLASS]: {
     isTransparent: true,
     isSolid: true,
+    icon: {
+      row: 0,
+      col: 6,
+    },
     texture: {
       side: {
         row: 2,
@@ -217,6 +268,11 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.COAL_ORE]: {
     isTransparent: false,
     isSolid: true,
+    drop: BlockType.COAL_ORE,
+    icon: {
+      row: 0,
+      col: 4,
+    },
     texture: {
       side: {
         row: 0,
