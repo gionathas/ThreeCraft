@@ -90,7 +90,7 @@ export default class Inventory {
   }
 
   private initDragListener() {
-    window.addEventListener("mousemove", (evt) => {
+    document.addEventListener("mousemove", (evt) => {
       if (this.inventoryManager.isDragging()) {
         this.dragItemElement.style.left = `${evt.pageX}px`;
         this.dragItemElement.style.top = `${evt.pageY}px`;

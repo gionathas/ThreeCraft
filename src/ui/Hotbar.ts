@@ -44,7 +44,7 @@ export default class Hotbar {
   }
 
   private initSelectionListener() {
-    window.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", (event) => {
       const numPressed = parseInt(event.key);
 
       if (!isNaN(numPressed)) {
@@ -52,7 +52,7 @@ export default class Hotbar {
       }
     });
 
-    window.addEventListener("wheel", (event) => {
+    document.addEventListener("wheel", (event) => {
       const isScrollingUp = event.deltaY < 0;
       const isScrollingDown = event.deltaY > 0;
       const selectedIndex = this.inventoryManager.getSelectedIndex();

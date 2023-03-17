@@ -44,7 +44,7 @@ export default class UI {
 
   attachEventListeners() {
     //FIXME this is a temporary solution
-    window.addEventListener("click", () => {
+    document.addEventListener("pointerdown", () => {
       if (this.isFirstTime) {
         this.isFirstTime = false;
         this.player.lockControls();
@@ -52,11 +52,11 @@ export default class UI {
     });
 
     // to prevent the context menu from appearingt
-    window.addEventListener("contextmenu", (evt) => {
+    document.addEventListener("contextmenu", (evt) => {
       evt.preventDefault();
     });
 
-    window.addEventListener("keydown", (evt) => {
+    document.addEventListener("keydown", (evt) => {
       switch (evt.code) {
         case "KeyT": {
           this.toggleInventory();
