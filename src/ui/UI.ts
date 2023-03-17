@@ -34,21 +34,10 @@ export default class UI {
 
     this.pausedMenu = new PausedMenu();
     this.debugInfo = new DebugInfo(player, terrain);
-    this.initInventoryUI();
-  }
 
-  private initInventoryUI() {
     const playerInventory = this.player.getInventory();
-
-    if (playerInventory.isLoading) {
-      playerInventory.onLoad(() => {
-        this.inventory = new Inventory(playerInventory);
-        this.hotbar = new Hotbar(playerInventory);
-      });
-    } else {
-      this.inventory = new Inventory(playerInventory);
-      this.hotbar = new Hotbar(playerInventory);
-    }
+    this.inventory = new Inventory(playerInventory);
+    this.hotbar = new Hotbar(playerInventory);
   }
 
   update(dt: number) {
@@ -85,20 +74,27 @@ export default class UI {
       this.player.lockControls();
     });
 
-    //TODO save the game
     this.pausedMenu.setOnQuitClick(async () => {
       const inventory = this.player.getInventory();
 
       try {
         console.log("Saving game...");
+
+        //TODO unload all the terrain chunks
+
+        // save player info
+        const playerPosition = this.player.getPosition().toArray();
+        await this.dataManager.savePlayerData(playerPosition);
+
+        // save inventory
         await this.dataManager.saveInventory(
           inventory.getHotbarSlots(),
           inventory.getInventorySlots()
         );
+        console.log("Game saved!");
       } catch (err) {
         console.error(err);
       }
-      console.log("Game saved!");
     });
 
     this.player.setOnLockControls(() => {

@@ -1,11 +1,17 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
-import Player from "../entities/Player";
+import Player, { PlayerInventory } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import UI from "../ui/UI";
 import Engine from "./Engine";
 import GameState from "./GameState";
+
+export type GameData = {
+  seed: string;
+  spawnPosition: THREE.Vector3;
+  inventory: PlayerInventory;
+};
 
 export default class GameLoop {
   private engine!: Engine;
@@ -14,15 +20,20 @@ export default class GameLoop {
   private gameState!: GameState;
 
   private inputController!: InputController;
-  private player!: Player;
-  private terrain!: Terrain;
-  private UI!: UI;
+  private player: Player | null;
+  private terrain: Terrain | null;
+  private UI: UI | null;
 
   constructor() {
     this.gameState = GameState.getInstance();
+    this.player = null;
+    this.terrain = null;
+    this.UI = null;
   }
 
-  start() {
+  start(gameData: GameData) {
+    const { spawnPosition, inventory } = gameData;
+
     this.gameState.setState("loading");
 
     this.engine = Engine.getInstance();
@@ -30,9 +41,10 @@ export default class GameLoop {
 
     this.inputController = InputController.getInstance();
     this.initLights();
-    this.initTerrain();
-    this.initPlayer(this.terrain);
-    this.initGameUI();
+
+    this.terrain = this.initTerrain(spawnPosition);
+    this.player = this.initPlayer(this.terrain, spawnPosition, inventory);
+    this.UI = this.initGameUI(this.player, this.terrain);
 
     this.gameState.setState("running");
 
@@ -49,8 +61,10 @@ export default class GameLoop {
       throw new Error("Game is not running!");
     }
 
-    //TODO
+    //TODO proper cleanup
     this.engine.stop();
+    this.player = null;
+    this.terrain = null;
   }
 
   private loop(dt: number) {
@@ -58,9 +72,9 @@ export default class GameLoop {
     const state = this.gameState.getState();
 
     if (state === "running") {
-      terrain.update(player.getPosition());
-      player.update(dt);
-      UI.update(dt);
+      terrain!.update(player!.getPosition());
+      player!.update(dt);
+      UI!.update(dt);
       inputController.update(); // this must come lastly
     }
   }
@@ -84,26 +98,37 @@ export default class GameLoop {
     this.scene.background = new THREE.Color("#87CEEB");
   }
 
-  private initTerrain() {
-    if (!this.terrain) {
-      const spawn = new THREE.Vector3(0, 0, 0);
-
-      this.terrain = new Terrain(spawn);
-      this.terrain.update(spawn, true);
+  private initTerrain(spawn: THREE.Vector3) {
+    if (this.terrain) {
+      return this.terrain;
     }
+
+    const terrain = new Terrain(spawn);
+    terrain.update(spawn, true);
+
+    return terrain;
   }
 
   //TODO wait terrain loading
-  private initPlayer(terrain: Terrain) {
-    if (!this.player) {
-      this.player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE);
-
-      this.player.setSpawnOnPosition(0, 20);
+  private initPlayer(
+    terrain: Terrain,
+    spawn: THREE.Vector3,
+    inventory: PlayerInventory
+  ) {
+    if (this.player) {
+      return this.player;
     }
+
+    const player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE, inventory);
+    player.setSpawnOnPosition(spawn.x, spawn.z);
+
+    return player;
   }
 
-  private initGameUI() {
-    this.UI = new UI(this.player, this.terrain);
-    this.UI.attachEventListeners();
+  private initGameUI(player: Player, terrain: Terrain) {
+    const ui = new UI(player, terrain);
+    ui.attachEventListeners();
+
+    return ui;
   }
 }

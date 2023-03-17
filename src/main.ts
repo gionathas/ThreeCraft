@@ -1,4 +1,6 @@
 import GameManager from "./core/GameManager";
 
-const game = new GameManager();
-game.loadGame();
+(async () => {
+  const game = new GameManager();
+  await game.loadGame();
+})();

@@ -20,7 +20,6 @@ export default class InventoryManager {
 
   private dataManager: GameDataManager;
   public isDirty: boolean;
-  public isLoading: boolean;
 
   private crafting: Slot[];
   private inventory: Slot[];
@@ -31,44 +30,33 @@ export default class InventoryManager {
 
   private eventEmitter: EventEmitter;
 
-  constructor() {
+  constructor(inventory: Slot[], hotbar: Slot[]) {
     this.dataManager = GameDataManager.getInstance();
-
-    this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
-    this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
-    this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
-
     this.eventEmitter = new EventEmitter();
 
     this.selectedHotbarIndex = 0;
     this.draggedItem = null;
     this.isDirty = false;
 
-    this.isLoading = true;
-    this.loadInventory();
+    this.inventory = new Array(InventoryManager.INVENTORY_SLOTS).fill(null);
+    this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
+    this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
+
+    // dev purposes
+    this.loadInventory(inventory, hotbar);
   }
 
-  async saveInventory() {
-    this.dataManager.saveInventory(this.hotbar, this.inventory);
-  }
-
-  private async loadInventory() {
-    const savedInventory = await this.dataManager.getSavedInventory();
-
-    if (savedInventory) {
-      this.inventory = savedInventory.inventory;
-      this.hotbar = savedInventory.hotbar;
-    }
-
-    if (EnvVars.DEV_INVENTORY_ENABLED) {
-      this.loadDevInventory();
-    }
-
-    this.isLoading = false;
-    this.eventEmitter.emit("load");
+  private loadInventory(inventory: Slot[], hotbar: Slot[]) {
+    this.inventory.map((_, i) => (this.inventory[i] = inventory[i] ?? null));
+    this.hotbar.map((_, i) => (this.hotbar[i] = hotbar[i] ?? null));
+    this.loadDevInventory();
   }
 
   private loadDevInventory() {
+    if (!EnvVars.DEV_INVENTORY_ENABLED) {
+      return;
+    }
+
     const devInventory = EnvVars.DEV_INVENTORY_ITEMS;
     const devHotbar = EnvVars.DEV_HOTBAR_ITEMS;
 
@@ -85,6 +73,10 @@ export default class InventoryManager {
         amount: InventoryManager.MAX_STACK_SIZE,
       });
     }
+  }
+
+  async saveInventory() {
+    this.dataManager.saveInventory(this.hotbar, this.inventory);
   }
 
   beginDrag(items: Slot[], index: number, split: boolean): Item | null {
@@ -375,10 +367,6 @@ export default class InventoryManager {
         callback(items, index, item);
       }
     });
-  }
-
-  onLoad(callback: () => void) {
-    this.eventEmitter.on("load", callback);
   }
 
   isDragging() {
