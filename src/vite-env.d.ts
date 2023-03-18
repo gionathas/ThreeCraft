@@ -1,6 +1,9 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  // Game settings
+  readonly VITE_JUMP_START: string;
+
   // UI
   readonly VITE_SHOW_DEBUG_UI: string;
 

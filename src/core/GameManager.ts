@@ -17,8 +17,8 @@ export default class GameManager {
   private dataManager: GameDataManager;
 
   constructor() {
-    this.gameLoop = new GameLoop();
     this.dataManager = GameDataManager.getInstance();
+    this.gameLoop = new GameLoop();
   }
 
   async newGame() {

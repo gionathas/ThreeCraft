@@ -20,7 +20,8 @@ export default class UI {
   private pausedMenu: PausedMenu;
   private debugInfo: DebugInfo;
   private hotbar!: Hotbar;
-  private inventory!: Inventory;
+  private inventoryPanel!: Inventory;
+  private crosshair: HTMLElement;
 
   private isFirstTime: boolean;
 
@@ -33,13 +34,31 @@ export default class UI {
     this.dataManager = GameDataManager.getInstance();
 
     this.isFirstTime = true;
+    this.crosshair = this.initCrosshair();
+    this.hotbar = this.initHotbar(player);
+    this.inventoryPanel = this.initInventoryPanel(player);
 
     this.pausedMenu = new PausedMenu();
     this.debugInfo = new DebugInfo(player, terrain);
+  }
 
-    const playerInventory = this.player.getInventory();
-    this.inventory = new Inventory(playerInventory);
-    this.hotbar = new Hotbar(playerInventory);
+  private initCrosshair() {
+    const crosshair = document.getElementById("crosshair")!;
+    crosshair.style.display = "block";
+
+    return crosshair;
+  }
+
+  private initInventoryPanel(player: Player) {
+    const inventory = new Inventory(player.getInventory());
+    return inventory;
+  }
+
+  private initHotbar(player: Player) {
+    const hotbar = new Hotbar(player.getInventory());
+    hotbar.show();
+
+    return hotbar;
   }
 
   update(dt: number) {
@@ -101,7 +120,7 @@ export default class UI {
       this.inputController.disable();
 
       // whenever the player unlocks the controls, it means that the game is paused
-      if (!this.inventory.isOpen) {
+      if (!this.inventoryPanel.isOpen) {
         this.pauseGame();
       }
     });
@@ -138,17 +157,17 @@ export default class UI {
 
   private toggleInventory() {
     if (this.gameState.getState() === "running") {
-      this.inventory.isOpen ? this.closeInventory() : this.openInventory();
+      this.inventoryPanel.isOpen ? this.closeInventory() : this.openInventory();
     }
   }
 
   private openInventory() {
-    this.inventory.showInventory();
+    this.inventoryPanel.showInventory();
     this.player.unlockControls();
   }
 
   private closeInventory() {
     this.player.lockControls();
-    this.inventory.hideInventory();
+    this.inventoryPanel.hideInventory();
   }
 }

@@ -21,6 +21,14 @@ export default class Hotbar {
     this.initSelectionListener();
   }
 
+  show() {
+    this.hotbarGrid.style.display = "flex";
+  }
+
+  hide() {
+    this.hotbarGrid.style.display = "none";
+  }
+
   private initHotbarGrid() {
     const hotbarElement = document.getElementById("hotbar");
 

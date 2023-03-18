@@ -5,6 +5,10 @@ export default class EnvVars {
    * Game Settings
    */
   static readonly TARGET_FRAME_RATE = 1 / 60;
+  static readonly JUMP_START = this.getBoolean(import.meta.env.VITE_JUMP_START);
+  static readonly EDITING_ENABLED = this.getBoolean(
+    import.meta.env.VITE_EDITING_ENABLED
+  );
 
   /** Player */
   static readonly DEFAULT_PLAYER_MODE: PlayerMode = "fly";
@@ -41,13 +45,6 @@ export default class EnvVars {
    */
   static readonly SHOW_DEBUG_UI = this.getBoolean(
     import.meta.env.VITE_SHOW_DEBUG_UI
-  );
-
-  /**
-   * Editing settings
-   */
-  static readonly EDITING_ENABLED = this.getBoolean(
-    import.meta.env.VITE_EDITING_ENABLED
   );
 
   /**

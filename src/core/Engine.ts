@@ -4,14 +4,14 @@ import EnvVars from "../config/EnvVars";
 export default class Engine {
   private static instance: Engine;
 
-  private renderer!: THREE.WebGLRenderer;
-  private scene!: THREE.Scene;
-  private camera!: THREE.PerspectiveCamera;
+  private renderer: THREE.WebGLRenderer;
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
 
   private constructor() {
-    this.initRenderer();
-    this.initScene();
-    this.initCamera();
+    this.renderer = this.initRenderer();
+    this.scene = this.initScene();
+    this.camera = this.initCamera();
   }
 
   public static getInstance(): Engine {
@@ -22,17 +22,19 @@ export default class Engine {
   }
 
   private initRenderer() {
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
     window.addEventListener("resize", () => {
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+    return renderer;
   }
 
   private initScene() {
-    this.scene = new THREE.Scene();
+    return new THREE.Scene();
   }
 
   private initCamera() {
@@ -41,12 +43,14 @@ export default class Engine {
     const near = 0.01;
     const far = 1000;
 
-    this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
     window.addEventListener("resize", () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
     });
+
+    return camera;
   }
 
   start(update: (dt: number) => void) {
