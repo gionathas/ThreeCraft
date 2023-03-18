@@ -19,6 +19,7 @@
   color: #fff;
   font-family: monospace;
   font-weight: lighter;
+  user-select: none;
 }
 
 /* Button style */
