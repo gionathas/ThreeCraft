@@ -3,6 +3,7 @@ import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import GameDataManager from "../io/GameDataManager";
 import InputController from "../io/InputController";
+import CrossHair from "./CrossHair";
 import DebugInfo from "./DebugInfo";
 import Hotbar from "./Hotbar";
 import Inventory from "./Inventory";
@@ -19,9 +20,9 @@ export default class UI {
   // UI's
   private pausedMenu: PausedMenu;
   private debugInfo: DebugInfo;
-  private hotbar!: Hotbar;
   private inventoryPanel!: Inventory;
-  private crosshair: HTMLElement;
+  private hotbar!: Hotbar;
+  private crosshair: CrossHair;
 
   private isFirstTime: boolean;
 
@@ -43,8 +44,8 @@ export default class UI {
   }
 
   private initCrosshair() {
-    const crosshair = document.getElementById("crosshair")!;
-    crosshair.style.display = "block";
+    const crosshair = new CrossHair();
+    crosshair.show();
 
     return crosshair;
   }
@@ -65,11 +66,11 @@ export default class UI {
     this.debugInfo.update(dt);
   }
 
-  detachEventListeners() {
+  disableEventListeners() {
     //TODO
   }
 
-  attachEventListeners() {
+  enableEventListeners() {
     //FIXME this is a temporary solution
     document.addEventListener("pointerdown", () => {
       if (this.isFirstTime) {
@@ -91,13 +92,18 @@ export default class UI {
       }
     });
 
-    this.pausedMenu.setOnResumeClick(() => {
+    this.pausedMenu.onResume(() => {
       this.player.lockControls();
     });
 
-    this.pausedMenu.setOnQuitClick(async () => {
+    this.pausedMenu.onQuit(async () => {
+      console.log("Quitting game...");
       try {
+        //TODO unload all the terrain chunks
+
         await this.saveGame();
+        this.dispose();
+        this.gameState.setState("menu");
       } catch (err) {
         console.error(err);
       }
@@ -126,13 +132,20 @@ export default class UI {
     });
   }
 
+  private dispose() {
+    this.disableEventListeners();
+
+    this.pausedMenu.hide();
+    this.inventoryPanel.hide();
+    this.crosshair.hide();
+    this.hotbar.hide();
+  }
+
   private async saveGame() {
     console.log("Saving game...");
 
     const seed = this.terrain.getSeed();
     const inventory = this.player.getInventory();
-
-    //TODO unload all the terrain chunks
 
     // save player info
     const playerPosition = this.player.getPosition().toArray();
@@ -162,12 +175,12 @@ export default class UI {
   }
 
   private openInventory() {
-    this.inventoryPanel.showInventory();
+    this.inventoryPanel.show();
     this.player.unlockControls();
   }
 
   private closeInventory() {
     this.player.lockControls();
-    this.inventoryPanel.hideInventory();
+    this.inventoryPanel.hide();
   }
 }

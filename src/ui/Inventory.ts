@@ -28,7 +28,7 @@ export default class Inventory {
     this.initDragListener();
   }
 
-  showInventory() {
+  show() {
     if (this.inventoryManager.isDirty) {
       this.syncInventory();
     }
@@ -38,7 +38,7 @@ export default class Inventory {
     this.isOpen = true;
   }
 
-  hideInventory() {
+  hide() {
     // perform a safe drop if it was dragging
     this.inventoryManager.forceEndDrag();
 

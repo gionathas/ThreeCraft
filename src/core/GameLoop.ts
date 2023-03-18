@@ -54,13 +54,6 @@ export default class GameLoop {
   }
 
   stop() {
-    const state = this.gameState.getState();
-    const canBeStopped = state === "running" || state === "paused";
-
-    if (!canBeStopped) {
-      throw new Error("Game is not running!");
-    }
-
     //TODO proper cleanup
     this.engine.stop();
     this.player = null;
@@ -127,7 +120,7 @@ export default class GameLoop {
 
   private initGameUI(player: Player, terrain: Terrain) {
     const ui = new UI(player, terrain);
-    ui.attachEventListeners();
+    ui.enableEventListeners();
 
     return ui;
   }

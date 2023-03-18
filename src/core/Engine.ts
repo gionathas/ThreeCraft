@@ -24,7 +24,6 @@ export default class Engine {
   private initRenderer() {
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
 
     window.addEventListener("resize", () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -54,7 +53,10 @@ export default class Engine {
   }
 
   start(update: (dt: number) => void) {
+    document.body.appendChild(this.renderer.domElement);
+
     let previousTime = performance.now();
+
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) * 0.001;
 
@@ -72,7 +74,9 @@ export default class Engine {
 
   stop() {
     //TODO clear scene
+    document.body.removeChild(this.renderer.domElement);
     this.renderer.setAnimationLoop(null);
+    // this.renderer.dispose();
   }
 
   getCanvas(): HTMLCanvasElement {

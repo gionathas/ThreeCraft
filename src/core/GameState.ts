@@ -1,12 +1,16 @@
-type State = "ready" | "loading" | "running" | "paused";
+import EventEmitter from "events";
+
+type State = "menu" | "loading" | "running" | "paused";
 
 export default class GameState {
   private static instance: GameState;
 
   private state!: State;
+  private eventsEmitter: EventEmitter;
 
   private constructor() {
-    this.setState("ready");
+    this.eventsEmitter = new EventEmitter();
+    this.setState("menu");
   }
 
   static getInstance() {
@@ -17,8 +21,22 @@ export default class GameState {
     return this.instance;
   }
 
+  onMenu(callback: () => void) {
+    this.eventsEmitter.on("menu", callback);
+  }
+
+  onLoading(callback: () => void) {
+    this.eventsEmitter.on("loading", callback);
+  }
+
+  onPaused(callback: () => void) {
+    this.eventsEmitter.on("paused", callback);
+  }
+
   setState(state: State) {
     this.state = state;
+
+    this.eventsEmitter.emit(state);
   }
 
   getState() {
