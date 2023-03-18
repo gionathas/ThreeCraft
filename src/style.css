@@ -41,6 +41,15 @@ button:hover {
   background-color: var(--button-hover-background);
 }
 
+#github-link-icon svg {
+  z-index: 3;
+  fill: #727272;
+  position: fixed;
+  left: 100%;
+  top: -1%;
+  transform: translate(-99%, 0%) rotate(-90deg) scale(1, -1);
+}
+
 #main-menu {
   display: none;
   height: 100vh;
