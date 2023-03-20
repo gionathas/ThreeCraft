@@ -133,7 +133,7 @@ button:hover {
 }
 
 /* Debug Panel */
-#debugPanel {
+#debug-panel {
   display: none;
   position: absolute;
   padding: 4px;
