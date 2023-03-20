@@ -31,6 +31,11 @@ export default class GameStarter {
   }
 
   private initEventListeners() {
+    // to prevent the context menu from appearingt
+    document.addEventListener("contextmenu", (evt) => {
+      evt.preventDefault();
+    });
+
     this.mainMenu.setOnPlayWorld(async () => {
       await this.loadGame();
       this.mainMenu.hide();

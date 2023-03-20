@@ -43,7 +43,7 @@ export default class EnvVars {
   /**
    * UI Settings
    */
-  static readonly SHOW_DEBUG_UI = this.getBoolean(
+  static readonly SHOW_DEBUG_INFO = this.getBoolean(
     import.meta.env.VITE_SHOW_DEBUG_UI
   );
 

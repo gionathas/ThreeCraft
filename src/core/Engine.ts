@@ -24,6 +24,9 @@ export default class Engine {
   private initRenderer() {
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    renderer.domElement.style.display = "none";
 
     window.addEventListener("resize", () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -53,7 +56,7 @@ export default class Engine {
   }
 
   start(update: (dt: number) => void) {
-    document.body.appendChild(this.renderer.domElement);
+    this.renderer.domElement.style.display = "block";
 
     let previousTime = performance.now();
 
@@ -73,7 +76,8 @@ export default class Engine {
   }
 
   dispose() {
-    document.body.removeChild(this.renderer.domElement);
+    this.renderer.domElement.style.display = "none";
+
     this.scene.clear();
     this.camera.clear();
 

@@ -22,7 +22,7 @@ export default class GameLoop {
   private inputController!: InputController;
   private player: Player | null;
   private terrain: Terrain | null;
-  private UI: UI | null;
+  private ui: UI | null;
 
   constructor() {
     this.engine = Engine.getInstance();
@@ -32,7 +32,7 @@ export default class GameLoop {
 
     this.player = null;
     this.terrain = null;
-    this.UI = null;
+    this.ui = null;
   }
 
   dispose() {
@@ -42,7 +42,7 @@ export default class GameLoop {
 
     this.player = null;
     this.terrain = null;
-    this.UI = null;
+    this.ui = null;
   }
 
   start(gameData: GameData) {
@@ -56,12 +56,13 @@ export default class GameLoop {
     // init game entities
     this.terrain = this.initTerrain(seed, spawnPosition);
     this.player = this.initPlayer(this.terrain, spawnPosition, inventory);
-    this.UI = this.initUI(this.player, this.terrain);
-
-    // enable input controller
-    this.inputController.enable();
+    this.ui = this.initUI(this.player, this.terrain);
 
     this.gameState.setState("running");
+
+    // enable input controller
+    this.player.lockControls();
+    this.inputController.enable();
 
     // start game loop
     this.engine.start((dt) => {
@@ -70,13 +71,13 @@ export default class GameLoop {
   }
 
   private loop(dt: number) {
-    const { inputController, player, terrain, UI } = this;
+    const { inputController, player, terrain, ui } = this;
     const state = this.gameState.getState();
 
     if (state === "running") {
       terrain!.update(player!.getPosition());
       player!.update(dt);
-      UI!.update(dt);
+      ui!.update(dt);
       inputController.update(); // this must come lastly
     }
   }

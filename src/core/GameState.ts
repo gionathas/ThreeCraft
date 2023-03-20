@@ -33,6 +33,10 @@ export default class GameState {
     this.eventsEmitter.on("paused", callback);
   }
 
+  onRunning(callback: () => void) {
+    this.eventsEmitter.on("running", callback);
+  }
+
   setState(state: State) {
     this.state = state;
 

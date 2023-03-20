@@ -79,11 +79,6 @@ export default class UI {
       }
     });
 
-    // to prevent the context menu from appearingt
-    document.addEventListener("contextmenu", (evt) => {
-      evt.preventDefault();
-    });
-
     document.addEventListener("keydown", (evt) => {
       switch (evt.code) {
         case "KeyT": {
