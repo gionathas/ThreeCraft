@@ -37,8 +37,10 @@ export default class GameLoop {
 
   dispose() {
     //TODO proper cleanup
-    this.engine.dispose();
     this.inputController.disable();
+    this.player?.dispose();
+    this.engine.dispose();
+    this.ui?.dispose();
 
     this.player = null;
     this.terrain = null;

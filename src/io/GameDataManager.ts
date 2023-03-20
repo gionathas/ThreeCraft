@@ -1,4 +1,6 @@
 import Dexie from "dexie";
+import Player from "../entities/Player";
+import Terrain from "../entities/Terrain";
 import { Slot } from "../player/InventoryManager";
 import { Chunk, ChunkID } from "../terrain/chunk";
 import { BufferGeometryData } from "../utils/helpers";
@@ -65,6 +67,28 @@ export default class GameDataManager extends Dexie {
       this.instance = new GameDataManager();
     }
     return this.instance;
+  }
+
+  async saveGame(player: Player, terrain: Terrain) {
+    console.log("Saving game...");
+
+    const seed = terrain.getSeed();
+    const inventory = player.getInventory();
+
+    // save player info
+    const playerPosition = player.getPosition().toArray();
+    await this.savePlayerData(playerPosition);
+
+    // save inventory
+    await this.saveInventory(
+      inventory.getHotbarSlots(),
+      inventory.getInventorySlots()
+    );
+
+    // save world info's
+    this.saveWorldData(seed);
+
+    console.log("Game saved!");
   }
 
   getSavedWorldData() {
