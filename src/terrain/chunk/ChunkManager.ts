@@ -292,6 +292,21 @@ export default class ChunkManager implements ChunkModel {
     return chunk.getBlock(blockCoord);
   }
 
+  dispose() {
+    console.debug("Disposing chunks...");
+
+    // unload all the currently loaded chunks
+    for (const chunk of this.loadedChunks.values()) {
+      this.unloadChunk(chunk.getId());
+    }
+
+    this.loadedChunks.clear();
+    this.processingChunks.clear();
+    this.chunkMeshManager.dispose();
+
+    console.debug("Chunks disposed");
+  }
+
   isChunkLoaded(chunkId: ChunkID) {
     return this.loadedChunks.has(chunkId);
   }

@@ -38,6 +38,7 @@ export default class GameLoop {
   dispose() {
     //TODO proper cleanup
     this.inputController.disable();
+    this.terrain?.dispose();
     this.player?.dispose();
     this.engine.dispose();
     this.ui?.dispose();
@@ -62,7 +63,7 @@ export default class GameLoop {
 
     this.gameState.setState("running");
 
-    // enable game controls
+    // enable player controls
     this.player.enableControls();
 
     // start game loop

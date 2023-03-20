@@ -68,6 +68,10 @@ export default class Terrain {
     }
   }
 
+  dispose() {
+    this.chunksManager.dispose();
+  }
+
   isSolidBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
