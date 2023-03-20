@@ -1,3 +1,5 @@
+import EnvVars from "../config/EnvVars";
+import KeyBindings from "../config/KeyBindings";
 import GameState from "../core/GameState";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -26,6 +28,10 @@ export default class UI {
 
   private isFirstTime: boolean;
 
+  // callbacks refs
+  private keyDownHandlerRef: (evt: KeyboardEvent) => void;
+  private customLockControlsHandlerRef: (evt: PointerEvent) => void;
+
   constructor(player: Player, terrain: Terrain) {
     this.gameState = GameState.getInstance();
     this.player = player;
@@ -41,6 +47,11 @@ export default class UI {
 
     this.pausedMenu = new PausedMenu();
     this.debugInfo = new DebugInfo(player, terrain);
+
+    // callbacks refs
+    this.keyDownHandlerRef = this.keyDownHandler.bind(this);
+    this.customLockControlsHandlerRef =
+      this.customLockControlsHandler.bind(this);
   }
 
   private initCrosshair() {
@@ -66,26 +77,10 @@ export default class UI {
     this.debugInfo.update(dt);
   }
 
-  disableEventListeners() {
-    //TODO
-  }
-
   enableEventListeners() {
-    //FIXME this is a temporary solution
-    document.addEventListener("pointerdown", () => {
-      if (this.isFirstTime) {
-        this.isFirstTime = false;
-        this.player.lockControls();
-      }
-    });
-
-    document.addEventListener("keydown", (evt) => {
-      switch (evt.code) {
-        case "KeyT": {
-          this.toggleInventory();
-        }
-      }
-    });
+    // custom event listeners
+    document.addEventListener("pointerdown", this.customLockControlsHandlerRef);
+    document.addEventListener("keydown", this.keyDownHandlerRef);
 
     this.pausedMenu.onResume(() => {
       this.player.lockControls();
@@ -128,13 +123,36 @@ export default class UI {
   }
 
   dispose() {
-    this.disableEventListeners();
-
     this.pausedMenu.dispose();
     this.inventoryPanel.dispose();
     this.crosshair.dispose();
     this.hotbar.dispose();
     this.debugInfo.dispose();
+
+    // remove custom event listeners
+    document.removeEventListener("keydown", this.keyDownHandlerRef);
+    document.removeEventListener(
+      "pointerdown",
+      this.customLockControlsHandlerRef
+    );
+  }
+
+  private keyDownHandler(evt: KeyboardEvent) {
+    switch (evt.code) {
+      case KeyBindings.TOGGLE_INVENTORY_KEY: {
+        this.toggleInventory();
+        break;
+      }
+    }
+  }
+
+  private customLockControlsHandler(evt: PointerEvent) {
+    const isJumpStart = EnvVars.JUMP_START;
+
+    if (this.isFirstTime && isJumpStart) {
+      this.isFirstTime = false;
+      this.player.lockControls();
+    }
   }
 
   private async saveGame() {
