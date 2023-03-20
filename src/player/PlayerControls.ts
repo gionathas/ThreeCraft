@@ -20,19 +20,19 @@ export interface PlayerControlsProperties {
 }
 
 const simProps: PlayerControlsProperties = {
-  width: EnvVars.VITE_PLAYER_WIDTH,
-  height: EnvVars.VITE_PLAYER_HEIGHT,
-  horizontalSpeed: EnvVars.VITE_PLAYER_HORIZONTAL_SPEED,
-  verticalSpeed: EnvVars.VITE_PLAYER_VERTICAL_SPEED,
-  dampingFactor: EnvVars.VITE_PLAYER_DAMPING_FACTOR,
+  width: EnvVars.PLAYER_WIDTH,
+  height: EnvVars.PLAYER_HEIGHT,
+  horizontalSpeed: EnvVars.PLAYER_HORIZONTAL_SPEED,
+  verticalSpeed: EnvVars.PLAYER_VERTICAL_SPEED,
+  dampingFactor: EnvVars.PLAYER_DAMPING_FACTOR,
   physicsEnabled: true,
 };
 
 const flyProps: PlayerControlsProperties = {
   ...simProps,
   physicsEnabled: false,
-  horizontalSpeed: EnvVars.VITE_FLY_HORIZONTAL_SPEED,
-  verticalSpeed: EnvVars.VITE_FLY_VERTICAL_SPEED,
+  horizontalSpeed: EnvVars.FLY_HORIZONTAL_SPEED,
+  verticalSpeed: EnvVars.FLY_VERTICAL_SPEED,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
@@ -126,7 +126,7 @@ export default class PlayerControls extends PointerLockControls {
     const hitbox = new THREE.LineSegments(edges, mat);
     hitbox.add(axesHelpers);
 
-    if (EnvVars.VITE_PLAYER_SHOW_BOUNDING_BOX) {
+    if (EnvVars.PLAYER_SHOW_BOUNDING_BOX) {
       scene.add(hitbox);
     }
 

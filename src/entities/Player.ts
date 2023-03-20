@@ -79,11 +79,11 @@ export default class Player {
   }
 
   getWidth() {
-    return EnvVars.VITE_PLAYER_WIDTH;
+    return EnvVars.PLAYER_WIDTH;
   }
 
   getHeight() {
-    return EnvVars.VITE_PLAYER_HEIGHT;
+    return EnvVars.PLAYER_HEIGHT;
   }
 
   getPosition() {
