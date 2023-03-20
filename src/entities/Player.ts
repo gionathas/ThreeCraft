@@ -39,6 +39,11 @@ export default class Player {
     this.editingControls.update();
   }
 
+  dispose() {
+    this.playerControls.dispose();
+    this.editingControls.dispose();
+  }
+
   setSpawnOnPosition(x: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
     const playerHeight = this.getHeight();
@@ -49,24 +54,24 @@ export default class Player {
     this.playerControls.position.set(x, y, z);
   }
 
-  lockControls() {
-    this.playerControls.lock();
-  }
-
-  unlockControls() {
-    this.playerControls.unlock();
-  }
-
-  isControlsLocked() {
+  controlsEnabled() {
     return this.playerControls.isLocked;
   }
 
-  setOnLockControls(func: () => void) {
-    return this.playerControls.addEventListener("lock", func);
+  enableControls() {
+    this.playerControls.lock();
   }
 
-  setOnUnlockControls(func: () => void) {
-    return this.playerControls.addEventListener("unlock", func);
+  disableControls() {
+    this.playerControls.unlock();
+  }
+
+  onEnableControls(cb: () => void) {
+    this.playerControls.onLock(cb);
+  }
+
+  onDisableControls(cb: () => void) {
+    this.playerControls.onUnlock(cb);
   }
 
   getMode() {

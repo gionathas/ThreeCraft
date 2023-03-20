@@ -60,9 +60,8 @@ export default class GameLoop {
 
     this.gameState.setState("running");
 
-    // enable input controller
-    this.player.lockControls();
-    this.inputController.enable();
+    // enable game controls
+    this.player.enableControls();
 
     // start game loop
     this.engine.start((dt) => {

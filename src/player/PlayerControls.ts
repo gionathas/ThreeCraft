@@ -60,6 +60,11 @@ export default class PlayerControls extends PointerLockControls {
 
   private hitbox: THREE.LineSegments;
 
+  private lockCbs: (() => void)[];
+  private unlockCbs: (() => void)[];
+  private onControlLockHandlerRef: () => void;
+  private onControlUnlockHandlerRef: () => void;
+
   constructor(terrain: Terrain, mode: PlayerMode) {
     super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
     this.terrain = terrain;
@@ -72,6 +77,41 @@ export default class PlayerControls extends PointerLockControls {
     this.velocity = new THREE.Vector3();
     this.controlsDirection = new THREE.Vector3();
     this.hitbox = this.initBoundingBox();
+
+    // lock/unlock event handlers
+    this.lockCbs = [];
+    this.unlockCbs = [];
+    this.onControlLockHandlerRef = this.onControlLockHandler.bind(this);
+    this.onControlUnlockHandlerRef = this.onControlUnlockHandler.bind(this);
+    this.onLock(this.onControlLockHandlerRef);
+    this.onUnlock(this.onControlUnlockHandlerRef);
+  }
+
+  dispose() {
+    this.hitbox.geometry.dispose();
+    // @ts-ignore
+    this.hitbox.material.dispose();
+
+    this.lockCbs.forEach((cb) => this.removeEventListener("lock", cb));
+    this.unlockCbs.forEach((cb) => this.removeEventListener("unlock", cb));
+  }
+
+  private onControlLockHandler() {
+    this.inputController.enable();
+  }
+
+  private onControlUnlockHandler() {
+    this.inputController.disable();
+  }
+
+  onLock(cb: () => void) {
+    this.addEventListener("lock", cb);
+    this.lockCbs.push(cb);
+  }
+
+  onUnlock(cb: () => void) {
+    this.addEventListener("unlock", cb);
+    this.unlockCbs.push(cb);
   }
 
   private initBoundingBox() {

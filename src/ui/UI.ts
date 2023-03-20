@@ -1,4 +1,3 @@
-import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
 import GameState from "../core/GameState";
 import Player from "../entities/Player";
@@ -51,7 +50,7 @@ export default class UI {
     // callbacks refs
     this.keyDownHandlerRef = this.keyDownHandler.bind(this);
     this.customLockControlsHandlerRef =
-      this.customLockControlsHandler.bind(this);
+      this.customControlsEnablerHandler.bind(this);
   }
 
   private initCrosshair() {
@@ -83,7 +82,19 @@ export default class UI {
     document.addEventListener("keydown", this.keyDownHandlerRef);
 
     this.pausedMenu.onResume(() => {
-      this.player.lockControls();
+      this.pausedMenu.hide();
+      this.gameState.setState("running");
+
+      // re-enable game controls
+      this.player.enableControls();
+    });
+
+    this.player.onDisableControls(() => {
+      // if the inventory is not open it means the player paused the game
+      if (!this.inventoryPanel.isOpen) {
+        this.gameState.setState("paused");
+        this.pausedMenu.show();
+      }
     });
 
     this.pausedMenu.onQuit(async () => {
@@ -96,28 +107,6 @@ export default class UI {
         this.gameState.setState("menu");
       } catch (err) {
         console.error(err);
-      }
-    });
-
-    this.player.setOnLockControls(() => {
-      // whenever the player locks the controls, it means that the game is running
-      this.gameState.setState("running");
-
-      if (this.pausedMenu.isVisible) {
-        this.pausedMenu.hide();
-      }
-
-      // enable input listeners
-      this.inputController.enable();
-    });
-
-    this.player.setOnUnlockControls(() => {
-      // disable input listeners
-      this.inputController.disable();
-
-      // whenever the player unlocks the controls, it means that the game is paused
-      if (!this.inventoryPanel.isOpen) {
-        this.pauseGame();
       }
     });
   }
@@ -146,12 +135,17 @@ export default class UI {
     }
   }
 
-  private customLockControlsHandler(evt: PointerEvent) {
-    const isJumpStart = EnvVars.JUMP_START;
+  /**
+   * This is for locking the controls when the player clicks on the screen
+   * when the game is running and the controls were not enabled.
+   */
+  private customControlsEnablerHandler(evt: PointerEvent) {
+    const state = this.gameState.getState();
+    const inventoryOpen = this.inventoryPanel.isOpen;
+    const controlsEnabled = this.player.controlsEnabled();
 
-    if (this.isFirstTime && isJumpStart) {
-      this.isFirstTime = false;
-      this.player.lockControls();
+    if (state === "running" && !inventoryOpen && !controlsEnabled) {
+      this.player.enableControls();
     }
   }
 
@@ -177,11 +171,6 @@ export default class UI {
     console.log("Game saved!");
   }
 
-  private pauseGame() {
-    this.gameState.setState("paused");
-    this.pausedMenu.show();
-  }
-
   private toggleInventory() {
     if (this.gameState.getState() === "running") {
       this.inventoryPanel.isOpen ? this.closeInventory() : this.openInventory();
@@ -190,11 +179,11 @@ export default class UI {
 
   private openInventory() {
     this.inventoryPanel.show();
-    this.player.unlockControls();
+    this.player.disableControls();
   }
 
   private closeInventory() {
-    this.player.lockControls();
+    this.player.enableControls();
     this.inventoryPanel.hide();
   }
 }

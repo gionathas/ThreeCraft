@@ -30,6 +30,15 @@ export default class EditingControls {
     this.inventory = player.getInventory();
   }
 
+  dispose() {
+    if (this.blockMarker) {
+      this.scene.remove(this.blockMarker);
+      this.blockMarker.geometry.dispose();
+      // @ts-ignore
+      this.blockMarker.material.dispose();
+    }
+  }
+
   update() {
     this.updateBlockMarker();
     this.updateBlockPlacement();
@@ -139,7 +148,7 @@ export default class EditingControls {
   private updateBlockMarker() {
     const targetBlock = this.getTargetBlock();
 
-    // any voxel in sight, hide the marker
+    // no voxel in sight, hide the marker
     if (!targetBlock && this.blockMarker) {
       this.blockMarker.visible = false;
     }
