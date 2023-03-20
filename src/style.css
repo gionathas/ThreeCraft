@@ -41,13 +41,17 @@ button:hover {
   background-color: var(--button-hover-background);
 }
 
-#github-link-icon svg {
-  z-index: 3;
-  fill: #727272;
+#github-link-icon {
+  display: none;
   position: fixed;
   left: 100%;
   top: -1%;
   transform: translate(-99%, 0%) rotate(-90deg) scale(1, -1);
+  z-index: 3;
+}
+
+#github-link-icon svg {
+  fill: #727272;
 }
 
 #main-menu {
