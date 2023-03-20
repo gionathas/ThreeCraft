@@ -132,13 +132,14 @@ export default class UI {
     });
   }
 
-  private dispose() {
+  dispose() {
     this.disableEventListeners();
 
-    this.pausedMenu.hide();
-    this.inventoryPanel.hide();
-    this.crosshair.hide();
-    this.hotbar.hide();
+    this.pausedMenu.dispose();
+    this.inventoryPanel.dispose();
+    this.crosshair.dispose();
+    this.hotbar.dispose();
+    this.debugInfo.dispose();
   }
 
   private async saveGame() {

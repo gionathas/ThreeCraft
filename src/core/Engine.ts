@@ -72,11 +72,13 @@ export default class Engine {
     });
   }
 
-  stop() {
-    //TODO clear scene
+  dispose() {
     document.body.removeChild(this.renderer.domElement);
+    this.scene.clear();
+    this.camera.clear();
+
     this.renderer.setAnimationLoop(null);
-    // this.renderer.dispose();
+    this.renderer.dispose();
   }
 
   getCanvas(): HTMLCanvasElement {

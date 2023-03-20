@@ -10,8 +10,14 @@ export default class PausedMenu implements UIComponent {
   private resumeButton!: HTMLButtonElement;
   private quitButton!: HTMLButtonElement;
 
+  // callbacks
+  private resumeCbs: ((e: Event) => void)[];
+  private quitCbs: ((e: Event) => void)[];
+
   constructor() {
     this.isVisible = false;
+    this.resumeCbs = [];
+    this.quitCbs = [];
     this.init();
   }
 
@@ -37,11 +43,26 @@ export default class PausedMenu implements UIComponent {
 
   onResume(callback: () => void) {
     this.resumeButton.addEventListener("click", callback);
+    this.resumeCbs.push(callback);
   }
 
   onQuit(callback: () => void) {
     this.quitButton.addEventListener("click", callback);
+    this.quitCbs.push(callback);
   }
 
-  //TODO add clear event listeners
+  dispose() {
+    this.hide();
+
+    // remove event listeners
+    this.resumeCbs.forEach((cb) =>
+      this.resumeButton.removeEventListener("click", cb)
+    );
+    this.quitCbs.forEach((cb) =>
+      this.quitButton.removeEventListener("click", cb)
+    );
+
+    this.resumeCbs = [];
+    this.quitCbs = [];
+  }
 }

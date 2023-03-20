@@ -38,8 +38,13 @@ export default class GameStarter {
 
     // back to main menu
     this.gameState.onMenu(() => {
-      this.gameLoop.stop();
+      this.gameLoop.dispose();
       this.mainMenu.show();
+    });
+
+    this.gameState.onLoading(() => {
+      //TODO implement loading screen
+      console.log("loading");
     });
   }
 

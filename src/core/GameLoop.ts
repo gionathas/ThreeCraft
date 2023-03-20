@@ -25,7 +25,21 @@ export default class GameLoop {
   private UI: UI | null;
 
   constructor() {
+    this.engine = Engine.getInstance();
     this.gameState = GameState.getInstance();
+    this.inputController = InputController.getInstance();
+    this.scene = this.engine.getScene();
+
+    this.player = null;
+    this.terrain = null;
+    this.UI = null;
+  }
+
+  dispose() {
+    //TODO proper cleanup
+    this.engine.dispose();
+    this.inputController.disable();
+
     this.player = null;
     this.terrain = null;
     this.UI = null;
@@ -36,28 +50,23 @@ export default class GameLoop {
 
     this.gameState.setState("loading");
 
-    this.engine = Engine.getInstance();
-    this.scene = this.engine.getScene();
-
-    this.inputController = InputController.getInstance();
+    // init scene
     this.initLights();
 
+    // init game entities
     this.terrain = this.initTerrain(seed, spawnPosition);
     this.player = this.initPlayer(this.terrain, spawnPosition, inventory);
-    this.UI = this.initGameUI(this.player, this.terrain);
+    this.UI = this.initUI(this.player, this.terrain);
+
+    // enable input controller
+    this.inputController.enable();
 
     this.gameState.setState("running");
 
+    // start game loop
     this.engine.start((dt) => {
       this.loop(dt);
     });
-  }
-
-  stop() {
-    //TODO proper cleanup
-    this.engine.stop();
-    this.player = null;
-    this.terrain = null;
   }
 
   private loop(dt: number) {
@@ -118,7 +127,7 @@ export default class GameLoop {
     return player;
   }
 
-  private initGameUI(player: Player, terrain: Terrain) {
+  private initUI(player: Player, terrain: Terrain) {
     const ui = new UI(player, terrain);
     ui.enableEventListeners();
 

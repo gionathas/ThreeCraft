@@ -103,25 +103,34 @@ export default class DebugInfo {
 
   private toggleVisibility(isVisible: boolean) {
     if (isVisible) {
-      this.showDebugUI();
+      this.show();
     } else {
-      this.hideDebugUI();
+      this.hide();
     }
   }
 
-  private showDebugUI() {
+  show() {
     this.isVisible = true;
 
-    this.debugPanel.style.visibility = "visible";
+    this.debugPanel.style.display = "block";
     this.fps.dom.style.visibility = "visible";
     this.mem.dom.style.visibility = "visible";
   }
 
-  private hideDebugUI() {
+  hide() {
     this.isVisible = false;
 
-    this.debugPanel.style.visibility = "hidden";
+    this.debugPanel.style.display = "none";
     this.fps.dom.style.visibility = "hidden";
     this.mem.dom.style.visibility = "hidden";
+  }
+
+  dispose() {
+    this.isVisible = false;
+
+    this.debugPanel.style.display = "none";
+    this.debugPanel.childNodes.forEach((node) => node.remove());
+    this.fps.dom.remove();
+    this.mem.dom.remove();
   }
 }

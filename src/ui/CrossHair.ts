@@ -20,4 +20,8 @@ export default class CrossHair implements UIComponent {
   hide() {
     this.crosshair.style.display = "none";
   }
+
+  dispose() {
+    this.hide();
+  }
 }
