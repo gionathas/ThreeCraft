@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
+import InventoryManager from "../player/InventoryManager";
 import MainMenu from "../ui/MainMenu";
 import { randomString } from "../utils/helpers";
 import GameLoop, { GameData } from "./GameLoop";
@@ -10,8 +11,12 @@ const newGameData: GameData = {
   seed: EnvVars.CUSTOM_SEED ? EnvVars.CUSTOM_SEED : randomString(10),
   spawnPosition: new THREE.Vector3(0, 0, 0),
   inventory: {
-    hotbar: [],
-    inventory: [],
+    hotbar: EnvVars.STARTING_HOTBAR_ITEMS.map((item) => {
+      return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
+    }),
+    inventory: EnvVars.STARTING_INVENTORY_ITEMS.map((item) => {
+      return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
+    }),
   },
 };
 export default class GameStarter {

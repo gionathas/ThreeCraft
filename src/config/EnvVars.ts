@@ -102,15 +102,12 @@ export default class EnvVars {
   );
 
   /** Inventory */
-  static readonly DEV_INVENTORY_ENABLED = this.getBoolean(
-    import.meta.env.VITE_DEV_INVENTORY_ENABLED
-  );
-  static readonly DEV_INVENTORY_ITEMS = this.getList(
-    import.meta.env.VITE_DEV_INVENTORY_ITEMS
+  static readonly STARTING_INVENTORY_ITEMS = this.getList(
+    import.meta.env.VITE_STARTING_INVENTORY_ITEMS
   ).map((item) => Number(item));
 
-  static readonly DEV_HOTBAR_ITEMS = this.getList(
-    import.meta.env.VITE_DEV_HOTBAR_ITEMS
+  static readonly STARTING_HOTBAR_ITEMS = this.getList(
+    import.meta.env.VITE_STARTING_HOTBAR_ITEMS
   ).map((item) => Number(item));
 
   /** Utilities */

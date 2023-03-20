@@ -33,9 +33,8 @@ interface ImportMetaEnv {
   readonly VITE_TESTING_MAP_PV?: number;
 
   // Inventory
-  readonly VITE_DEV_INVENTORY_ENABLED: string;
-  readonly VITE_DEV_INVENTORY_ITEMS: string;
-  readonly VITE_DEV_HOTBAR_ITEMS: number;
+  readonly VITE_STARTING_INVENTORY_ITEMS: string;
+  readonly VITE_STARTING_HOTBAR_ITEMS: number;
 
   // Player
   readonly VITE_PLAYER_SHOW_BOUNDING_BOX: string;

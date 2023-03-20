@@ -1,6 +1,5 @@
 import EventEmitter from "events";
 import * as THREE from "three";
-import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
 import { BlockType } from "../terrain/block";
 
@@ -49,30 +48,6 @@ export default class InventoryManager {
   private loadInventory(inventory: Slot[], hotbar: Slot[]) {
     this.inventory.map((_, i) => (this.inventory[i] = inventory[i] ?? null));
     this.hotbar.map((_, i) => (this.hotbar[i] = hotbar[i] ?? null));
-    this.loadDevInventory();
-  }
-
-  private loadDevInventory() {
-    if (!EnvVars.DEV_INVENTORY_ENABLED) {
-      return;
-    }
-
-    const devInventory = EnvVars.DEV_INVENTORY_ITEMS;
-    const devHotbar = EnvVars.DEV_HOTBAR_ITEMS;
-
-    for (let i = 0; i < devInventory.length; i++) {
-      this.addItemTo(this.inventory, {
-        block: devInventory[i],
-        amount: InventoryManager.MAX_STACK_SIZE,
-      });
-    }
-
-    for (let i = 0; i < devHotbar.length; i++) {
-      this.addItemTo(this.hotbar, {
-        block: devHotbar[i],
-        amount: InventoryManager.MAX_STACK_SIZE,
-      });
-    }
   }
 
   async saveInventory() {
