@@ -131,7 +131,6 @@ export default class GameLoop {
 
   private initUI(player: Player, terrain: Terrain) {
     const ui = new UI(player, terrain);
-    ui.enableEventListeners();
 
     return ui;
   }

@@ -45,6 +45,7 @@ export default class UI {
     this.interactionHandlerRef = this.interactionHandler.bind(this);
     this.customLockControlsHandlerRef =
       this.customControlsEnablerHandler.bind(this);
+    this.initEventListeners();
   }
 
   private initCrosshair() {
@@ -66,11 +67,7 @@ export default class UI {
     return hotbar;
   }
 
-  update(dt: number) {
-    this.debugInfo.update(dt);
-  }
-
-  enableEventListeners() {
+  private initEventListeners() {
     // custom event listeners
     document.addEventListener("pointerdown", this.customLockControlsHandlerRef);
     document.addEventListener("keydown", this.interactionHandlerRef);
@@ -102,21 +99,6 @@ export default class UI {
     });
   }
 
-  dispose() {
-    this.pausedMenu.dispose();
-    this.inventoryPanel.dispose();
-    this.crosshair.dispose();
-    this.hotbar.dispose();
-    this.debugInfo.dispose();
-
-    // remove custom event listeners
-    document.removeEventListener("keydown", this.interactionHandlerRef);
-    document.removeEventListener(
-      "pointerdown",
-      this.customLockControlsHandlerRef
-    );
-  }
-
   private interactionHandler(evt: KeyboardEvent) {
     switch (evt.code) {
       case KeyBindings.TOGGLE_INVENTORY_KEY: {
@@ -138,6 +120,25 @@ export default class UI {
     if (state === "running" && !inventoryOpen && !controlsEnabled) {
       this.player.enableControls();
     }
+  }
+
+  update(dt: number) {
+    this.debugInfo.update(dt);
+  }
+
+  dispose() {
+    this.pausedMenu.dispose();
+    this.inventoryPanel.dispose();
+    this.crosshair.dispose();
+    this.hotbar.dispose();
+    this.debugInfo.dispose();
+
+    // remove custom event listeners
+    document.removeEventListener("keydown", this.interactionHandlerRef);
+    document.removeEventListener(
+      "pointerdown",
+      this.customLockControlsHandlerRef
+    );
   }
 
   private toggleInventory() {
