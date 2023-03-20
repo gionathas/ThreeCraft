@@ -31,6 +31,17 @@ export default class GameStarter {
   }
 
   private initEventListeners() {
+    // to prevent the user from accidentally closing the tab
+    window.addEventListener("beforeunload", (evt) => {
+      const showAlert = EnvVars.SHOW_WINDOW_CLOSE_ALERT;
+      if (this.gameState.isInGame() && showAlert) {
+        // default behavior in Mozilla Firefox to prompt always the alert
+        evt.preventDefault();
+        // Chrome requires returnValue to be set
+        evt.returnValue = "";
+      }
+    });
+
     // to prevent the context menu from appearingt
     document.addEventListener("contextmenu", (evt) => {
       evt.preventDefault();

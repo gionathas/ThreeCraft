@@ -6,6 +6,7 @@ interface ImportMetaEnv {
 
   // UI
   readonly VITE_SHOW_DEBUG_UI: string;
+  readonly VITE_SHOW_WINDOW_CLOSE_ALERT: string;
 
   // Editing settings
   readonly VITE_EDITING_ENABLED: string;

@@ -46,4 +46,8 @@ export default class GameState {
   getState() {
     return this.state;
   }
+
+  isInGame() {
+    return this.state === "running" || this.state === "paused";
+  }
 }

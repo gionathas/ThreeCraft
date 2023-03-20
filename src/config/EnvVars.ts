@@ -46,6 +46,9 @@ export default class EnvVars {
   static readonly SHOW_DEBUG_INFO = this.getBoolean(
     import.meta.env.VITE_SHOW_DEBUG_UI
   );
+  static readonly SHOW_WINDOW_CLOSE_ALERT = this.getBoolean(
+    import.meta.env.VITE_SHOW_WINDOW_CLOSE_ALERT
+  );
 
   /**
    * Terrain Chunks
