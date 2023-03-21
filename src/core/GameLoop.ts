@@ -132,7 +132,6 @@ export default class GameLoop {
     return terrain;
   }
 
-  //TODO wait terrain loading
   private initPlayer(terrain: Terrain, gameData: GameData) {
     if (this.player) {
       return this.player;
