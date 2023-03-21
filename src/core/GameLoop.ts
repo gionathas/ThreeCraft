@@ -15,12 +15,12 @@ export type GameData = {
 };
 
 export default class GameLoop {
-  private engine!: Engine;
-  private scene!: THREE.Scene;
+  private engine: Engine;
+  private scene: THREE.Scene;
 
-  private gameState!: GameState;
+  private gameState: GameState;
+  private inputController: InputController;
 
-  private inputController!: InputController;
   private player: Player | null;
   private terrain: Terrain | null;
   private ui: UI | null;
