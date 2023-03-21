@@ -10,6 +10,7 @@ import GameState from "./GameState";
 const newGameData: GameData = {
   seed: EnvVars.CUSTOM_SEED ? EnvVars.CUSTOM_SEED : randomString(10),
   spawnPosition: new THREE.Vector3(0, 0, 0),
+  quaternion: new THREE.Quaternion(0, 0, 0, 0),
   inventory: {
     hotbar: EnvVars.STARTING_HOTBAR_ITEMS.map((item) => {
       return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
@@ -19,7 +20,7 @@ const newGameData: GameData = {
     }),
   },
 };
-export default class GameStarter {
+export default class Launcher {
   private gameState: GameState;
   private gameLoop: GameLoop;
   private dataManager: GameDataManager;
@@ -87,7 +88,7 @@ export default class GameStarter {
     this.gameLoop.start(loadedData);
   }
 
-  private async loadGameData() {
+  private async loadGameData(): Promise<GameData> {
     const worldData = await this.dataManager.getSavedWorldData();
     const playerData = await this.dataManager.getSavedPlayerData();
     const inventory = await this.dataManager.getSavedInventory();
@@ -97,6 +98,9 @@ export default class GameStarter {
       spawnPosition: playerData?.position
         ? new THREE.Vector3().fromArray(playerData.position)
         : newGameData.spawnPosition,
+      quaternion: playerData?.quaternion
+        ? new THREE.Quaternion().fromArray(playerData?.quaternion)
+        : newGameData.quaternion,
       inventory: {
         hotbar: inventory?.hotbar ?? newGameData.inventory.hotbar,
         inventory: inventory?.inventory ?? newGameData.inventory.inventory,

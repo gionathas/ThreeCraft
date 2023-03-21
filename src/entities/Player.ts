@@ -106,10 +106,26 @@ export default class Player {
     return this.playerControls.intersectsBlock(blockBB);
   }
 
-  getOrientation() {
-    const lookDirection = this.playerControls
+  getQuaternion() {
+    return this.playerControls.getCamera().quaternion.clone();
+  }
+
+  setQuaternion(quaternion: THREE.Quaternion) {
+    this.playerControls.getCamera().quaternion.copy(quaternion);
+  }
+
+  getLookDirection() {
+    return this.playerControls
       .getCamera()
       .getWorldDirection(new THREE.Vector3());
+  }
+
+  setLookDirection(direction: THREE.Vector3) {
+    this.playerControls.getCamera().lookAt(direction);
+  }
+
+  getOrientation() {
+    const lookDirection = this.getLookDirection();
     const angle = Math.atan2(lookDirection.x, lookDirection.z);
     return getOrientationFromAngle(angle);
   }

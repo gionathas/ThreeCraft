@@ -26,6 +26,7 @@ export default class Engine {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // do not show the canvas until the game starts
     renderer.domElement.style.display = "none";
 
     window.addEventListener("resize", () => {

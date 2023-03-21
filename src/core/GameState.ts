@@ -50,4 +50,12 @@ export default class GameState {
   isInGame() {
     return this.state === "running" || this.state === "paused";
   }
+
+  isRunning() {
+    return this.state === "running";
+  }
+
+  isPaused() {
+    return this.state === "paused";
+  }
 }

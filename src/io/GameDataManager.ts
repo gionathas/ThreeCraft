@@ -1,4 +1,5 @@
 import Dexie from "dexie";
+import { Vector3Tuple, Vector4Tuple } from "three";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import { Slot } from "../player/InventoryManager";
@@ -19,7 +20,8 @@ interface InventoryTable {
 
 interface PlayerDataTable {
   playerId: string;
-  position: [number, number, number];
+  position: Vector3Tuple;
+  quaternion: Vector4Tuple;
 }
 
 interface WorldDataTable {
@@ -77,7 +79,8 @@ export default class GameDataManager extends Dexie {
 
     // save player info
     const playerPosition = player.getPosition().toArray();
-    await this.savePlayerData(playerPosition);
+    const playerQuaternion = player.getQuaternion().toArray() as Vector4Tuple;
+    await this.savePlayerData(playerPosition, playerQuaternion);
 
     // save inventory
     await this.saveInventory(
@@ -106,10 +109,11 @@ export default class GameDataManager extends Dexie {
     return this.player.get("default");
   }
 
-  async savePlayerData(position: [number, number, number]) {
+  async savePlayerData(position: Vector3Tuple, quaternion: Vector4Tuple) {
     return this.player.put({
       playerId: "default",
       position,
+      quaternion,
     });
   }
 

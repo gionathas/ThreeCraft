@@ -10,6 +10,7 @@ import GameState from "./GameState";
 export type GameData = {
   seed: string;
   spawnPosition: THREE.Vector3;
+  quaternion: THREE.Quaternion;
   inventory: PlayerInventory;
 };
 
@@ -49,7 +50,7 @@ export default class GameLoop {
   }
 
   start(gameData: GameData) {
-    const { seed, spawnPosition, inventory } = gameData;
+    const { seed } = gameData;
 
     this.gameState.setState("loading");
 
@@ -57,8 +58,8 @@ export default class GameLoop {
     this.initLights();
 
     // init game entities
-    this.terrain = this.initTerrain(seed, spawnPosition);
-    this.player = this.initPlayer(this.terrain, spawnPosition, inventory);
+    this.terrain = this.initTerrain(seed, gameData);
+    this.player = this.initPlayer(this.terrain, gameData);
     this.ui = this.initUI(this.player, this.terrain);
 
     this.gameState.setState("running");
@@ -74,9 +75,8 @@ export default class GameLoop {
 
   private loop(dt: number) {
     const { inputController, player, terrain, ui } = this;
-    const state = this.gameState.getState();
 
-    if (state === "running") {
+    if (this.gameState.isRunning()) {
       terrain!.update(player!.getPosition());
       player!.update(dt);
       ui!.update(dt);
@@ -86,6 +86,7 @@ export default class GameLoop {
 
   /**
    * //TODO implement a better light system (smooth lighting)
+   * //TODO dispose lights
    */
   private initLights() {
     const sunLight = new THREE.DirectionalLight(0xffffff, 0.2);
@@ -103,10 +104,12 @@ export default class GameLoop {
     this.scene.background = new THREE.Color("#87CEEB");
   }
 
-  private initTerrain(seed: string, spawn: THREE.Vector3) {
+  private initTerrain(seed: string, gameData: GameData) {
     if (this.terrain) {
       return this.terrain;
     }
+
+    const { spawnPosition: spawn } = gameData;
 
     const terrain = new Terrain(seed, spawn);
     terrain.update(spawn, true);
@@ -115,17 +118,16 @@ export default class GameLoop {
   }
 
   //TODO wait terrain loading
-  private initPlayer(
-    terrain: Terrain,
-    spawn: THREE.Vector3,
-    inventory: PlayerInventory
-  ) {
+  private initPlayer(terrain: Terrain, gameData: GameData) {
     if (this.player) {
       return this.player;
     }
 
+    const { spawnPosition: spawn, quaternion, inventory } = gameData;
+
     const player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE, inventory);
     player.setSpawnOnPosition(spawn.x, spawn.z);
+    player.setQuaternion(quaternion);
 
     return player;
   }
