@@ -79,13 +79,29 @@ export default class Launcher {
   }
 
   private async newGame() {
+    const showTerrainGeneration = EnvVars.SHOW_INITIAL_TERRAIN_GENERATION;
+
+    // clear previous data
     await this.dataManager.clearAllData();
-    this.gameLoop.start(newGameData);
+
+    if (showTerrainGeneration) {
+      this.gameLoop.start(newGameData, false);
+    } else {
+      await this.gameLoop.start(newGameData, true);
+    }
   }
 
   private async loadGame() {
+    const showTerrainGeneration = EnvVars.SHOW_INITIAL_TERRAIN_GENERATION;
+
+    // load saved data
     const loadedData = await this.loadGameData();
-    this.gameLoop.start(loadedData);
+
+    if (showTerrainGeneration) {
+      this.gameLoop.start(loadedData, false);
+    } else {
+      await this.gameLoop.start(loadedData, true);
+    }
   }
 
   private async loadGameData(): Promise<GameData> {

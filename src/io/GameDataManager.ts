@@ -159,6 +159,7 @@ export default class GameDataManager extends Dexie {
       this.chunksGeometries.clear(),
       this.inventory.clear(),
       this.player.clear(),
+      this.world.clear(),
     ]);
   }
 }

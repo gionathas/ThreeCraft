@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_JUMP_START: string;
 
   // UI
+  readonly VITE_SHOW_INITIAL_TERRAIN_GENERATION: string;
   readonly VITE_SHOW_DEBUG_UI: string;
   readonly VITE_SHOW_WINDOW_CLOSE_ALERT: string;
 

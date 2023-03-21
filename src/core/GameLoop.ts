@@ -41,15 +41,15 @@ export default class GameLoop {
     this.inputController.disable();
     this.terrain?.dispose();
     this.player?.dispose();
-    this.engine.dispose();
     this.ui?.dispose();
+    this.engine.dispose();
 
     this.player = null;
     this.terrain = null;
     this.ui = null;
   }
 
-  start(gameData: GameData) {
+  async start(gameData: GameData, asyncStart: boolean) {
     const { seed } = gameData;
 
     this.gameState.setState("loading");
@@ -58,7 +58,9 @@ export default class GameLoop {
     this.initLights();
 
     // init game entities
-    this.terrain = this.initTerrain(seed, gameData);
+    this.terrain = asyncStart
+      ? await this.asyncInitTerrain(seed, gameData)
+      : this.initTerrain(seed, gameData);
     this.player = this.initPlayer(this.terrain, gameData);
     this.ui = this.initUI(this.player, this.terrain);
 
@@ -104,6 +106,19 @@ export default class GameLoop {
     this.scene.background = new THREE.Color("#87CEEB");
   }
 
+  private async asyncInitTerrain(seed: string, gameData: GameData) {
+    if (this.terrain) {
+      return this.terrain;
+    }
+
+    const { spawnPosition: spawn } = gameData;
+
+    const terrain = new Terrain(seed);
+    await terrain.asyncInit(spawn);
+
+    return terrain;
+  }
+
   private initTerrain(seed: string, gameData: GameData) {
     if (this.terrain) {
       return this.terrain;
@@ -111,8 +126,8 @@ export default class GameLoop {
 
     const { spawnPosition: spawn } = gameData;
 
-    const terrain = new Terrain(seed, spawn);
-    terrain.update(spawn, true);
+    const terrain = new Terrain(seed);
+    terrain.init(spawn);
 
     return terrain;
   }

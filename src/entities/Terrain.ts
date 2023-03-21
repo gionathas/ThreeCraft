@@ -19,7 +19,7 @@ export default class Terrain {
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
 
-  constructor(seed: string, centerPosition: THREE.Vector3) {
+  constructor(seed: string) {
     this.scene = Engine.getInstance().getScene();
     this.seed = seed;
 
@@ -27,11 +27,19 @@ export default class Terrain {
     this.terrainMap = this.globalMapManager.getTerrainMap();
 
     this.chunksManager = new ChunkManager(this.globalMapManager);
-    this.terrainLoader = new TerrainLoader(centerPosition, this.chunksManager);
+    this.terrainLoader = new TerrainLoader(this.chunksManager);
   }
 
-  update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    this.terrainLoader.update(newCenterPosition, isFirstUpdate);
+  async asyncInit(centerPosition: THREE.Vector3) {
+    await this.terrainLoader.asyncInit(centerPosition);
+  }
+
+  init(centerPosition: THREE.Vector3) {
+    this.terrainLoader.init(centerPosition);
+  }
+
+  update(newCenterPosition: THREE.Vector3) {
+    this.terrainLoader.update(newCenterPosition);
 
     // this.globalMapManager._logTotalRegionCount();
   }

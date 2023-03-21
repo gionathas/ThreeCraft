@@ -66,7 +66,7 @@ export default class ChunkManager implements ChunkModel {
     this.processingChunks.add(chunkId);
 
     // enqueue the creation of this new chunk
-    this.generatorsPool.queue(async (generateChunk) => {
+    return this.generatorsPool.queue(async (generateChunk) => {
       let solidGeometry: BufferGeometryData | undefined;
       let transparentGeometry: BufferGeometryData | undefined;
       const chunkMeshes = [];

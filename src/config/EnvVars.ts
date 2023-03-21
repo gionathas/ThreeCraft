@@ -41,8 +41,11 @@ export default class EnvVars {
   );
 
   /**
-   * UI Settings
+   * UI
    */
+  static readonly SHOW_INITIAL_TERRAIN_GENERATION = this.getBoolean(
+    import.meta.env.VITE_SHOW_INITIAL_TERRAIN_GENERATION
+  );
   static readonly SHOW_DEBUG_INFO = this.getBoolean(
     import.meta.env.VITE_SHOW_DEBUG_UI
   );
