@@ -77,11 +77,24 @@ button:hover {
 }
 
 #main-menu .title {
-  position: absolute;
-  top: -80%;
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 15%;
+  transform: translate(-50%);
   font-weight: bold;
   text-shadow: -5px 5px #262626;
   font-size: 6em;
+  z-index: 3;
+}
+
+#main-menu button {
+  display: none;
+}
+
+#main-menu .loading-label {
+  display: none;
+  font-size: xx-large;
 }
 
 #overlay {

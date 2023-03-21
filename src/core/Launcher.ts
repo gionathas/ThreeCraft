@@ -61,12 +61,12 @@ export default class Launcher {
     // back to main menu
     this.gameState.onMenu(() => {
       this.gameLoop.dispose();
+      this.mainMenu.setMenuScreen("initial");
       this.mainMenu.show();
     });
 
     this.gameState.onLoading(() => {
-      //TODO implement loading screen
-      console.log("loading");
+      this.mainMenu.setMenuScreen("loading");
     });
   }
 
