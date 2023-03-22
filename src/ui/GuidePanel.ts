@@ -22,6 +22,9 @@ export default class GuidePanel {
     <b>Open/Close Inventory</b>: ${this.prettyPrintKey(
       KeyBindings.TOGGLE_INVENTORY_KEY
     )} <br />
+    <b>Show Debug Info</b>: ${this.prettyPrintKey(
+      KeyBindings.TOGGLE_DEBUG_INFO_KEY
+    )} <br />
     `;
   }
 
