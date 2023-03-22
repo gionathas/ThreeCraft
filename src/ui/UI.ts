@@ -89,8 +89,6 @@ export default class UI {
     });
 
     this.pausedMenu.onQuit(async () => {
-      console.log("Quitting game...");
-
       // save game
       await this.dataManager.saveGame(this.player, this.terrain);
 

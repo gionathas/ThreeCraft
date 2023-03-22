@@ -83,7 +83,7 @@ export default class GameDataManager extends Dexie {
   }
 
   async saveGame(player: Player, terrain: Terrain) {
-    console.log("Saving game...");
+    console.debug("Saving game...");
 
     const seed = terrain.getSeed();
     const inventory = player.getInventory();
@@ -102,7 +102,7 @@ export default class GameDataManager extends Dexie {
     // save world info's
     this.saveWorldData(seed);
 
-    console.log("Game saved!");
+    console.debug("Game saved!");
   }
 
   getSavedWorldData() {
