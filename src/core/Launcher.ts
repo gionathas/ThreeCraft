@@ -68,6 +68,11 @@ export default class Launcher {
       this.mainMenu.hide();
     });
 
+    this.mainMenu.onResetWorld(async () => {
+      await this.newGame();
+      this.mainMenu.hide();
+    });
+
     this.mainMenu.onSettings(async () => {
       await this.loadSettings();
       this.mainMenu.setMenuLayout("settings");
