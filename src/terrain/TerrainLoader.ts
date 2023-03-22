@@ -15,17 +15,16 @@ type TerrainBoundaries = {
 };
 
 export default class TerrainLoader {
-  static readonly HORIZONTAL_RENDER_DISTANCE =
-    EnvVars.DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
-
   private scene: THREE.Scene;
   private chunksManager: ChunkManager;
 
   private prevCenterChunk?: ChunkID;
+  private hozRenderDistance: number;
 
-  constructor(chunksManager: ChunkManager) {
+  constructor(chunksManager: ChunkManager, renderDistanceInChunks: number) {
     this.scene = Engine.getInstance().getScene();
     this.chunksManager = chunksManager;
+    this.hozRenderDistance = renderDistanceInChunks * Chunk.WIDTH;
   }
 
   async asyncInit(centerPosition: THREE.Vector3) {
@@ -123,15 +122,11 @@ export default class TerrainLoader {
     const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
     const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
 
-    const lowerX =
-      centerChunkOriginX - TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
-    const upperX =
-      centerChunkOriginX + TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
+    const lowerX = centerChunkOriginX - this.hozRenderDistance;
+    const upperX = centerChunkOriginX + this.hozRenderDistance;
 
-    const upperZ =
-      centerChunkOriginZ + TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
-    const lowerZ =
-      centerChunkOriginZ - TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
+    const upperZ = centerChunkOriginZ + this.hozRenderDistance;
+    const lowerZ = centerChunkOriginZ - this.hozRenderDistance;
 
     const upperY = World.MAX_WORLD_HEIGHT;
     const lowerY = World.MIN_WORLD_HEIGHT;
@@ -145,5 +140,9 @@ export default class TerrainLoader {
 
   private roundToNearestVerticalChunk(val: number) {
     return Math.round(val / Chunk.HEIGHT) * Chunk.HEIGHT;
+  }
+
+  setRenderDistance(renderDistanceInChunks: number) {
+    this.hozRenderDistance = renderDistanceInChunks * Chunk.WIDTH;
   }
 }

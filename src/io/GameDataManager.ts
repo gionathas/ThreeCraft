@@ -1,5 +1,6 @@
 import Dexie from "dexie";
 import { Vector3Tuple, Vector4Tuple } from "three";
+import { Settings } from "../core/SettingsManager";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import { Slot } from "../player/InventoryManager";
@@ -29,6 +30,12 @@ interface WorldDataTable {
   seed: string;
 }
 
+interface SettingsDataTable {
+  settingsId: string;
+  fov: number;
+  renderDistance: number;
+}
+
 export default class GameDataManager extends Dexie {
   private static instance: GameDataManager | null;
 
@@ -45,6 +52,9 @@ export default class GameDataManager extends Dexie {
   // World
   private world!: Dexie.Table<WorldDataTable, string>;
 
+  // Settings
+  private settings!: Dexie.Table<SettingsDataTable, string>;
+
   private constructor() {
     super("GameDataManager");
     this.init();
@@ -59,6 +69,7 @@ export default class GameDataManager extends Dexie {
       inventory: "&inventoryId",
       player: "&playerId",
       world: "&worldId",
+      settings: "&settingsId",
     });
 
     this.chunks.mapToClass(Chunk);
@@ -153,7 +164,19 @@ export default class GameDataManager extends Dexie {
     );
   }
 
-  clearAllData() {
+  async saveSettingsData(settings: Settings) {
+    return this.settings.put({
+      settingsId: "default",
+      fov: settings.fov,
+      renderDistance: settings.renderDistance,
+    });
+  }
+
+  getSettingsData() {
+    return this.settings.get("default");
+  }
+
+  clearGameData() {
     return Promise.all([
       this.chunks.clear(),
       this.chunksGeometries.clear(),

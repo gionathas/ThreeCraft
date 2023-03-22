@@ -37,21 +37,75 @@ button {
   box-shadow: inset 2px 0 0 0 rgb(205, 205, 205);
 }
 
+button.back-btn,
+button.apply-btn {
+  width: 100%;
+}
+
 button:hover {
   background-color: var(--button-hover-background);
 }
 
-#github-link-icon {
+.panel {
   display: none;
-  position: fixed;
-  left: 100%;
-  top: -1%;
-  transform: translate(-99%, 0%) rotate(-90deg) scale(1, -1);
-  z-index: 3;
+  flex-direction: column;
+  width: 420px;
+  height: 400px;
+  padding: 30px;
+  gap: 30px;
+  background-color: #727272;
+  border-radius: 2px;
+  border: 2px outset black;
+  box-shadow: inset 2px 0 0 0 rgb(205, 205, 205);
 }
 
-#github-link-icon svg {
-  fill: #727272;
+.panel .btn-container {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.slidecontainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: large;
+}
+
+.slider {
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  background-color: rgb(43, 47, 49);
+  box-shadow: 0 0 0 2px black;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 30px;
+  background-color: #727272;
+  border-left: 2px solid #a4a4a4;
+  border-top: 2px solid #a4a4a4;
+  border-bottom: 2px solid #545655;
+  border-right: 2px solid #545655;
+  box-shadow: 0 0 0 2px black;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  appearance: none;
+  width: 20px;
+  height: 30px;
+  background-color: #727272;
+  border-left: 2px solid #a4a4a4;
+  border-top: 2px solid #a4a4a4;
+  border-bottom: 2px solid #545655;
+  border-right: 2px solid #545655;
+  box-shadow: 0 0 0 2px black;
+
+  cursor: pointer;
 }
 
 #main-menu {
@@ -88,13 +142,22 @@ button:hover {
   z-index: 3;
 }
 
-#main-menu button {
-  display: none;
-}
-
 #main-menu .loading-label {
   display: none;
   font-size: xx-large;
+}
+
+#github-link-icon {
+  display: none;
+  position: fixed;
+  left: 100%;
+  top: -1%;
+  transform: translate(-99%, 0%) rotate(-90deg) scale(1, -1);
+  z-index: 3;
+}
+
+#github-link-icon svg {
+  fill: #727272;
 }
 
 #overlay {

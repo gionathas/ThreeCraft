@@ -27,6 +27,7 @@
         ></path>
       </svg>
     </a>
+    <!-- Main Menu -->
     <div id="main-menu">
       <h1 class="title">ThreeCraft</h1>
       <div class="content">
@@ -35,6 +36,40 @@
         <button id="options-btn">Options</button>
         <button id="guide-btn">Guide</button>
         <p class="loading-label">Loading Terrain...</p>
+        <div id="settings-panel" class="panel">
+          <div class="slidecontainer">
+            <p>FOV: <span id="fov-label">Not set</span></p>
+            <input
+              type="range"
+              min="40"
+              max="100"
+              step="1"
+              class="slider"
+              id="fov-slider"
+            />
+          </div>
+          <div class="slidecontainer">
+            <p>Render Distance: <span id="rdistance-label">Not set</span></p>
+            <input
+              type="range"
+              min="3"
+              max="15"
+              step="1"
+              class="slider"
+              id="rdistance-slider"
+            />
+          </div>
+          <div class="btn-container">
+            <button class="back-btn">Back</button>
+            <button class="apply-btn">Apply</button>
+          </div>
+        </div>
+        <div id="guide-panel" class="panel">
+          <p>Guide</p>
+          <div class="btn-container">
+            <button class="back-btn">Back</button>
+          </div>
+        </div>
       </div>
     </div>
 

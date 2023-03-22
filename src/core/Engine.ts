@@ -2,6 +2,10 @@ import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 
 export default class Engine {
+  public static readonly DEFAULT_FOV = 75;
+  private static readonly Z_NEAR = 0.01;
+  private static readonly Z_FAR = 1000;
+
   private static instance: Engine;
 
   private renderer: THREE.WebGLRenderer;
@@ -41,10 +45,10 @@ export default class Engine {
   }
 
   private initCamera() {
-    const fov = 75;
+    const fov = Engine.DEFAULT_FOV;
+    const near = Engine.Z_NEAR;
+    const far = Engine.Z_FAR;
     const aspect = window.innerWidth / window.innerHeight;
-    const near = 0.01;
-    const far = 1000;
 
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
@@ -100,5 +104,10 @@ export default class Engine {
 
   getTotalMeshes(): number {
     return this.scene.children.length;
+  }
+
+  setFov(fov: number) {
+    this.camera.fov = fov;
+    this.camera.updateProjectionMatrix();
   }
 }

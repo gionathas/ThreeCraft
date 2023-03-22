@@ -6,12 +6,17 @@ import InputController from "../io/InputController";
 import UI from "../ui/UI";
 import Engine from "./Engine";
 import GameState from "./GameState";
+import { Settings } from "./SettingsManager";
 
 export type GameData = {
-  seed: string;
-  spawnPosition: THREE.Vector3;
-  quaternion: THREE.Quaternion;
-  inventory: PlayerInventory;
+  world: {
+    seed: string;
+  };
+  player: {
+    spawnPosition: THREE.Vector3;
+    quaternion: THREE.Quaternion;
+    inventory: PlayerInventory;
+  };
 };
 
 export default class GameLoop {
@@ -49,18 +54,17 @@ export default class GameLoop {
     this.ui = null;
   }
 
-  async start(gameData: GameData, asyncStart: boolean) {
-    const { seed } = gameData;
-
+  async start(gameData: GameData, settings: Settings, asyncStart: boolean) {
     this.gameState.setState("loading");
 
     // init scene
+    this.engine.setFov(settings.fov);
     this.initLights();
 
     // init game entities
     this.terrain = asyncStart
-      ? await this.asyncInitTerrain(seed, gameData)
-      : this.initTerrain(seed, gameData);
+      ? await this.asyncInitTerrain(gameData, settings)
+      : this.initTerrain(gameData, settings);
     this.player = this.initPlayer(this.terrain, gameData);
     this.ui = this.initUI(this.player, this.terrain);
 
@@ -106,28 +110,32 @@ export default class GameLoop {
     this.scene.background = new THREE.Color("#87CEEB");
   }
 
-  private async asyncInitTerrain(seed: string, gameData: GameData) {
+  private async asyncInitTerrain(gameData: GameData, settings: Settings) {
     if (this.terrain) {
       return this.terrain;
     }
 
-    const { spawnPosition: spawn } = gameData;
+    const { spawnPosition } = gameData.player;
+    const { seed } = gameData.world;
+    const { renderDistance } = settings;
 
-    const terrain = new Terrain(seed);
-    await terrain.asyncInit(spawn);
+    const terrain = new Terrain(seed, renderDistance);
+    await terrain.asyncInit(spawnPosition);
 
     return terrain;
   }
 
-  private initTerrain(seed: string, gameData: GameData) {
+  private initTerrain(gameData: GameData, settings: Settings) {
     if (this.terrain) {
       return this.terrain;
     }
 
-    const { spawnPosition: spawn } = gameData;
+    const { spawnPosition } = gameData.player;
+    const { seed } = gameData.world;
+    const { renderDistance } = settings;
 
-    const terrain = new Terrain(seed);
-    terrain.init(spawn);
+    const terrain = new Terrain(seed, renderDistance);
+    terrain.init(spawnPosition);
 
     return terrain;
   }
@@ -137,7 +145,7 @@ export default class GameLoop {
       return this.player;
     }
 
-    const { spawnPosition: spawn, quaternion, inventory } = gameData;
+    const { spawnPosition: spawn, quaternion, inventory } = gameData.player;
 
     const player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE, inventory);
     player.setSpawnOnPosition(spawn.x, spawn.z);

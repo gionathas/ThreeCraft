@@ -19,7 +19,7 @@ export default class Terrain {
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
 
-  constructor(seed: string) {
+  constructor(seed: string, renderDistanceInChunks: number) {
     this.scene = Engine.getInstance().getScene();
     this.seed = seed;
 
@@ -27,7 +27,10 @@ export default class Terrain {
     this.terrainMap = this.globalMapManager.getTerrainMap();
 
     this.chunksManager = new ChunkManager(this.globalMapManager);
-    this.terrainLoader = new TerrainLoader(this.chunksManager);
+    this.terrainLoader = new TerrainLoader(
+      this.chunksManager,
+      renderDistanceInChunks
+    );
   }
 
   async asyncInit(centerPosition: THREE.Vector3) {
@@ -78,6 +81,10 @@ export default class Terrain {
 
   dispose() {
     this.chunksManager.dispose();
+  }
+
+  setRenderDistance(renderDistanceInChunks: number) {
+    this.terrainLoader.setRenderDistance(renderDistanceInChunks);
   }
 
   isSolidBlock(blockCoord: Coordinate): boolean {
