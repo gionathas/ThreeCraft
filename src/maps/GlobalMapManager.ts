@@ -126,6 +126,15 @@ export default class GlobalMapManager extends MapManager {
     this.globalTreeMap?.unloadRegionAt(x, z);
   }
 
+  dispose() {
+    this.continentalMap?.dispose();
+    this.erosionMap?.dispose();
+    this.pvMap?.dispose();
+    this.heightMap?.dispose();
+    this.densityMap?.dispose();
+    this.globalTreeMap?.dispose();
+  }
+
   _logTotalRegionCount() {
     console.group("GlobalMapManager");
     console.log("continentalMap", this.continentalMap?._totalRegionsCount());

@@ -80,7 +80,12 @@ export default class Terrain {
   }
 
   dispose() {
+    // dispose all the chunks
     this.chunksManager.dispose();
+
+    // dispose all the global maps
+    console.debug("Unloading map data...");
+    this.globalMapManager.dispose();
   }
 
   setRenderDistance(renderDistanceInChunks: number) {

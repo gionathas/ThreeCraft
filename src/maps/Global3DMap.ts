@@ -20,6 +20,10 @@ export default class Global3DMap<T extends Map3D> implements Map3D {
     this.regions.delete(regionKey);
   }
 
+  dispose() {
+    this.regions.clear();
+  }
+
   getValueAt(x: number, y: number, z: number) {
     const regionKey = this.getRegionKey(x, y, z);
     const regionMap = this.regions.get(regionKey);

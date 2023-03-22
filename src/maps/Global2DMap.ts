@@ -17,6 +17,10 @@ export default class Global2DMap<T extends Map2D> implements Map2D {
     this.regions.delete(regionKey);
   }
 
+  dispose() {
+    this.regions.clear();
+  }
+
   getValueAt(x: number, z: number) {
     const regionKey = this.getRegionKey(x, z);
     const regionMap = this.regions.get(regionKey);
