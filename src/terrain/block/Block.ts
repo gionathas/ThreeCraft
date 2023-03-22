@@ -1,15 +1,15 @@
 import * as THREE from "three";
-import {
-  TILE_SIZE,
-  TILE_TEXTURES_WIDTH,
-  TILE_TEXTURE_HEIGHT,
-} from "../../core/TextureAtlas";
 import { ChunkModel } from "../chunk";
 import {
   BlockFace,
   BlockFaceNormal,
   BlockFacesGeometry,
 } from "./BlockGeometry";
+import {
+  TILE_SIZE,
+  TILE_TEXTURES_WIDTH,
+  TILE_TEXTURE_HEIGHT,
+} from "./BlockMaterial";
 import { BlockRegistry, BlockType } from "./BlockType";
 
 export type BlockTextureFace = "top" | "bottom" | "side";

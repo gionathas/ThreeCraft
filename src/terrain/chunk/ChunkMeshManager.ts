@@ -22,12 +22,14 @@ export default class ChunkMeshManager {
   private transparentMesh: Map<ChunkID, THREE.Mesh>;
   private solidMeshPool: Array<THREE.Mesh>;
   private transparentMeshPool: Array<THREE.Mesh>;
+  private blockMaterials: BlockMaterial;
 
   constructor() {
     this.solidMesh = new Map();
     this.transparentMesh = new Map();
     this.solidMeshPool = [];
     this.transparentMeshPool = [];
+    this.blockMaterials = BlockMaterial.getInstance();
   }
 
   generateChunkSolidMesh(
@@ -136,6 +138,7 @@ export default class ChunkMeshManager {
     this.transparentMesh.clear();
     this.solidMeshPool.length = 0;
     this.transparentMeshPool.length = 0;
+    this.blockMaterials.dispose();
   }
 
   /**
@@ -157,7 +160,7 @@ export default class ChunkMeshManager {
 
     // pool is empty create a new mesh
     if (!newMesh) {
-      const solidMaterial = BlockMaterial.getInstance().getSolidBlockMaterial();
+      const solidMaterial = this.blockMaterials.getBlockSolidMaterial();
       newMesh = new THREE.Mesh(new THREE.BufferGeometry(), solidMaterial);
     }
 
@@ -183,7 +186,7 @@ export default class ChunkMeshManager {
 
     if (!newMesh) {
       const transparentMaterial =
-        BlockMaterial.getInstance().getBlockTransparentMaterial();
+        this.blockMaterials.getBlockTransparentMaterial();
       newMesh = new THREE.Mesh(new THREE.BufferGeometry(), transparentMaterial);
     }
 
