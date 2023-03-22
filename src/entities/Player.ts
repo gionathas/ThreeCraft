@@ -1,20 +1,16 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
-import InventoryManager, { Slot } from "../player/InventoryManager";
+import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerControls from "../player/PlayerControls";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
-export type PlayerMode = "sim" | "fly";
-export type PlayerInventory = {
-  hotbar: Slot[];
-  inventory: Slot[];
-};
+export type PlayerControlsMode = "sim" | "fly";
 
 export default class Player {
-  private mode: PlayerMode;
+  private controlsMode: PlayerControlsMode;
 
   private terrain: Terrain;
 
@@ -22,15 +18,12 @@ export default class Player {
   private editingControls: EditingControls;
   private inventoryManager: InventoryManager;
 
-  constructor(terrain: Terrain, mode: PlayerMode, inventory: PlayerInventory) {
+  constructor(terrain: Terrain, inventory: InventoryState) {
     this.terrain = terrain;
-    this.mode = mode;
+    this.controlsMode = EnvVars.PLAYER_DEFAULT_CONTROLS_MODE;
 
-    this.inventoryManager = new InventoryManager(
-      inventory.inventory,
-      inventory.hotbar
-    );
-    this.playerControls = new PlayerControls(terrain, mode);
+    this.inventoryManager = new InventoryManager(inventory);
+    this.playerControls = new PlayerControls(terrain, this.controlsMode);
     this.editingControls = new EditingControls(this, terrain);
   }
 
@@ -75,7 +68,7 @@ export default class Player {
   }
 
   getMode() {
-    return this.mode;
+    return this.controlsMode;
   }
 
   getWidth() {

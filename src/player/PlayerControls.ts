@@ -3,7 +3,7 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
-import { PlayerMode } from "../entities/Player";
+import { PlayerControlsMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { Block } from "../terrain/block";
@@ -54,7 +54,7 @@ export default class PlayerControls extends PointerLockControls {
   private velocity: THREE.Vector3;
   private controlsDirection: THREE.Vector3;
 
-  private mode: PlayerMode;
+  private mode: PlayerControlsMode;
   private properties: PlayerControlsProperties;
   private state: "onGround" | "falling" | "jumping";
 
@@ -65,7 +65,7 @@ export default class PlayerControls extends PointerLockControls {
   private onControlLockHandlerRef: () => void;
   private onControlUnlockHandlerRef: () => void;
 
-  constructor(terrain: Terrain, mode: PlayerMode) {
+  constructor(terrain: Terrain, mode: PlayerControlsMode) {
     super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
     this.terrain = terrain;
     this.inputController = InputController.getInstance();
@@ -1434,7 +1434,7 @@ export default class PlayerControls extends PointerLockControls {
     );
   }
 
-  private getPlayerProps(mode: PlayerMode) {
+  private getPlayerProps(mode: PlayerControlsMode) {
     return this.mode === "sim" ? simProps : flyProps;
   }
 

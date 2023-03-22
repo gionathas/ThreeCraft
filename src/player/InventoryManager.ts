@@ -8,6 +8,11 @@ export type Item = {
   amount: number;
 };
 
+export type InventoryState = {
+  hotbar: Slot[];
+  inventory: Slot[];
+};
+
 export type Slot = Item | null;
 
 export default class InventoryManager {
@@ -29,7 +34,7 @@ export default class InventoryManager {
 
   private eventEmitter: EventEmitter;
 
-  constructor(inventory: Slot[], hotbar: Slot[]) {
+  constructor(inventory: InventoryState) {
     this.dataManager = GameDataManager.getInstance();
     this.eventEmitter = new EventEmitter();
 
@@ -42,10 +47,10 @@ export default class InventoryManager {
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
 
     // dev purposes
-    this.loadInventory(inventory, hotbar);
+    this.loadInventory(inventory);
   }
 
-  private loadInventory(inventory: Slot[], hotbar: Slot[]) {
+  private loadInventory({ inventory, hotbar }: InventoryState) {
     this.inventory.map((_, i) => (this.inventory[i] = inventory[i] ?? null));
     this.hotbar.map((_, i) => (this.hotbar[i] = hotbar[i] ?? null));
   }

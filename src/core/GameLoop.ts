@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import EnvVars from "../config/EnvVars";
-import Player, { PlayerInventory } from "../entities/Player";
+import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
+import { InventoryState } from "../player/InventoryManager";
 import UI from "../ui/UI";
 import Engine from "./Engine";
 import GameState from "./GameState";
@@ -15,7 +15,7 @@ export type GameData = {
   player: {
     spawnPosition: THREE.Vector3;
     quaternion: THREE.Quaternion;
-    inventory: PlayerInventory;
+    inventory: InventoryState;
   };
 };
 
@@ -147,7 +147,7 @@ export default class GameLoop {
 
     const { spawnPosition: spawn, quaternion, inventory } = gameData.player;
 
-    const player = new Player(terrain, EnvVars.DEFAULT_PLAYER_MODE, inventory);
+    const player = new Player(terrain, inventory);
     player.setSpawnOnPosition(spawn.x, spawn.z);
     player.setQuaternion(quaternion);
 

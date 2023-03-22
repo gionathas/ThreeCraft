@@ -1,4 +1,4 @@
-import { PlayerMode } from "../entities/Player";
+import { PlayerControlsMode } from "../entities/Player";
 
 export default class EnvVars {
   /**
@@ -11,7 +11,8 @@ export default class EnvVars {
   );
 
   /** Player */
-  static readonly DEFAULT_PLAYER_MODE: PlayerMode = "fly";
+  static readonly PLAYER_DEFAULT_CONTROLS_MODE = import.meta.env
+    .VITE_PLAYER_DEFAULT_CONTROLS_MODE as PlayerControlsMode;
   static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
     import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
   );

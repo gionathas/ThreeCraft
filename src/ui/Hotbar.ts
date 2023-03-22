@@ -1,8 +1,10 @@
+import GameState from "../core/GameState";
 import InventoryManager, { Slot } from "../player/InventoryManager";
 import SlotGrid from "./SlotGrid";
 import { UIComponent } from "./UIComponent";
 
 export default class Hotbar implements UIComponent {
+  private gameState: GameState;
   private inventoryManager: InventoryManager;
 
   private hotbarSlots: Slot[];
@@ -14,6 +16,7 @@ export default class Hotbar implements UIComponent {
   private onWheelSelectionHandlerRef: (event: WheelEvent) => void;
 
   constructor(inventoryManager: InventoryManager) {
+    this.gameState = GameState.getInstance();
     this.inventoryManager = inventoryManager;
     this.hotbarSlots = this.inventoryManager.getHotbarSlots();
 
@@ -75,6 +78,10 @@ export default class Hotbar implements UIComponent {
   }
 
   private onNumSelectionHandler(event: KeyboardEvent) {
+    if (!this.gameState.isRunning()) {
+      return;
+    }
+
     const numPressed = parseInt(event.key);
 
     if (!isNaN(numPressed)) {
@@ -83,6 +90,10 @@ export default class Hotbar implements UIComponent {
   }
 
   private onWheelSelectionHandler(event: WheelEvent) {
+    if (!this.gameState.isRunning()) {
+      return;
+    }
+
     const isScrollingUp = event.deltaY < 0;
     const isScrollingDown = event.deltaY > 0;
     const selectedIndex = this.inventoryManager.getSelectedIndex();
