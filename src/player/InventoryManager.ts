@@ -46,7 +46,6 @@ export default class InventoryManager {
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
 
-    // dev purposes
     this.loadInventory(inventory);
   }
 
