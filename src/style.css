@@ -22,6 +22,10 @@
   user-select: none;
 }
 
+b {
+  font-weight: 900;
+}
+
 /* Button style */
 button {
   width: 400px;
@@ -145,6 +149,11 @@ button:hover {
 #main-menu .loading-label {
   display: none;
   font-size: xx-large;
+}
+
+#guide-content {
+  font-size: large;
+  line-height: 1.8;
 }
 
 #github-link-icon {

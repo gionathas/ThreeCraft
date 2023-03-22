@@ -1,4 +1,5 @@
 import { Settings } from "../core/SettingsManager";
+import GuidePanel from "./GuidePanel";
 import SettingsPanel from "./SettingsPanel";
 
 type MenuLayout = "main" | "loading" | "settings" | "guide";
@@ -20,7 +21,7 @@ export default class MainMenu {
   private guideBtn: HTMLElement;
 
   // panels
-  private guidePanel: HTMLElement;
+  private guidePanel: GuidePanel;
   private settingsPanel: SettingsPanel;
 
   constructor() {
@@ -35,14 +36,14 @@ export default class MainMenu {
     // main menu buttons
     this.playBtn = document.getElementById("play-btn")!;
     this.resetBtn = document.getElementById("reset-btn")!;
-    this.settingsBtn = document.getElementById("options-btn")!;
+    this.settingsBtn = document.getElementById("settings-btn")!;
     this.guideBtn = document.getElementById("guide-btn")!;
 
     // settings panel
     this.settingsPanel = new SettingsPanel();
 
     //panels
-    this.guidePanel = document.getElementById("guide-panel")!;
+    this.guidePanel = new GuidePanel();
 
     // set initial screen
     this.setMenuLayout("main");
@@ -70,15 +71,15 @@ export default class MainMenu {
         break;
       case "loading":
         this.layout = "loading";
-        this.showLoadingLayout();
+        this.showLoadingScreen();
         break;
       case "settings":
         this.layout = "settings";
-        this.showSettingsLayout();
+        this.showSettingsPanel();
         break;
       case "guide":
         this.layout = "guide";
-        this.showGuideLayout();
+        this.showGuidePanel();
         break;
     }
   }
@@ -89,13 +90,13 @@ export default class MainMenu {
         this.hideMainLayout();
         break;
       case "loading":
-        this.hideLoadingLayout();
+        this.hideLoadingScreen();
         break;
       case "settings":
-        this.hideOptionsLayout();
+        this.hideSettingsPanel();
         break;
       case "guide":
-        this.hideGuideLayout();
+        this.hideGuidePanel();
         break;
     }
   }
@@ -107,19 +108,19 @@ export default class MainMenu {
     this.guideBtn.style.display = "none";
   }
 
-  private hideLoadingLayout() {
+  private hideLoadingScreen() {
     this.title.style.display = "block";
     this.loadingLabel.style.display = "none";
   }
 
-  private hideOptionsLayout() {
+  private hideSettingsPanel() {
     this.title.style.display = "block";
     this.settingsPanel.hide();
   }
 
-  private hideGuideLayout() {
+  private hideGuidePanel() {
     this.title.style.display = "block";
-    this.guidePanel.style.display = "none";
+    this.guidePanel.hide();
   }
 
   private showMainLayout() {
@@ -132,19 +133,19 @@ export default class MainMenu {
     this.guideBtn.style.display = "block";
   }
 
-  private showLoadingLayout() {
+  private showLoadingScreen() {
     this.title.style.display = "none";
     this.loadingLabel.style.display = "block";
   }
 
-  private showSettingsLayout() {
+  private showSettingsPanel() {
     this.title.style.display = "none";
     this.settingsPanel.show();
   }
 
-  private showGuideLayout() {
+  private showGuidePanel() {
     this.title.style.display = "none";
-    this.guidePanel.style.display = "flex";
+    this.guidePanel.show();
   }
 
   onPlayWorld(callback: () => void) {
@@ -169,5 +170,6 @@ export default class MainMenu {
 
   onBack(callback: () => void) {
     this.settingsPanel.onBack(callback);
+    this.guidePanel.onBack(callback);
   }
 }
