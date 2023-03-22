@@ -1,12 +1,16 @@
 import EventEmitter from "events";
 import * as THREE from "three";
-import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
 import { BlockType } from "../terrain/block";
 
 export type Item = {
   block: BlockType;
   amount: number;
+};
+
+export type InventoryState = {
+  hotbar: Slot[];
+  inventory: Slot[];
 };
 
 export type Slot = Item | null;
@@ -30,7 +34,7 @@ export default class InventoryManager {
 
   private eventEmitter: EventEmitter;
 
-  constructor(inventory: Slot[], hotbar: Slot[]) {
+  constructor(inventory: InventoryState) {
     this.dataManager = GameDataManager.getInstance();
     this.eventEmitter = new EventEmitter();
 
@@ -42,37 +46,12 @@ export default class InventoryManager {
     this.hotbar = new Array(InventoryManager.HOTBAR_SLOTS).fill(null);
     this.crafting = new Array(InventoryManager.CRAFTING_SLOTS).fill(null);
 
-    // dev purposes
-    this.loadInventory(inventory, hotbar);
+    this.loadInventory(inventory);
   }
 
-  private loadInventory(inventory: Slot[], hotbar: Slot[]) {
+  private loadInventory({ inventory, hotbar }: InventoryState) {
     this.inventory.map((_, i) => (this.inventory[i] = inventory[i] ?? null));
     this.hotbar.map((_, i) => (this.hotbar[i] = hotbar[i] ?? null));
-    this.loadDevInventory();
-  }
-
-  private loadDevInventory() {
-    if (!EnvVars.DEV_INVENTORY_ENABLED) {
-      return;
-    }
-
-    const devInventory = EnvVars.DEV_INVENTORY_ITEMS;
-    const devHotbar = EnvVars.DEV_HOTBAR_ITEMS;
-
-    for (let i = 0; i < devInventory.length; i++) {
-      this.addItemTo(this.inventory, {
-        block: devInventory[i],
-        amount: InventoryManager.MAX_STACK_SIZE,
-      });
-    }
-
-    for (let i = 0; i < devHotbar.length; i++) {
-      this.addItemTo(this.hotbar, {
-        block: devHotbar[i],
-        amount: InventoryManager.MAX_STACK_SIZE,
-      });
-    }
   }
 
   async saveInventory() {

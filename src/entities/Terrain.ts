@@ -19,7 +19,7 @@ export default class Terrain {
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
 
-  constructor(seed: string, centerPosition: THREE.Vector3) {
+  constructor(seed: string, renderDistanceInChunks: number) {
     this.scene = Engine.getInstance().getScene();
     this.seed = seed;
 
@@ -27,11 +27,22 @@ export default class Terrain {
     this.terrainMap = this.globalMapManager.getTerrainMap();
 
     this.chunksManager = new ChunkManager(this.globalMapManager);
-    this.terrainLoader = new TerrainLoader(centerPosition, this.chunksManager);
+    this.terrainLoader = new TerrainLoader(
+      this.chunksManager,
+      renderDistanceInChunks
+    );
   }
 
-  update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    this.terrainLoader.update(newCenterPosition, isFirstUpdate);
+  async asyncInit(centerPosition: THREE.Vector3) {
+    await this.terrainLoader.asyncInit(centerPosition);
+  }
+
+  init(centerPosition: THREE.Vector3) {
+    this.terrainLoader.init(centerPosition);
+  }
+
+  update(newCenterPosition: THREE.Vector3) {
+    this.terrainLoader.update(newCenterPosition);
 
     // this.globalMapManager._logTotalRegionCount();
   }
@@ -66,6 +77,14 @@ export default class Terrain {
         this.scene.remove(removedMesh);
       }
     }
+  }
+
+  dispose() {
+    this.chunksManager.dispose();
+  }
+
+  setRenderDistance(renderDistanceInChunks: number) {
+    this.terrainLoader.setRenderDistance(renderDistanceInChunks);
   }
 
   isSolidBlock(blockCoord: Coordinate): boolean {

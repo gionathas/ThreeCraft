@@ -1,9 +1,11 @@
 export default class KeyBindings {
-  /** Debug Controls */
-  static readonly TOGGLE_DEBUG_UI_KEY = "F3";
-  static readonly SWITCH_PLAYER_MODE = "KeyP";
+  /** UI Controls */
+  static readonly TOGGLE_DEBUG_INFO_KEY = "F3";
+  static readonly TOGGLE_INVENTORY_KEY = "KeyT";
 
   /** Player Controls */
+  static readonly SWITCH_PLAYER_MODE = "KeyP";
+
   static readonly MOVE_FORWARD_KEY = "KeyW";
   static readonly MOVE_BACK_KEY = "KeyS";
   static readonly MOVE_RIGHT_KEY = "KeyD";

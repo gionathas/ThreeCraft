@@ -118,6 +118,25 @@ export default class ChunkMeshManager {
     return transparentMesh;
   }
 
+  dispose() {
+    this.solidMesh.forEach((mesh) => {
+      mesh.geometry.dispose();
+      // @ts-ignore
+      mesh.material.dispose();
+    });
+
+    this.transparentMesh.forEach((mesh) => {
+      mesh.geometry.dispose();
+      // @ts-ignore
+      mesh.material.dispose();
+    });
+
+    this.solidMesh.clear();
+    this.transparentMesh.clear();
+    this.solidMeshPool.length = 0;
+    this.transparentMeshPool.length = 0;
+  }
+
   /**
    * Return the chunk mesh associated to the chunkID.
    *

@@ -15,26 +15,42 @@ type TerrainBoundaries = {
 };
 
 export default class TerrainLoader {
-  static readonly HORIZONTAL_RENDER_DISTANCE =
-    EnvVars.DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * Chunk.WIDTH;
-
   private scene: THREE.Scene;
   private chunksManager: ChunkManager;
-  private prevCenterChunk: ChunkID;
 
-  constructor(centerPosition: THREE.Vector3, chunksManager: ChunkManager) {
+  private prevCenterChunk?: ChunkID;
+  private hozRenderDistance: number;
+
+  constructor(chunksManager: ChunkManager, renderDistanceInChunks: number) {
     this.scene = Engine.getInstance().getScene();
-    this.prevCenterChunk = World.getChunkIdFromPosition(centerPosition);
     this.chunksManager = chunksManager;
+    this.hozRenderDistance = renderDistanceInChunks * Chunk.WIDTH;
   }
 
-  update(centerPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
+  async asyncInit(centerPosition: THREE.Vector3) {
+    const terrainBoundaries =
+      this.getTerrainBoundariesFromPosition(centerPosition);
+
+    const tasks = this.loadTerrain(terrainBoundaries);
+    await Promise.all(tasks);
+    this.prevCenterChunk = World.getChunkIdFromPosition(centerPosition);
+  }
+
+  init(centerPosition: THREE.Vector3) {
+    const terrainBoundaries =
+      this.getTerrainBoundariesFromPosition(centerPosition);
+
+    this.loadTerrain(terrainBoundaries);
+    this.prevCenterChunk = World.getChunkIdFromPosition(centerPosition);
+  }
+
+  update(centerPosition: THREE.Vector3) {
     const isGenerationEnabled = EnvVars.TERRAIN_GENERATION_ENABLED;
 
     const currCenterChunk = World.getChunkIdFromPosition(centerPosition);
     const isSameChunk = this.prevCenterChunk === currCenterChunk;
 
-    if ((!isSameChunk && isGenerationEnabled) || isFirstUpdate) {
+    if (!isSameChunk && isGenerationEnabled) {
       const terrainBoundaries =
         this.getTerrainBoundariesFromPosition(centerPosition);
 
@@ -52,18 +68,27 @@ export default class TerrainLoader {
   // we can implement a diff between the previous terrain boundaries and the current boundaries
   // to find the chunk that needs to be loaded
   private loadTerrain(boundaries: TerrainBoundaries) {
+    const tasks = [];
+
     const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
     for (let x = lowerX; x < upperX; x += Chunk.WIDTH) {
       for (let z = lowerZ; z < upperZ; z += Chunk.WIDTH) {
         for (let y = upperY; y > lowerY; y -= Chunk.HEIGHT) {
-          this.chunksManager.generateChunkAt({ x, y, z }, (chunkMesh) => {
-            for (const mesh of chunkMesh) {
-              this.scene.add(mesh);
+          const task = this.chunksManager.generateChunkAt(
+            { x, y, z },
+            (chunkMesh) => {
+              for (const mesh of chunkMesh) {
+                this.scene.add(mesh);
+              }
             }
-          });
+          );
+
+          tasks.push(task);
         }
       }
     }
+
+    return tasks;
   }
 
   private unloadTerrain(boundaries: TerrainBoundaries) {
@@ -97,15 +122,11 @@ export default class TerrainLoader {
     const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
     const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
 
-    const lowerX =
-      centerChunkOriginX - TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
-    const upperX =
-      centerChunkOriginX + TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
+    const lowerX = centerChunkOriginX - this.hozRenderDistance;
+    const upperX = centerChunkOriginX + this.hozRenderDistance;
 
-    const upperZ =
-      centerChunkOriginZ + TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
-    const lowerZ =
-      centerChunkOriginZ - TerrainLoader.HORIZONTAL_RENDER_DISTANCE;
+    const upperZ = centerChunkOriginZ + this.hozRenderDistance;
+    const lowerZ = centerChunkOriginZ - this.hozRenderDistance;
 
     const upperY = World.MAX_WORLD_HEIGHT;
     const lowerY = World.MIN_WORLD_HEIGHT;
@@ -119,5 +140,9 @@ export default class TerrainLoader {
 
   private roundToNearestVerticalChunk(val: number) {
     return Math.round(val / Chunk.HEIGHT) * Chunk.HEIGHT;
+  }
+
+  setRenderDistance(renderDistanceInChunks: number) {
+    this.hozRenderDistance = renderDistanceInChunks * Chunk.WIDTH;
   }
 }

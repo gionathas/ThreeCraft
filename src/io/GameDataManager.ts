@@ -1,4 +1,8 @@
 import Dexie from "dexie";
+import { Vector3Tuple, Vector4Tuple } from "three";
+import { Settings } from "../core/SettingsManager";
+import Player from "../entities/Player";
+import Terrain from "../entities/Terrain";
 import { Slot } from "../player/InventoryManager";
 import { Chunk, ChunkID } from "../terrain/chunk";
 import { BufferGeometryData } from "../utils/helpers";
@@ -17,12 +21,19 @@ interface InventoryTable {
 
 interface PlayerDataTable {
   playerId: string;
-  position: [number, number, number];
+  position: Vector3Tuple;
+  quaternion: Vector4Tuple;
 }
 
 interface WorldDataTable {
   worldId: string;
   seed: string;
+}
+
+interface SettingsDataTable {
+  settingsId: string;
+  fov: number;
+  renderDistance: number;
 }
 
 export default class GameDataManager extends Dexie {
@@ -41,6 +52,9 @@ export default class GameDataManager extends Dexie {
   // World
   private world!: Dexie.Table<WorldDataTable, string>;
 
+  // Settings
+  private settings!: Dexie.Table<SettingsDataTable, string>;
+
   private constructor() {
     super("GameDataManager");
     this.init();
@@ -55,6 +69,7 @@ export default class GameDataManager extends Dexie {
       inventory: "&inventoryId",
       player: "&playerId",
       world: "&worldId",
+      settings: "&settingsId",
     });
 
     this.chunks.mapToClass(Chunk);
@@ -65,6 +80,29 @@ export default class GameDataManager extends Dexie {
       this.instance = new GameDataManager();
     }
     return this.instance;
+  }
+
+  async saveGame(player: Player, terrain: Terrain) {
+    console.debug("Saving game...");
+
+    const seed = terrain.getSeed();
+    const inventory = player.getInventory();
+
+    // save player info
+    const playerPosition = player.getPosition().toArray();
+    const playerQuaternion = player.getQuaternion().toArray() as Vector4Tuple;
+    await this.savePlayerData(playerPosition, playerQuaternion);
+
+    // save inventory
+    await this.saveInventory(
+      inventory.getHotbarSlots(),
+      inventory.getInventorySlots()
+    );
+
+    // save world info's
+    this.saveWorldData(seed);
+
+    console.debug("Game saved!");
   }
 
   getSavedWorldData() {
@@ -82,10 +120,11 @@ export default class GameDataManager extends Dexie {
     return this.player.get("default");
   }
 
-  async savePlayerData(position: [number, number, number]) {
+  async savePlayerData(position: Vector3Tuple, quaternion: Vector4Tuple) {
     return this.player.put({
       playerId: "default",
       position,
+      quaternion,
     });
   }
 
@@ -125,12 +164,25 @@ export default class GameDataManager extends Dexie {
     );
   }
 
-  clearAllData() {
+  async saveSettingsData(settings: Settings) {
+    return this.settings.put({
+      settingsId: "default",
+      fov: settings.fov,
+      renderDistance: settings.renderDistance,
+    });
+  }
+
+  getSettingsData() {
+    return this.settings.get("default");
+  }
+
+  clearGameData() {
     return Promise.all([
       this.chunks.clear(),
       this.chunksGeometries.clear(),
       this.inventory.clear(),
       this.player.clear(),
+      this.world.clear(),
     ]);
   }
 }

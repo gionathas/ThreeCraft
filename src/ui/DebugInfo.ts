@@ -10,42 +10,52 @@ import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
 export default class DebugInfo {
   private player: Player;
   private terrain: Terrain;
-
   private inputController: InputController;
-  private isVisible!: boolean;
 
-  private fps!: Stats;
-  private mem!: Stats;
+  private isVisible: boolean;
 
-  private debugPanel!: HTMLElement;
+  private debugPanel: HTMLElement;
+  private fps: Stats;
+  private mem: Stats;
 
   constructor(player: Player, terrain: Terrain) {
     this.inputController = InputController.getInstance();
 
     this.player = player;
     this.terrain = terrain;
-    this.init();
+
+    this.isVisible = EnvVars.SHOW_DEBUG_INFO;
+
+    this.debugPanel = this.initPanel();
+    this.fps = this.initFpsStats();
+    this.mem = this.initMemStats();
   }
 
-  private init() {
-    this.debugPanel = document.getElementById("debugPanel")!;
+  private initPanel() {
+    const debugPanel = document.getElementById("debug-panel")!;
+    debugPanel.style.display = this.isVisible ? "block" : "none";
 
-    this.initStats();
-
-    const initialVisibility = EnvVars.SHOW_DEBUG_UI;
-    this.toggleVisibility(initialVisibility);
+    return debugPanel;
   }
 
-  private initStats() {
-    this.fps = Stats();
-    this.fps.showPanel(0);
-    this.fps.dom.style.cssText = "position:absolute;top:0px;left:0px;"; // set position
-    document.body.appendChild(this.fps.dom);
+  private initFpsStats() {
+    const fps = Stats();
+    fps.showPanel(0);
+    fps.dom.style.cssText = "position:absolute;top:0px;left:0px;";
+    fps.dom.style.display = this.isVisible ? "block" : "none";
+    document.body.appendChild(fps.dom);
 
-    this.mem = Stats();
-    this.mem.showPanel(2);
-    this.mem.dom.style.cssText = "position:absolute;top:50px;left:0px;"; // set position
-    document.body.appendChild(this.mem.dom);
+    return fps;
+  }
+
+  private initMemStats() {
+    const mem = Stats();
+    mem.showPanel(2);
+    mem.dom.style.cssText = "position:absolute;top:50px;left:0px;";
+    mem.dom.style.display = this.isVisible ? "block" : "none";
+    document.body.appendChild(mem.dom);
+
+    return mem;
   }
 
   update(dt: number) {
@@ -92,36 +102,37 @@ export default class DebugInfo {
   }
 
   private updateDebugVisibility() {
-    const { isVisible } = this;
+    const hasSwitchedVisibility = this.inputController.hasJustPressedKey(
+      KeyBindings.TOGGLE_DEBUG_INFO_KEY
+    );
 
-    if (
-      this.inputController.hasJustPressedKey(KeyBindings.TOGGLE_DEBUG_UI_KEY)
-    ) {
-      this.toggleVisibility(!isVisible);
+    if (hasSwitchedVisibility) {
+      !this.isVisible ? this.show() : this.hide();
     }
   }
 
-  private toggleVisibility(isVisible: boolean) {
-    if (isVisible) {
-      this.showDebugUI();
-    } else {
-      this.hideDebugUI();
-    }
-  }
-
-  private showDebugUI() {
+  show() {
     this.isVisible = true;
 
-    this.debugPanel.style.visibility = "visible";
-    this.fps.dom.style.visibility = "visible";
-    this.mem.dom.style.visibility = "visible";
+    this.debugPanel.style.display = "block";
+    this.fps.dom.style.display = "block";
+    this.mem.dom.style.display = "block";
   }
 
-  private hideDebugUI() {
+  hide() {
     this.isVisible = false;
 
-    this.debugPanel.style.visibility = "hidden";
-    this.fps.dom.style.visibility = "hidden";
-    this.mem.dom.style.visibility = "hidden";
+    this.debugPanel.style.display = "none";
+    this.fps.dom.style.display = "none";
+    this.mem.dom.style.display = "none";
+  }
+
+  dispose() {
+    this.isVisible = false;
+
+    this.debugPanel.style.display = "none";
+    this.debugPanel.childNodes.forEach((node) => node.remove());
+    this.fps.dom.remove();
+    this.mem.dom.remove();
   }
 }

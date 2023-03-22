@@ -3,7 +3,7 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
-import { PlayerMode } from "../entities/Player";
+import { PlayerControlsMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { Block } from "../terrain/block";
@@ -20,19 +20,19 @@ export interface PlayerControlsProperties {
 }
 
 const simProps: PlayerControlsProperties = {
-  width: EnvVars.VITE_PLAYER_WIDTH,
-  height: EnvVars.VITE_PLAYER_HEIGHT,
-  horizontalSpeed: EnvVars.VITE_PLAYER_HORIZONTAL_SPEED,
-  verticalSpeed: EnvVars.VITE_PLAYER_VERTICAL_SPEED,
-  dampingFactor: EnvVars.VITE_PLAYER_DAMPING_FACTOR,
+  width: EnvVars.PLAYER_WIDTH,
+  height: EnvVars.PLAYER_HEIGHT,
+  horizontalSpeed: EnvVars.PLAYER_HORIZONTAL_SPEED,
+  verticalSpeed: EnvVars.PLAYER_VERTICAL_SPEED,
+  dampingFactor: EnvVars.PLAYER_DAMPING_FACTOR,
   physicsEnabled: true,
 };
 
 const flyProps: PlayerControlsProperties = {
   ...simProps,
   physicsEnabled: false,
-  horizontalSpeed: EnvVars.VITE_FLY_HORIZONTAL_SPEED,
-  verticalSpeed: EnvVars.VITE_FLY_VERTICAL_SPEED,
+  horizontalSpeed: EnvVars.FLY_HORIZONTAL_SPEED,
+  verticalSpeed: EnvVars.FLY_VERTICAL_SPEED,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
@@ -54,13 +54,18 @@ export default class PlayerControls extends PointerLockControls {
   private velocity: THREE.Vector3;
   private controlsDirection: THREE.Vector3;
 
-  private mode: PlayerMode;
+  private mode: PlayerControlsMode;
   private properties: PlayerControlsProperties;
   private state: "onGround" | "falling" | "jumping";
 
   private hitbox: THREE.LineSegments;
 
-  constructor(terrain: Terrain, mode: PlayerMode) {
+  private lockCbs: (() => void)[];
+  private unlockCbs: (() => void)[];
+  private onControlLockHandlerRef: () => void;
+  private onControlUnlockHandlerRef: () => void;
+
+  constructor(terrain: Terrain, mode: PlayerControlsMode) {
     super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
     this.terrain = terrain;
     this.inputController = InputController.getInstance();
@@ -72,6 +77,41 @@ export default class PlayerControls extends PointerLockControls {
     this.velocity = new THREE.Vector3();
     this.controlsDirection = new THREE.Vector3();
     this.hitbox = this.initBoundingBox();
+
+    // lock/unlock event handlers
+    this.lockCbs = [];
+    this.unlockCbs = [];
+    this.onControlLockHandlerRef = this.onControlLockHandler.bind(this);
+    this.onControlUnlockHandlerRef = this.onControlUnlockHandler.bind(this);
+    this.onLock(this.onControlLockHandlerRef);
+    this.onUnlock(this.onControlUnlockHandlerRef);
+  }
+
+  dispose() {
+    this.hitbox.geometry.dispose();
+    // @ts-ignore
+    this.hitbox.material.dispose();
+
+    this.lockCbs.forEach((cb) => this.removeEventListener("lock", cb));
+    this.unlockCbs.forEach((cb) => this.removeEventListener("unlock", cb));
+  }
+
+  private onControlLockHandler() {
+    this.inputController.enable();
+  }
+
+  private onControlUnlockHandler() {
+    this.inputController.disable();
+  }
+
+  onLock(cb: () => void) {
+    this.addEventListener("lock", cb);
+    this.lockCbs.push(cb);
+  }
+
+  onUnlock(cb: () => void) {
+    this.addEventListener("unlock", cb);
+    this.unlockCbs.push(cb);
   }
 
   private initBoundingBox() {
@@ -86,7 +126,7 @@ export default class PlayerControls extends PointerLockControls {
     const hitbox = new THREE.LineSegments(edges, mat);
     hitbox.add(axesHelpers);
 
-    if (EnvVars.VITE_PLAYER_SHOW_BOUNDING_BOX) {
+    if (EnvVars.PLAYER_SHOW_BOUNDING_BOX) {
       scene.add(hitbox);
     }
 
@@ -1394,7 +1434,7 @@ export default class PlayerControls extends PointerLockControls {
     );
   }
 
-  private getPlayerProps(mode: PlayerMode) {
+  private getPlayerProps(mode: PlayerControlsMode) {
     return this.mode === "sim" ? simProps : flyProps;
   }
 

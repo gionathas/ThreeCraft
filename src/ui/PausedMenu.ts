@@ -1,28 +1,34 @@
-export default class PausedMenu {
+import { UIComponent } from "./UIComponent";
+
+export default class PausedMenu implements UIComponent {
   public isVisible: boolean;
+
+  // parent element
   private pausedMenu!: HTMLElement;
 
   // buttons
   private resumeButton!: HTMLButtonElement;
   private quitButton!: HTMLButtonElement;
 
+  // callbacks
+  private resumeCbs: ((e: Event) => void)[];
+  private quitCbs: ((e: Event) => void)[];
+
   constructor() {
     this.isVisible = false;
+    this.resumeCbs = [];
+    this.quitCbs = [];
     this.init();
   }
 
   private init() {
-    const pausedMenu = document.getElementById("game-paused-menu");
-    const resumeBtn = document.getElementById("resume-btn");
-    const exitBtn = document.getElementById("quit-btn");
-
-    if (!pausedMenu || !resumeBtn || !exitBtn) {
-      throw new Error("Paused menu invalid markup!");
-    }
-
-    this.pausedMenu = pausedMenu;
-    this.resumeButton = resumeBtn as HTMLButtonElement;
-    this.quitButton = exitBtn as HTMLButtonElement;
+    this.pausedMenu = document.getElementById("game-paused-menu")!;
+    this.resumeButton = this.pausedMenu.querySelector(
+      "#resume-btn"
+    )! as HTMLButtonElement;
+    this.quitButton = this.pausedMenu.querySelector(
+      "#quit-btn"
+    )! as HTMLButtonElement;
   }
 
   show() {
@@ -35,13 +41,28 @@ export default class PausedMenu {
     this.pausedMenu.style.display = "none";
   }
 
-  setOnResumeClick(callback: () => void) {
+  onResume(callback: () => void) {
     this.resumeButton.addEventListener("click", callback);
+    this.resumeCbs.push(callback);
   }
 
-  setOnQuitClick(callback: () => void) {
+  onQuit(callback: () => void) {
     this.quitButton.addEventListener("click", callback);
+    this.quitCbs.push(callback);
   }
 
-  //TODO add clear event listeners
+  dispose() {
+    this.hide();
+
+    // remove event listeners
+    this.resumeCbs.forEach((cb) =>
+      this.resumeButton.removeEventListener("click", cb)
+    );
+    this.quitCbs.forEach((cb) =>
+      this.quitButton.removeEventListener("click", cb)
+    );
+
+    this.resumeCbs = [];
+    this.quitCbs = [];
+  }
 }

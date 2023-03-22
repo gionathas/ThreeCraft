@@ -43,8 +43,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.COBBLESTONE,
     icon: {
-      row: 0,
-      col: 2,
+      row: 48,
+      col: 12,
     },
     texture: {
       top: {
@@ -66,8 +66,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.COBBLESTONE,
     icon: {
-      row: 0,
-      col: 2,
+      row: 8,
+      col: 31,
     },
     texture: {
       top: {
@@ -89,8 +89,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.DIRT,
     icon: {
-      row: 0,
-      col: 0,
+      row: 16,
+      col: 27,
     },
     texture: {
       top: {
@@ -112,8 +112,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.DIRT,
     icon: {
-      row: -1,
-      col: -1,
+      row: 13,
+      col: 18,
     },
     texture: {
       top: {
@@ -135,8 +135,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.DIRT,
     icon: {
-      row: 0,
-      col: 1,
+      row: 13,
+      col: 18,
     },
     texture: {
       top: {
@@ -158,8 +158,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.OAK_LOG,
     icon: {
-      row: 0,
-      col: 5,
+      row: 25,
+      col: 9,
     },
     texture: {
       top: {
@@ -180,8 +180,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isTransparent: true,
     isSolid: true,
     icon: {
-      row: 0,
-      col: 0,
+      row: 25,
+      col: 8,
     },
     texture: {
       top: {
@@ -203,8 +203,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.SAND,
     icon: {
-      row: 0,
-      col: 3,
+      row: 32,
+      col: 6,
     },
     texture: {
       top: {
@@ -225,8 +225,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isTransparent: true,
     isSolid: false,
     icon: {
-      row: 0,
-      col: 0,
+      row: 37,
+      col: 28,
     },
     texture: {
       side: {
@@ -247,8 +247,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isTransparent: true,
     isSolid: true,
     icon: {
-      row: 0,
-      col: 6,
+      row: 15,
+      col: 26,
     },
     texture: {
       side: {
@@ -270,8 +270,8 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     isSolid: true,
     drop: BlockType.COAL_ORE,
     icon: {
-      row: 0,
-      col: 4,
+      row: 8,
+      col: 25,
     },
     texture: {
       side: {

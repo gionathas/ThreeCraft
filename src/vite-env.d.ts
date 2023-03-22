@@ -1,8 +1,13 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  // Game settings
+  readonly VITE_JUMP_START: string;
+
   // UI
+  readonly VITE_SHOW_INITIAL_TERRAIN_GENERATION: string;
   readonly VITE_SHOW_DEBUG_UI: string;
+  readonly VITE_SHOW_WINDOW_CLOSE_ALERT: string;
 
   // Editing settings
   readonly VITE_EDITING_ENABLED: string;
@@ -29,11 +34,11 @@ interface ImportMetaEnv {
   readonly VITE_TESTING_MAP_PV?: number;
 
   // Inventory
-  readonly VITE_DEV_INVENTORY_ENABLED: string;
-  readonly VITE_DEV_INVENTORY_ITEMS: string;
-  readonly VITE_DEV_HOTBAR_ITEMS: number;
+  readonly VITE_STARTING_INVENTORY_ITEMS: string;
+  readonly VITE_STARTING_HOTBAR_ITEMS: number;
 
   // Player
+  readonly VITE_PLAYER_DEFAULT_CONTROLS_MODE: string;
   readonly VITE_PLAYER_SHOW_BOUNDING_BOX: string;
 
   readonly VITE_PLAYER_WIDTH: number;

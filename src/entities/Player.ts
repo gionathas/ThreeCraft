@@ -1,20 +1,16 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
-import InventoryManager, { Slot } from "../player/InventoryManager";
+import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerControls from "../player/PlayerControls";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
-export type PlayerMode = "sim" | "fly";
-export type PlayerInventory = {
-  hotbar: Slot[];
-  inventory: Slot[];
-};
+export type PlayerControlsMode = "sim" | "fly";
 
 export default class Player {
-  private mode: PlayerMode;
+  private controlsMode: PlayerControlsMode;
 
   private terrain: Terrain;
 
@@ -22,21 +18,23 @@ export default class Player {
   private editingControls: EditingControls;
   private inventoryManager: InventoryManager;
 
-  constructor(terrain: Terrain, mode: PlayerMode, inventory: PlayerInventory) {
+  constructor(terrain: Terrain, inventory: InventoryState) {
     this.terrain = terrain;
-    this.mode = mode;
+    this.controlsMode = EnvVars.PLAYER_DEFAULT_CONTROLS_MODE;
 
-    this.inventoryManager = new InventoryManager(
-      inventory.inventory,
-      inventory.hotbar
-    );
-    this.playerControls = new PlayerControls(terrain, mode);
+    this.inventoryManager = new InventoryManager(inventory);
+    this.playerControls = new PlayerControls(terrain, this.controlsMode);
     this.editingControls = new EditingControls(this, terrain);
   }
 
   update(dt: number) {
     this.playerControls.update(dt);
     this.editingControls.update();
+  }
+
+  dispose() {
+    this.playerControls.dispose();
+    this.editingControls.dispose();
   }
 
   setSpawnOnPosition(x: number, z: number) {
@@ -49,36 +47,36 @@ export default class Player {
     this.playerControls.position.set(x, y, z);
   }
 
-  lockControls() {
-    this.playerControls.lock();
-  }
-
-  unlockControls() {
-    this.playerControls.unlock();
-  }
-
-  isControlsLocked() {
+  controlsEnabled() {
     return this.playerControls.isLocked;
   }
 
-  setOnLockControls(func: () => void) {
-    return this.playerControls.addEventListener("lock", func);
+  enableControls() {
+    this.playerControls.lock();
   }
 
-  setOnUnlockControls(func: () => void) {
-    return this.playerControls.addEventListener("unlock", func);
+  disableControls() {
+    this.playerControls.unlock();
+  }
+
+  onEnableControls(cb: () => void) {
+    this.playerControls.onLock(cb);
+  }
+
+  onDisableControls(cb: () => void) {
+    this.playerControls.onUnlock(cb);
   }
 
   getMode() {
-    return this.mode;
+    return this.controlsMode;
   }
 
   getWidth() {
-    return EnvVars.VITE_PLAYER_WIDTH;
+    return EnvVars.PLAYER_WIDTH;
   }
 
   getHeight() {
-    return EnvVars.VITE_PLAYER_HEIGHT;
+    return EnvVars.PLAYER_HEIGHT;
   }
 
   getPosition() {
@@ -101,10 +99,26 @@ export default class Player {
     return this.playerControls.intersectsBlock(blockBB);
   }
 
-  getOrientation() {
-    const lookDirection = this.playerControls
+  getQuaternion() {
+    return this.playerControls.getCamera().quaternion.clone();
+  }
+
+  setQuaternion(quaternion: THREE.Quaternion) {
+    this.playerControls.getCamera().quaternion.copy(quaternion);
+  }
+
+  getLookDirection() {
+    return this.playerControls
       .getCamera()
       .getWorldDirection(new THREE.Vector3());
+  }
+
+  setLookDirection(direction: THREE.Vector3) {
+    this.playerControls.getCamera().lookAt(direction);
+  }
+
+  getOrientation() {
+    const lookDirection = this.getLookDirection();
     const angle = Math.atan2(lookDirection.x, lookDirection.z);
     return getOrientationFromAngle(angle);
   }

@@ -2,16 +2,20 @@ import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 
 export default class Engine {
+  public static readonly DEFAULT_FOV = 75;
+  private static readonly Z_NEAR = 0.01;
+  private static readonly Z_FAR = 1000;
+
   private static instance: Engine;
 
-  private renderer!: THREE.WebGLRenderer;
-  private scene!: THREE.Scene;
-  private camera!: THREE.PerspectiveCamera;
+  private renderer: THREE.WebGLRenderer;
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
 
   private constructor() {
-    this.initRenderer();
-    this.initScene();
-    this.initCamera();
+    this.renderer = this.initRenderer();
+    this.scene = this.initScene();
+    this.camera = this.initCamera();
   }
 
   public static getInstance(): Engine {
@@ -22,35 +26,45 @@ export default class Engine {
   }
 
   private initRenderer() {
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // do not show the canvas until the game starts
+    renderer.domElement.style.display = "none";
 
     window.addEventListener("resize", () => {
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+    return renderer;
   }
 
   private initScene() {
-    this.scene = new THREE.Scene();
+    return new THREE.Scene();
   }
 
   private initCamera() {
-    const fov = 75;
+    const fov = Engine.DEFAULT_FOV;
+    const near = Engine.Z_NEAR;
+    const far = Engine.Z_FAR;
     const aspect = window.innerWidth / window.innerHeight;
-    const near = 0.01;
-    const far = 1000;
 
-    this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
     window.addEventListener("resize", () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
     });
+
+    return camera;
   }
 
   start(update: (dt: number) => void) {
+    this.renderer.domElement.style.display = "block";
+
     let previousTime = performance.now();
+
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) * 0.001;
 
@@ -66,9 +80,14 @@ export default class Engine {
     });
   }
 
-  stop() {
-    //TODO clear scene
+  dispose() {
+    this.renderer.domElement.style.display = "none";
+
+    this.scene.clear();
+    this.camera.clear();
+
     this.renderer.setAnimationLoop(null);
+    this.renderer.dispose();
   }
 
   getCanvas(): HTMLCanvasElement {
@@ -85,5 +104,10 @@ export default class Engine {
 
   getTotalMeshes(): number {
     return this.scene.children.length;
+  }
+
+  setFov(fov: number) {
+    this.camera.fov = fov;
+    this.camera.updateProjectionMatrix();
   }
 }

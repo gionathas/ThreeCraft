@@ -1,53 +1,57 @@
-import { PlayerMode } from "../entities/Player";
+import { PlayerControlsMode } from "../entities/Player";
 
 export default class EnvVars {
   /**
    * Game Settings
    */
   static readonly TARGET_FRAME_RATE = 1 / 60;
+  static readonly JUMP_START = this.getBoolean(import.meta.env.VITE_JUMP_START);
+  static readonly EDITING_ENABLED = this.getBoolean(
+    import.meta.env.VITE_EDITING_ENABLED
+  );
 
   /** Player */
-  static readonly DEFAULT_PLAYER_MODE: PlayerMode = "fly";
-  static readonly VITE_PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
+  static readonly PLAYER_DEFAULT_CONTROLS_MODE = import.meta.env
+    .VITE_PLAYER_DEFAULT_CONTROLS_MODE as PlayerControlsMode;
+  static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
     import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
   );
-  static readonly VITE_PLAYER_WIDTH = this.getNumber(
+  static readonly PLAYER_WIDTH = this.getNumber(
     import.meta.env.VITE_PLAYER_WIDTH
   );
-  static readonly VITE_PLAYER_HEIGHT = this.getNumber(
+  static readonly PLAYER_HEIGHT = this.getNumber(
     import.meta.env.VITE_PLAYER_HEIGHT
   );
-  static readonly VITE_PLAYER_HORIZONTAL_SPEED = this.getNumber(
+  static readonly PLAYER_HORIZONTAL_SPEED = this.getNumber(
     import.meta.env.VITE_PLAYER_HORIZONTAL_SPEED
   );
-  static readonly VITE_PLAYER_VERTICAL_SPEED = this.getNumber(
+  static readonly PLAYER_VERTICAL_SPEED = this.getNumber(
     import.meta.env.VITE_PLAYER_VERTICAL_SPEED
   );
-  static readonly VITE_PLAYER_DAMPING_FACTOR = this.getNumber(
+  static readonly PLAYER_DAMPING_FACTOR = this.getNumber(
     import.meta.env.VITE_PLAYER_DAMPING_FACTOR
   );
-  static readonly VITE_FLY_HORIZONTAL_SPEED = this.getNumber(
+  static readonly FLY_HORIZONTAL_SPEED = this.getNumber(
     import.meta.env.VITE_FLY_HORIZONTAL_SPEED
   );
-  static readonly VITE_FLY_VERTICAL_SPEED = this.getNumber(
+  static readonly FLY_VERTICAL_SPEED = this.getNumber(
     import.meta.env.VITE_FLY_VERTICAL_SPEED
   );
-  static readonly VITE_FLY_DAMPING_FACTOR = this.getNumber(
+  static readonly FLY_DAMPING_FACTOR = this.getNumber(
     import.meta.env.VITE_FLY_DAMPING_FACTOR
   );
 
   /**
-   * UI Settings
+   * UI
    */
-  static readonly SHOW_DEBUG_UI = this.getBoolean(
+  static readonly SHOW_INITIAL_TERRAIN_GENERATION = this.getBoolean(
+    import.meta.env.VITE_SHOW_INITIAL_TERRAIN_GENERATION
+  );
+  static readonly SHOW_DEBUG_INFO = this.getBoolean(
     import.meta.env.VITE_SHOW_DEBUG_UI
   );
-
-  /**
-   * Editing settings
-   */
-  static readonly EDITING_ENABLED = this.getBoolean(
-    import.meta.env.VITE_EDITING_ENABLED
+  static readonly SHOW_WINDOW_CLOSE_ALERT = this.getBoolean(
+    import.meta.env.VITE_SHOW_WINDOW_CLOSE_ALERT
   );
 
   /**
@@ -102,15 +106,12 @@ export default class EnvVars {
   );
 
   /** Inventory */
-  static readonly DEV_INVENTORY_ENABLED = this.getBoolean(
-    import.meta.env.VITE_DEV_INVENTORY_ENABLED
-  );
-  static readonly DEV_INVENTORY_ITEMS = this.getList(
-    import.meta.env.VITE_DEV_INVENTORY_ITEMS
+  static readonly STARTING_INVENTORY_ITEMS = this.getList(
+    import.meta.env.VITE_STARTING_INVENTORY_ITEMS
   ).map((item) => Number(item));
 
-  static readonly DEV_HOTBAR_ITEMS = this.getList(
-    import.meta.env.VITE_DEV_HOTBAR_ITEMS
+  static readonly STARTING_HOTBAR_ITEMS = this.getList(
+    import.meta.env.VITE_STARTING_HOTBAR_ITEMS
   ).map((item) => Number(item));
 
   /** Utilities */

@@ -37,6 +37,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   left: {
     normal: BlockFaceNormal.left,
     vertices: [
+      // top left
       {
         pos: [0, 1, 0],
         uv: [0, 1],
@@ -46,6 +47,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, -0.5],
         },
       },
+      // bottom left
       {
         pos: [0, 0, 0],
         uv: [0, 0],
@@ -55,6 +57,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, -0.5],
         },
       },
+      // top right
       {
         pos: [0, 1, 1],
         uv: [1, 1],
@@ -64,6 +67,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, 0.5],
         },
       },
+      // bottom right
       {
         pos: [0, 0, 1],
         uv: [1, 0],
@@ -78,6 +82,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   right: {
     normal: BlockFaceNormal.right,
     vertices: [
+      // top left
       {
         pos: [1, 1, 1],
         uv: [0, 1],
@@ -87,6 +92,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, 0.5],
         },
       },
+      // bottom left
       {
         pos: [1, 0, 1],
         uv: [0, 0],
@@ -96,6 +102,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, 0.5],
         },
       },
+      // top right
       {
         pos: [1, 1, 0],
         uv: [1, 1],
@@ -105,6 +112,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, -0.5],
         },
       },
+      // bottom right
       {
         pos: [1, 0, 0],
         uv: [1, 0],
@@ -119,6 +127,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   top: {
     normal: BlockFaceNormal.top,
     vertices: [
+      // bottom left
       {
         pos: [0, 1, 1],
         uv: [1, 1],
@@ -128,6 +137,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, 0.5, -0.5],
         },
       },
+      // bottom right
       {
         pos: [1, 1, 1],
         uv: [0, 1],
@@ -137,6 +147,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, 0.5, -0.5],
         },
       },
+      // top left
       {
         pos: [0, 1, 0],
         uv: [1, 0],
@@ -146,6 +157,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, 0.5, 0.5],
         },
       },
+      // top right
       {
         pos: [1, 1, 0],
         uv: [0, 0],
@@ -160,6 +172,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   bottom: {
     normal: BlockFaceNormal.bottom,
     vertices: [
+      // top right
       {
         pos: [1, 0, 1],
         uv: [1, 0],
@@ -169,6 +182,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, -0.5],
         },
       },
+      // top left
       {
         pos: [0, 0, 1],
         uv: [0, 0],
@@ -178,6 +192,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, 0.5],
         },
       },
+      // bottom right
       {
         pos: [1, 0, 0],
         uv: [1, 1],
@@ -187,6 +202,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, -0.5],
         },
       },
+      // bottom left
       {
         pos: [0, 0, 0],
         uv: [0, 1],
@@ -201,6 +217,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   front: {
     normal: BlockFaceNormal.front,
     vertices: [
+      // bottom left
       {
         pos: [0, 0, 1],
         uv: [0, 0],
@@ -210,6 +227,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, 0.5],
         },
       },
+      // bottom right
       {
         pos: [1, 0, 1],
         uv: [1, 0],
@@ -219,6 +237,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, 0.5],
         },
       },
+      // top left
       {
         pos: [0, 1, 1],
         uv: [0, 1],
@@ -228,6 +247,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, 0.5, 0.5],
         },
       },
+      // top right
       {
         pos: [1, 1, 1],
         uv: [1, 1],
@@ -242,6 +262,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
   back: {
     normal: BlockFaceNormal.back,
     vertices: [
+      // bottom left
       {
         pos: [1, 0, 0],
         uv: [0, 0],
@@ -251,6 +272,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, -0.5],
         },
       },
+      // bottom right
       {
         pos: [0, 0, 0],
         uv: [1, 0],
@@ -260,6 +282,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [-0.5, -0.5, -0.5],
         },
       },
+      // top left
       {
         pos: [1, 1, 0],
         uv: [0, 1],
@@ -269,6 +292,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
           side2: [0.5, -0.5, -0.5],
         },
       },
+      // top right
       {
         pos: [0, 1, 0],
         uv: [1, 1],

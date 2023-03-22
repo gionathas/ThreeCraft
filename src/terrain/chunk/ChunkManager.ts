@@ -66,7 +66,7 @@ export default class ChunkManager implements ChunkModel {
     this.processingChunks.add(chunkId);
 
     // enqueue the creation of this new chunk
-    this.generatorsPool.queue(async (generateChunk) => {
+    return this.generatorsPool.queue(async (generateChunk) => {
       let solidGeometry: BufferGeometryData | undefined;
       let transparentGeometry: BufferGeometryData | undefined;
       const chunkMeshes = [];
@@ -290,6 +290,22 @@ export default class ChunkManager implements ChunkModel {
     }
 
     return chunk.getBlock(blockCoord);
+  }
+
+  dispose() {
+    console.debug("Unloading chunks...");
+
+    // unload all the currently loaded chunks
+    for (const chunk of this.loadedChunks.values()) {
+      this.unloadChunk(chunk.getId());
+    }
+
+    this.loadedChunks.clear();
+    this.processingChunks.clear();
+    this.chunkMeshManager.dispose();
+
+    console.debug("Terminating workers...");
+    this.generatorsPool.terminate(true);
   }
 
   isChunkLoaded(chunkId: ChunkID) {

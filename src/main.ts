@@ -1,6 +1,4 @@
-import GameManager from "./core/GameManager";
+import Launcher from "./core/Launcher";
 
-(async () => {
-  const game = new GameManager();
-  await game.loadGame();
-})();
+const gameLauncher = new Launcher();
+gameLauncher.start();

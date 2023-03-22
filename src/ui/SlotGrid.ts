@@ -49,6 +49,12 @@ export default class SlotGrid {
     }
   }
 
+  static removeSlots(gridContainer: HTMLElement) {
+    while (gridContainer.firstChild) {
+      gridContainer.removeChild(gridContainer.firstChild);
+    }
+  }
+
   static getSlot(slotsGrid: HTMLElement, index: number): HTMLElement | null {
     return slotsGrid.querySelector(
       `[${dataSlotIndexAttr}="${index}"]`

@@ -5,6 +5,7 @@ export const TILE_SIZE = 16;
 export const TILE_TEXTURES_WIDTH = 128;
 export const TILE_TEXTURE_HEIGHT = 128;
 
+//TODO add dispose method
 export default class TextureAtlas {
   private static instance: TextureAtlas;
 
