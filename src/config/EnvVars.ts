@@ -4,7 +4,6 @@ export default class EnvVars {
   /**
    * Game Settings
    */
-  static readonly TARGET_FRAME_RATE = 1 / 60;
   static readonly JUMP_START = this.getBoolean(import.meta.env.VITE_JUMP_START);
   static readonly EDITING_ENABLED = this.getBoolean(
     import.meta.env.VITE_EDITING_ENABLED

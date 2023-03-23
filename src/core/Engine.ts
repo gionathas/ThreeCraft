@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import EnvVars from "../config/EnvVars";
 
 export default class Engine {
   public static readonly DEFAULT_FOV = 75;
   private static readonly Z_NEAR = 0.01;
   private static readonly Z_FAR = 1000;
+  private static readonly TARGET_FRAME_RATE = 1 / 60;
 
   private static instance: Engine;
 
@@ -66,11 +66,7 @@ export default class Engine {
     let previousTime = performance.now();
 
     this.renderer.setAnimationLoop((time) => {
-      let dt = (time - previousTime) * 0.001;
-
-      if (dt > EnvVars.TARGET_FRAME_RATE || dt < 0) {
-        dt = EnvVars.TARGET_FRAME_RATE;
-      }
+      let dt = (time - previousTime) / 1000;
 
       update(dt);
 
