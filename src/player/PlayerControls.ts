@@ -52,7 +52,7 @@ export default class PlayerControls extends PointerLockControls {
   private terrain: Terrain;
 
   private velocity: THREE.Vector3;
-  private controlsDirection: THREE.Vector3;
+  private moveDirection: THREE.Vector3;
 
   private mode: PlayerControlsMode;
   private properties: PlayerControlsProperties;
@@ -75,7 +75,7 @@ export default class PlayerControls extends PointerLockControls {
     this.properties = this.getPlayerProps(mode);
 
     this.velocity = new THREE.Vector3();
-    this.controlsDirection = new THREE.Vector3();
+    this.moveDirection = new THREE.Vector3();
     this.hitbox = this.initBoundingBox();
 
     // lock/unlock event handlers
@@ -156,20 +156,19 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   update(dt: number) {
-    const timeStep = EnvVars.TARGET_FRAME_RATE;
     this.updateMode();
 
     this.updateHorizontalVelocity();
     this.updateVerticalVelocity();
 
-    this.detectHorizontalCollision(timeStep);
+    this.detectHorizontalCollision(dt);
     this.detectVerticalCollision();
 
-    this.moveForward(this.velocity.z * timeStep);
-    this.moveUp(this.velocity.y * timeStep);
-    this.moveRight(this.velocity.x * timeStep);
+    this.moveForward(this.velocity.z * dt);
+    this.moveUp(this.velocity.y * dt);
+    this.moveRight(this.velocity.x * dt);
 
-    this.applyVelocityDamping(timeStep);
+    this.applyVelocityDamping(dt);
     this.updateHitBox();
   }
 
@@ -193,11 +192,11 @@ export default class PlayerControls extends PointerLockControls {
   private updateHorizontalVelocity() {
     const { horizontalSpeed } = this.properties;
 
-    this.controlsDirection.x = this.getControlsRightDirection();
-    this.controlsDirection.z = this.getControlsForwardDirection();
+    this.moveDirection.x = this.getControlsRightDirection();
+    this.moveDirection.z = this.getControlsForwardDirection();
 
-    this.velocity.x += this.controlsDirection.x * horizontalSpeed;
-    this.velocity.z += this.controlsDirection.z * horizontalSpeed;
+    this.velocity.x += this.moveDirection.x * horizontalSpeed;
+    this.velocity.z += this.moveDirection.z * horizontalSpeed;
   }
 
   private updateVerticalVelocity() {
@@ -1385,16 +1384,15 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private applyVelocityDamping(dt: number) {
-    const { dampingFactor: dampingCoefficient, physicsEnabled } =
-      this.properties;
+    const { dampingFactor, physicsEnabled } = this.properties;
 
-    this.velocity.x -= this.velocity.x * dampingCoefficient * dt;
-    this.velocity.z -= this.velocity.z * dampingCoefficient * dt;
+    this.velocity.x -= this.velocity.x * dampingFactor * dt;
+    this.velocity.z -= this.velocity.z * dampingFactor * dt;
 
     // if physics is not enabled, we have no forces that will push the player down
     // so we need to set one manually
     if (!physicsEnabled) {
-      this.velocity.y -= this.velocity.y * dampingCoefficient * dt;
+      this.velocity.y -= this.velocity.y * dampingFactor * dt;
     } else {
       this.applyGravity(dt);
     }
@@ -1416,7 +1414,7 @@ export default class PlayerControls extends PointerLockControls {
 
   private hasSwitchedMode() {
     return this.inputController.hasJustPressedKey(
-      KeyBindings.SWITCH_PLAYER_MODE
+      KeyBindings.SWITCH_PLAYER_CONTROLS_MODE
     );
   }
 
