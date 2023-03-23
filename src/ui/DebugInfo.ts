@@ -58,7 +58,7 @@ export default class DebugInfo {
     return mem;
   }
 
-  update(dt: number) {
+  update() {
     this.updateDebugVisibility();
     this.updatePerformance();
     this.updateGameInfo();

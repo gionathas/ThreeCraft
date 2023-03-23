@@ -85,7 +85,7 @@ export default class GameLoop {
     if (this.gameState.isRunning()) {
       terrain!.update(player!.getPosition());
       player!.update(dt);
-      ui!.update(dt);
+      ui!.update();
       inputController.update(); // this must come lastly
     }
   }
