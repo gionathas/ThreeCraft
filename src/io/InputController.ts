@@ -79,16 +79,16 @@ export default class InputController {
     return this.enabled;
   }
 
-  getKey(key: KeyCode) {
+  isPressingKey(key: KeyCode) {
     return this.keys[key];
   }
 
-  getPrevKey(key: KeyCode) {
+  wasPressingKey(key: KeyCode) {
     return this.prevKeys[key];
   }
 
   hasJustPressedKey(key: KeyCode) {
-    return this.getKey(key) && !this.getPrevKey(key);
+    return this.isPressingKey(key) && !this.wasPressingKey(key);
   }
 
   get pointer() {
