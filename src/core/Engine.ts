@@ -1,21 +1,20 @@
 import * as THREE from "three";
+import GameCamera from "./GameCamera";
+import GameScene from "./GameScene";
 
 export default class Engine {
-  public static readonly DEFAULT_FOV = 75;
-  private static readonly Z_NEAR = 0.01;
-  private static readonly Z_FAR = 1000;
   private static readonly MAX_FPS = 75;
 
   private static instance: Engine;
 
   private renderer: THREE.WebGLRenderer;
-  private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
+  private scene: GameScene;
+  private camera: GameCamera;
 
   private constructor() {
     this.renderer = this.initRenderer();
-    this.scene = this.initScene();
-    this.camera = this.initCamera();
+    this.scene = GameScene.getInstance();
+    this.camera = GameCamera.getInstance();
   }
 
   public static getInstance(): Engine {
@@ -38,26 +37,6 @@ export default class Engine {
     });
 
     return renderer;
-  }
-
-  private initScene() {
-    return new THREE.Scene();
-  }
-
-  private initCamera() {
-    const fov = Engine.DEFAULT_FOV;
-    const near = Engine.Z_NEAR;
-    const far = Engine.Z_FAR;
-    const aspect = window.innerWidth / window.innerHeight;
-
-    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-    });
-
-    return camera;
   }
 
   start(update: (dt: number) => void) {
@@ -106,22 +85,5 @@ export default class Engine {
 
   getCanvas(): HTMLCanvasElement {
     return this.renderer.domElement;
-  }
-
-  getCamera(): THREE.PerspectiveCamera {
-    return this.camera;
-  }
-
-  getScene(): THREE.Scene {
-    return this.scene;
-  }
-
-  getTotalMeshes(): number {
-    return this.scene.children.length;
-  }
-
-  setFov(fov: number) {
-    this.camera.fov = fov;
-    this.camera.updateProjectionMatrix();
   }
 }

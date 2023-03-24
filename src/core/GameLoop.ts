@@ -5,6 +5,8 @@ import InputController from "../io/InputController";
 import { InventoryState } from "../player/InventoryManager";
 import UI from "../ui/UI";
 import Engine from "./Engine";
+import GameCamera from "./GameCamera";
+import GameScene from "./GameScene";
 import GameState from "./GameState";
 import { Settings } from "./SettingsManager";
 
@@ -21,7 +23,8 @@ export type GameData = {
 
 export default class GameLoop {
   private engine: Engine;
-  private scene: THREE.Scene;
+  private scene: GameScene;
+  private camera: GameCamera;
 
   private gameState: GameState;
   private inputController: InputController;
@@ -34,7 +37,8 @@ export default class GameLoop {
     this.engine = Engine.getInstance();
     this.gameState = GameState.getInstance();
     this.inputController = InputController.getInstance();
-    this.scene = this.engine.getScene();
+    this.scene = GameScene.getInstance();
+    this.camera = GameCamera.getInstance();
 
     this.player = null;
     this.terrain = null;
@@ -42,7 +46,6 @@ export default class GameLoop {
   }
 
   dispose() {
-    //TODO proper cleanup
     this.inputController.disable();
     this.terrain?.dispose();
     this.player?.dispose();
@@ -58,7 +61,7 @@ export default class GameLoop {
     this.gameState.setState("loading");
 
     // init scene
-    this.engine.setFov(settings.fov);
+    this.applySettings(settings);
     this.initLights();
 
     // init game entities
@@ -86,6 +89,10 @@ export default class GameLoop {
       ui!.update();
       inputController.update(); // this must come lastly
     }
+  }
+
+  private applySettings(settings: Settings) {
+    this.camera.setFov(settings.fov);
   }
 
   /**

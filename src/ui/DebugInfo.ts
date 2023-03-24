@@ -1,16 +1,18 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
-import Engine from "../core/Engine";
+import GameScene from "../core/GameScene";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
 
 export default class DebugInfo {
+  private scene: GameScene;
+  private inputController: InputController;
+
   private player: Player;
   private terrain: Terrain;
-  private inputController: InputController;
 
   private isVisible: boolean;
 
@@ -19,6 +21,7 @@ export default class DebugInfo {
   private mem: Stats;
 
   constructor(player: Player, terrain: Terrain) {
+    this.scene = GameScene.getInstance();
     this.inputController = InputController.getInstance();
 
     this.player = player;
@@ -78,7 +81,7 @@ export default class DebugInfo {
 
     const currentChunkId = this.player._currentChunkId;
     const totalChunks = this.terrain._totalChunks;
-    const totalMesh = Engine.getInstance().getTotalMeshes();
+    const totalMesh = this.scene.getMeshCount();
 
     const continentalness = this.terrain._getContinentalness(px, pz);
     const erosion = this.terrain._getErosion(px, pz);

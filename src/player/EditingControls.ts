@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
-import Engine from "../core/Engine";
+import GameScene from "../core/GameScene";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -10,7 +10,7 @@ import InventoryManager from "./InventoryManager";
 export default class EditingControls {
   static readonly EDITING_DISTANCE = 7;
 
-  private scene: THREE.Scene;
+  private scene: GameScene;
   private inputController: InputController;
 
   private terrain: Terrain;
@@ -21,7 +21,7 @@ export default class EditingControls {
 
   constructor(player: Player, terrain: Terrain) {
     this.inputController = InputController.getInstance();
-    this.scene = Engine.getInstance().getScene();
+    this.scene = GameScene.getInstance();
 
     this.player = player;
     this.terrain = terrain;

@@ -3,6 +3,8 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
+import GameCamera from "../core/GameCamera";
+import GameScene from "../core/GameScene";
 import { PlayerControlsMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
@@ -48,6 +50,7 @@ const MIN_VELOCITY = 0.001;
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerControls extends PointerLockControls {
+  private scene: GameScene;
   private inputController: InputController;
   private terrain: Terrain;
 
@@ -66,7 +69,8 @@ export default class PlayerControls extends PointerLockControls {
   private onControlUnlockHandlerRef: () => void;
 
   constructor(terrain: Terrain, mode: PlayerControlsMode) {
-    super(Engine.getInstance().getCamera(), Engine.getInstance().getCanvas());
+    super(GameCamera.getInstance(), Engine.getInstance().getCanvas());
+    this.scene = GameScene.getInstance();
     this.terrain = terrain;
     this.inputController = InputController.getInstance();
 
@@ -116,7 +120,6 @@ export default class PlayerControls extends PointerLockControls {
 
   private initCollider() {
     const { width, height } = this.properties;
-    const scene = Engine.getInstance().getScene();
 
     const boxGeom = new THREE.BoxGeometry(width, height, width);
     const mat = new THREE.LineBasicMaterial({ color: "white" });
@@ -127,7 +130,7 @@ export default class PlayerControls extends PointerLockControls {
     collider.add(axesHelpers);
 
     if (EnvVars.PLAYER_SHOW_BOUNDING_BOX) {
-      scene.add(collider);
+      this.scene.add(collider);
     }
 
     return collider;

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Engine from "../core/Engine";
+import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
 import { BlockType } from "../terrain/block";
@@ -9,7 +9,7 @@ import World from "../terrain/World";
 import { Coordinate } from "../utils/helpers";
 
 export default class Terrain {
-  private scene: THREE.Scene;
+  private scene: GameScene;
 
   private seed: string;
 
@@ -20,7 +20,7 @@ export default class Terrain {
   private terrainMap: TerrainMap;
 
   constructor(seed: string, renderDistanceInChunks: number) {
-    this.scene = Engine.getInstance().getScene();
+    this.scene = GameScene.getInstance();
     this.seed = seed;
 
     this.globalMapManager = GlobalMapManager.getInstance(seed);

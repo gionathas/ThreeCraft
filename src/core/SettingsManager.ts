@@ -1,6 +1,6 @@
 import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
-import Engine from "./Engine";
+import GameCamera from "./GameCamera";
 
 export type Settings = {
   fov: number;
@@ -10,7 +10,7 @@ export type Settings = {
 export default class SettingsManager {
   private static instance: SettingsManager;
 
-  static readonly DEFAULT_FOV = Engine.DEFAULT_FOV;
+  static readonly DEFAULT_FOV = GameCamera.DEFAULT_FOV;
   static readonly DEFAULT_RENDER_DISTANCE_IN_CHUNKS =
     EnvVars.DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS;
 

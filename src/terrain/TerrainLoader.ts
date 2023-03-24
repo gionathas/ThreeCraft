@@ -1,5 +1,5 @@
 import EnvVars from "../config/EnvVars";
-import Engine from "../core/Engine";
+import GameScene from "../core/GameScene";
 import { Coordinate } from "../utils/helpers";
 import Chunk, { ChunkID } from "./chunk/Chunk";
 import ChunkManager from "./chunk/ChunkManager";
@@ -15,14 +15,14 @@ type TerrainBoundaries = {
 };
 
 export default class TerrainLoader {
-  private scene: THREE.Scene;
+  private scene: GameScene;
   private chunksManager: ChunkManager;
 
   private prevCenterChunk?: ChunkID;
   private hozRenderDistance: number;
 
   constructor(chunksManager: ChunkManager, renderDistanceInChunks: number) {
-    this.scene = Engine.getInstance().getScene();
+    this.scene = GameScene.getInstance();
     this.chunksManager = chunksManager;
     this.hozRenderDistance = renderDistanceInChunks * Chunk.WIDTH;
   }
