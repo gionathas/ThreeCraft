@@ -134,7 +134,7 @@ export default class EditingControls {
         new THREE.Vector3(x, y, z)
       );
 
-      const willBlockCollide = this.player.intersectBlock(blockBoundingBox);
+      const willBlockCollide = this.player.intersectWith(blockBoundingBox);
 
       if (!willBlockCollide) {
         terrain.setBlock({ x, y, z }, block);

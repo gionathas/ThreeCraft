@@ -1,36 +1,30 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
 import GameCamera from "../core/GameCamera";
-import GameScene from "../core/GameScene";
-import { PlayerControlsMode } from "../entities/Player";
+import Player, { PlayerControlsMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { Block } from "../terrain/block";
 import { determineAngleQuadrant } from "../utils/helpers";
 import Physics from "../utils/Physics";
 
-export interface PlayerControlsProperties {
-  width: number;
-  height: number;
+export interface PlayerProperties {
   horizontalSpeed: number;
   verticalSpeed: number;
   dampingFactor: number;
   physicsEnabled: boolean;
 }
 
-const simProps: PlayerControlsProperties = {
-  width: 0.4,
-  height: 1.8,
+const simProps: PlayerProperties = {
   horizontalSpeed: 0.6,
   verticalSpeed: 9.2,
   dampingFactor: 10,
   physicsEnabled: true,
 };
 
-const flyProps: PlayerControlsProperties = {
+const flyProps: PlayerProperties = {
   ...simProps,
   physicsEnabled: false,
   horizontalSpeed: 4,
@@ -50,7 +44,6 @@ const MIN_VELOCITY = 0.001;
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerControls extends PointerLockControls {
-  private scene: GameScene;
   private inputController: InputController;
   private terrain: Terrain;
 
@@ -58,10 +51,8 @@ export default class PlayerControls extends PointerLockControls {
   private moveDirection: THREE.Vector3;
 
   private mode: PlayerControlsMode;
-  private properties: PlayerControlsProperties;
+  private properties: PlayerProperties;
   private state: "onGround" | "falling" | "jumping";
-
-  private collider: THREE.LineSegments;
 
   private lockCbs: (() => void)[];
   private unlockCbs: (() => void)[];
@@ -70,17 +61,15 @@ export default class PlayerControls extends PointerLockControls {
 
   constructor(terrain: Terrain, mode: PlayerControlsMode) {
     super(GameCamera.getInstance(), Engine.getInstance().getCanvas());
-    this.scene = GameScene.getInstance();
     this.terrain = terrain;
     this.inputController = InputController.getInstance();
 
     this.mode = mode;
     this.state = "falling";
-    this.properties = this.getPlayerProps();
+    this.properties = this.getPlayerProperties();
 
-    this.velocity = new THREE.Vector3();
     this.moveDirection = new THREE.Vector3();
-    this.collider = this.initCollider();
+    this.velocity = new THREE.Vector3();
 
     // lock/unlock event handlers
     this.lockCbs = [];
@@ -89,61 +78,6 @@ export default class PlayerControls extends PointerLockControls {
     this.onControlUnlockHandlerRef = this.onControlUnlockHandler.bind(this);
     this.onLock(this.onControlLockHandlerRef);
     this.onUnlock(this.onControlUnlockHandlerRef);
-  }
-
-  dispose() {
-    this.collider.geometry.dispose();
-    // @ts-ignore
-    this.collider.material.dispose();
-
-    this.lockCbs.forEach((cb) => this.removeEventListener("lock", cb));
-    this.unlockCbs.forEach((cb) => this.removeEventListener("unlock", cb));
-  }
-
-  private onControlLockHandler() {
-    this.inputController.enable();
-  }
-
-  private onControlUnlockHandler() {
-    this.inputController.disable();
-  }
-
-  onLock(cb: () => void) {
-    this.addEventListener("lock", cb);
-    this.lockCbs.push(cb);
-  }
-
-  onUnlock(cb: () => void) {
-    this.addEventListener("unlock", cb);
-    this.unlockCbs.push(cb);
-  }
-
-  private initCollider() {
-    const { width, height } = this.properties;
-
-    const boxGeom = new THREE.BoxGeometry(width, height, width);
-    const mat = new THREE.LineBasicMaterial({ color: "white" });
-    const edges = new THREE.EdgesGeometry(boxGeom);
-    const axesHelpers = new THREE.AxesHelper();
-
-    const collider = new THREE.LineSegments(edges, mat);
-    collider.add(axesHelpers);
-
-    if (EnvVars.PLAYER_SHOW_BOUNDING_BOX) {
-      this.scene.add(collider);
-    }
-
-    return collider;
-  }
-
-  intersectsBlock(blockCollider: THREE.Box3) {
-    this.collider.geometry.computeBoundingBox();
-
-    // transform the hitbox bounding box to world space
-    const boundingBox = this.collider.geometry.boundingBox;
-    boundingBox?.applyMatrix4(this.collider.matrixWorld);
-
-    return boundingBox?.intersectsBox(blockCollider) ?? false;
   }
 
   moveUp(distance: number) {
@@ -167,12 +101,12 @@ export default class PlayerControls extends PointerLockControls {
     this.applyHorizontalCollisionResponse(dt);
     this.applyVerticalCollisionResponse();
 
+    // update player position
     this.moveForward(this.velocity.z);
     this.moveUp(this.velocity.y);
     this.moveRight(this.velocity.x);
 
     this.applyVelocityDamping(dt);
-    this.updateHitBox();
   }
 
   private updateMode() {
@@ -180,16 +114,8 @@ export default class PlayerControls extends PointerLockControls {
 
     if (this.hasSwitchedMode()) {
       this.mode = currentMode === "sim" ? "fly" : "sim";
-      this.properties = this.getPlayerProps();
+      this.properties = this.getPlayerProperties();
     }
-  }
-
-  private updateHitBox() {
-    this.collider?.position.set(
-      this.position.x,
-      this.position.y - this.height / 2,
-      this.position.z
-    );
   }
 
   private updateHorizontalVelocity(dt: number) {
@@ -247,7 +173,8 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private applyVerticalCollisionResponse() {
-    const { physicsEnabled, height } = this.properties;
+    const { physicsEnabled } = this.properties;
+    const height = this.height;
 
     if (!physicsEnabled) return;
 
@@ -275,7 +202,7 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private isHittingGround() {
-    const { width, height } = this.properties;
+    const height = this.height;
     const position = this.position;
 
     const isBlockBeneathSolid = this.terrain.isSolidBlock({
@@ -336,7 +263,8 @@ export default class PlayerControls extends PointerLockControls {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height } = this.properties;
+    const width = this.width;
+    const height = this.height;
     const position = this.position.clone();
 
     const top = position.y;
@@ -584,7 +512,8 @@ export default class PlayerControls extends PointerLockControls {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height } = this.properties;
+    const width = this.width;
+    const height = this.height;
     const position = this.position.clone();
 
     const top = position.y;
@@ -832,7 +761,8 @@ export default class PlayerControls extends PointerLockControls {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height } = this.properties;
+    const width = this.width;
+    const height = this.height;
     const position = this.position.clone();
 
     const top = position.y;
@@ -1080,7 +1010,8 @@ export default class PlayerControls extends PointerLockControls {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height } = this.properties;
+    const width = this.width;
+    const height = this.height;
     const position = this.position.clone();
 
     const top = position.y;
@@ -1333,7 +1264,8 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private isZSideColliding(side: "back" | "front") {
-    const { width, height } = this.properties;
+    const width = this.width;
+    const height = this.height;
     const position = this.position.clone();
 
     // slightly offset to distinguish from left or right collisions
@@ -1364,7 +1296,8 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   private isXSideColliding(side: "right" | "left") {
-    const { width, height } = this.properties;
+    const width = this.width;
+    const height = this.height;
     const position = this.position.clone();
 
     // slightly offset to distinguish from front or back collisions
@@ -1407,7 +1340,7 @@ export default class PlayerControls extends PointerLockControls {
 
     // NOTE a bit too much magic here (should be refactored)
     const directionFactor = Math.abs(Math.cos(angle));
-    return horizontalSpeed * directionFactor * dt * 6;
+    return horizontalSpeed * directionFactor * dt * 8;
   }
 
   private hasJumped() {
@@ -1443,7 +1376,30 @@ export default class PlayerControls extends PointerLockControls {
     );
   }
 
-  private getPlayerProps() {
+  private onControlLockHandler() {
+    this.inputController.enable();
+  }
+
+  private onControlUnlockHandler() {
+    this.inputController.disable();
+  }
+
+  onLock(cb: () => void) {
+    this.addEventListener("lock", cb);
+    this.lockCbs.push(cb);
+  }
+
+  onUnlock(cb: () => void) {
+    this.addEventListener("unlock", cb);
+    this.unlockCbs.push(cb);
+  }
+
+  dispose() {
+    this.lockCbs.forEach((cb) => this.removeEventListener("lock", cb));
+    this.unlockCbs.forEach((cb) => this.removeEventListener("unlock", cb));
+  }
+
+  getPlayerProperties() {
     return this.mode === "sim" ? simProps : flyProps;
   }
 
@@ -1455,15 +1411,23 @@ export default class PlayerControls extends PointerLockControls {
     return this.velocity;
   }
 
-  get position() {
+  getPosition() {
+    return this.position;
+  }
+
+  setPosition(x: number, y: number, z: number) {
+    this.position.set(x, y, z);
+  }
+
+  private get position() {
     return this.getObject().position;
   }
 
-  get width() {
-    return this.properties.width;
+  private get width() {
+    return Player.WIDTH;
   }
 
-  get height() {
-    return this.properties.height;
+  private get height() {
+    return Player.HEIGHT;
   }
 }

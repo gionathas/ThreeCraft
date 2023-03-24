@@ -2,6 +2,7 @@ import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
 import InventoryManager, { InventoryState } from "../player/InventoryManager";
+import PlayerCollider from "../player/PlayerCollider";
 import PlayerControls from "../player/PlayerControls";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
@@ -10,11 +11,15 @@ import Terrain from "./Terrain";
 export type PlayerControlsMode = "sim" | "fly";
 
 export default class Player {
+  static readonly WIDTH = 0.4;
+  static readonly HEIGHT = 1.8;
+
   private controlsMode: PlayerControlsMode;
 
   private terrain: Terrain;
 
-  private playerControls: PlayerControls;
+  private collider: PlayerCollider;
+  private controls: PlayerControls;
   private editingControls: EditingControls;
   private inventoryManager: InventoryManager;
 
@@ -23,98 +28,94 @@ export default class Player {
     this.controlsMode = EnvVars.PLAYER_DEFAULT_CONTROLS_MODE;
 
     this.inventoryManager = new InventoryManager(inventory);
-    this.playerControls = new PlayerControls(terrain, this.controlsMode);
+    this.controls = new PlayerControls(terrain, this.controlsMode);
+    this.collider = new PlayerCollider(this);
     this.editingControls = new EditingControls(this, terrain);
   }
 
   update(dt: number) {
-    this.playerControls.update(dt);
+    this.controls.update(dt);
+    this.collider.update();
     this.editingControls.update();
   }
 
   dispose() {
-    this.playerControls.dispose();
+    this.collider.dispose();
+    this.controls.dispose();
     this.editingControls.dispose();
   }
 
-  setSpawnOnPosition(x: number, z: number) {
+  setSpawnPosition(x: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
-    const playerHeight = this.getHeight();
-    this.setSpawn(x, surfaceHeight + playerHeight + 1, z);
+
+    // set the player position above the surface height plus a small offset
+    const y = surfaceHeight + Player.HEIGHT + 1;
+
+    this.setPosition(x, y, z);
   }
 
-  setSpawn(x: number, y: number, z: number) {
-    this.playerControls.position.set(x, y, z);
+  setPosition(x: number, y: number, z: number) {
+    this.controls.setPosition(x, y, z);
   }
 
   controlsEnabled() {
-    return this.playerControls.isLocked;
+    return this.controls.isLocked;
   }
 
   enableControls() {
-    this.playerControls.lock();
+    this.controls.lock();
   }
 
   disableControls() {
-    this.playerControls.unlock();
+    this.controls.unlock();
   }
 
   onEnableControls(cb: () => void) {
-    this.playerControls.onLock(cb);
+    this.controls.onLock(cb);
   }
 
   onDisableControls(cb: () => void) {
-    this.playerControls.onUnlock(cb);
+    this.controls.onUnlock(cb);
   }
 
   getMode() {
     return this.controlsMode;
   }
 
-  getWidth() {
-    return this.playerControls.height;
-  }
-
-  getHeight() {
-    return this.playerControls.width;
-  }
-
   getPosition() {
-    return this.playerControls.position.clone();
+    return this.controls.getPosition().clone();
   }
 
   getVelocity() {
-    return this.playerControls.getVelocity().clone();
+    return this.controls.getVelocity().clone();
   }
 
   getCamera() {
-    return this.playerControls.getCamera();
+    return this.controls.getCamera();
   }
 
   getTargetBlock() {
     return this.editingControls.getTargetBlock();
   }
 
-  intersectBlock(blockBB: THREE.Box3) {
-    return this.playerControls.intersectsBlock(blockBB);
+  intersectWith(entityCollider: THREE.Box3) {
+    return this.collider.intersectsWith(entityCollider);
   }
 
   getQuaternion() {
-    return this.playerControls.getCamera().quaternion.clone();
+    return this.controls.getCamera().quaternion.clone();
   }
 
   setQuaternion(quaternion: THREE.Quaternion) {
-    this.playerControls.getCamera().quaternion.copy(quaternion);
+    this.controls.getCamera().quaternion.copy(quaternion);
   }
 
   getLookDirection() {
-    return this.playerControls
-      .getCamera()
-      .getWorldDirection(new THREE.Vector3());
+    return this.controls.getCamera().getWorldDirection(new THREE.Vector3());
   }
 
-  setLookDirection(direction: THREE.Vector3) {
-    this.playerControls.getCamera().lookAt(direction);
+  lookAt(direction: THREE.Vector3) {
+    this.controls.getCamera().lookAt(direction);
   }
 
   getOrientation() {
@@ -128,7 +129,7 @@ export default class Player {
   }
 
   get _currentChunkId() {
-    const currentPosition = this.playerControls.position;
+    const currentPosition = this.controls.getPosition();
     const chunkId = World.getChunkIdFromPosition(currentPosition);
 
     return chunkId;
