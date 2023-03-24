@@ -5,13 +5,11 @@ import Player from "../entities/Player";
 
 export default class PlayerCollider {
   private scene: GameScene;
-  private player: Player;
 
   private collider: THREE.LineSegments;
 
-  constructor(player: Player) {
+  constructor() {
     this.scene = GameScene.getInstance();
-    this.player = player;
     this.collider = this.initCollider();
   }
 
@@ -34,9 +32,7 @@ export default class PlayerCollider {
     return collider;
   }
 
-  update() {
-    const playerPosition = this.player.getPosition();
-
+  update(playerPosition: THREE.Vector3) {
     // set the collider position to the player position, except for the y axis
     // which is set to the player's center of mass
     this.collider.position.set(

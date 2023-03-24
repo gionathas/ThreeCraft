@@ -17,10 +17,7 @@ export default class Player {
   static readonly WIDTH = 0.4;
   static readonly HEIGHT = 1.8;
 
-  private controlsMode: PlayerControlsMode;
-
   private terrain: Terrain;
-
   private collider: PlayerCollider;
   private controls: PlayerControls;
   private editingControls: EditingControls;
@@ -28,17 +25,19 @@ export default class Player {
 
   constructor(terrain: Terrain, inventory: InventoryState) {
     this.terrain = terrain;
-    this.controlsMode = EnvVars.PLAYER_DEFAULT_CONTROLS_MODE;
 
     this.inventoryManager = new InventoryManager(inventory);
-    this.controls = new PlayerControls(terrain, this.controlsMode);
-    this.collider = new PlayerCollider(this);
+    this.controls = new PlayerControls(
+      terrain,
+      EnvVars.PLAYER_DEFAULT_CONTROLS_MODE
+    );
+    this.collider = new PlayerCollider();
     this.editingControls = new EditingControls(this, terrain);
   }
 
   update(dt: number) {
     this.controls.update(dt);
-    this.collider.update();
+    this.collider.update(this.getPosition());
     this.editingControls.update();
   }
 
@@ -86,7 +85,7 @@ export default class Player {
   }
 
   getMode() {
-    return this.controlsMode;
+    return this.controls.getMode();
   }
 
   getVelocity() {

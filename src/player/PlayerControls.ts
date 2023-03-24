@@ -1422,6 +1422,10 @@ export default class PlayerControls extends PointerLockControls {
     this.position.set(x, y, z);
   }
 
+  getMode() {
+    return this.mode;
+  }
+
   private get position() {
     return this.getObject().position;
   }
