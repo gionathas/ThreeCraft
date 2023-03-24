@@ -33,8 +33,8 @@ export default class PlayerCollider {
   }
 
   update(playerPosition: THREE.Vector3) {
-    // set the collider position to the player position, except for the y axis
-    // which is set to the player's center of mass
+    // update the collider position to the current player position,
+    // except for the y axis which is set to the player's center of mass
     this.collider.position.set(
       playerPosition.x,
       playerPosition.y - Player.HEIGHT / 2,
