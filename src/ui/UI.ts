@@ -120,8 +120,8 @@ export default class UI {
     }
   }
 
-  update(dt: number) {
-    this.debugInfo.update(dt);
+  update() {
+    this.debugInfo.update();
   }
 
   dispose() {

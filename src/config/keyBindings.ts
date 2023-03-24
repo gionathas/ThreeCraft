@@ -4,7 +4,7 @@ export default class KeyBindings {
   static readonly TOGGLE_INVENTORY_KEY = "KeyT";
 
   /** Player Controls */
-  static readonly SWITCH_PLAYER_MODE = "KeyP";
+  static readonly SWITCH_PLAYER_CONTROLS_MODE = "KeyP";
 
   static readonly MOVE_FORWARD_KEY = "KeyW";
   static readonly MOVE_BACK_KEY = "KeyS";

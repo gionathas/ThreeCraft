@@ -1,4 +1,4 @@
 export default class Physics {
-  static readonly FALLING_GRAVITY = 18;
-  static readonly JUMPING_GRAVITY = 15;
+  static readonly FALLING_GRAVITY = 0.5;
+  static readonly JUMPING_GRAVITY = 0.5;
 }

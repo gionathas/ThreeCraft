@@ -4,7 +4,6 @@ export default class EnvVars {
   /**
    * Game Settings
    */
-  static readonly TARGET_FRAME_RATE = 1 / 60;
   static readonly JUMP_START = this.getBoolean(import.meta.env.VITE_JUMP_START);
   static readonly EDITING_ENABLED = this.getBoolean(
     import.meta.env.VITE_EDITING_ENABLED
@@ -15,30 +14,6 @@ export default class EnvVars {
     .VITE_PLAYER_DEFAULT_CONTROLS_MODE as PlayerControlsMode;
   static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
     import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
-  );
-  static readonly PLAYER_WIDTH = this.getNumber(
-    import.meta.env.VITE_PLAYER_WIDTH
-  );
-  static readonly PLAYER_HEIGHT = this.getNumber(
-    import.meta.env.VITE_PLAYER_HEIGHT
-  );
-  static readonly PLAYER_HORIZONTAL_SPEED = this.getNumber(
-    import.meta.env.VITE_PLAYER_HORIZONTAL_SPEED
-  );
-  static readonly PLAYER_VERTICAL_SPEED = this.getNumber(
-    import.meta.env.VITE_PLAYER_VERTICAL_SPEED
-  );
-  static readonly PLAYER_DAMPING_FACTOR = this.getNumber(
-    import.meta.env.VITE_PLAYER_DAMPING_FACTOR
-  );
-  static readonly FLY_HORIZONTAL_SPEED = this.getNumber(
-    import.meta.env.VITE_FLY_HORIZONTAL_SPEED
-  );
-  static readonly FLY_VERTICAL_SPEED = this.getNumber(
-    import.meta.env.VITE_FLY_VERTICAL_SPEED
-  );
-  static readonly FLY_DAMPING_FACTOR = this.getNumber(
-    import.meta.env.VITE_FLY_DAMPING_FACTOR
   );
 
   /**

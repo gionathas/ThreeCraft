@@ -40,7 +40,7 @@ export default class Player {
   setSpawnOnPosition(x: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
     const playerHeight = this.getHeight();
-    this.setSpawn(x, surfaceHeight + playerHeight, z);
+    this.setSpawn(x, surfaceHeight + playerHeight + 1, z);
   }
 
   setSpawn(x: number, y: number, z: number) {
@@ -72,11 +72,11 @@ export default class Player {
   }
 
   getWidth() {
-    return EnvVars.PLAYER_WIDTH;
+    return this.playerControls.height;
   }
 
   getHeight() {
-    return EnvVars.PLAYER_HEIGHT;
+    return this.playerControls.width;
   }
 
   getPosition() {

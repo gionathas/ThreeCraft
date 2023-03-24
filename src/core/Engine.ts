@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import EnvVars from "../config/EnvVars";
 
 export default class Engine {
   public static readonly DEFAULT_FOV = 75;
   private static readonly Z_NEAR = 0.01;
   private static readonly Z_FAR = 1000;
+  private static readonly MAX_FPS = 75;
 
   private static instance: Engine;
 
@@ -65,28 +65,42 @@ export default class Engine {
 
     let previousTime = performance.now();
 
-    this.renderer.setAnimationLoop((time) => {
-      let dt = (time - previousTime) * 0.001;
+    // fixed timestep
+    const timestep = 1 / Engine.MAX_FPS;
+    let accumulator = 0;
 
-      if (dt > EnvVars.TARGET_FRAME_RATE || dt < 0) {
-        dt = EnvVars.TARGET_FRAME_RATE;
+    this.renderer.setAnimationLoop((time) => {
+      let dt = (time - previousTime) / 1000;
+      previousTime = time;
+
+      // Track the accumulated time that hasn't been simulated yet
+      accumulator += dt;
+
+      // Simulate the total elapsed time in fixed-size chunks
+      let numUpdateSteps = 0;
+      while (accumulator >= timestep) {
+        update(timestep);
+        accumulator -= timestep;
+
+        // Prevent spiral of death
+        if (++numUpdateSteps >= 240) {
+          console.warn("Too many update steps");
+          // discard the unsimulated time
+          accumulator = 0;
+          break;
+        }
       }
 
-      update(dt);
-
       this.renderer.render(this.scene, this.camera);
-
-      previousTime = time;
     });
   }
 
   dispose() {
     this.renderer.domElement.style.display = "none";
 
+    this.renderer.setAnimationLoop(null);
     this.scene.clear();
     this.camera.clear();
-
-    this.renderer.setAnimationLoop(null);
     this.renderer.dispose();
   }
 
