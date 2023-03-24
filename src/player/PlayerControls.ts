@@ -1,14 +1,13 @@
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import KeyBindings from "../config/KeyBindings";
 import Engine from "../core/Engine";
 import GameCamera from "../core/GameCamera";
 import Player, { PlayerControlsMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
-import InputController from "../io/InputController";
 import { Block } from "../terrain/block";
 import { determineAngleQuadrant } from "../utils/helpers";
 import Physics from "../utils/Physics";
+import PlayerController from "./PlayerController";
 
 export interface PlayerProperties {
   horizontalSpeed: number;
@@ -44,7 +43,7 @@ const MIN_VELOCITY = 0.001;
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerControls extends PointerLockControls {
-  private inputController: InputController;
+  private playerController: PlayerController;
   private terrain: Terrain;
 
   private velocity: THREE.Vector3;
@@ -59,10 +58,15 @@ export default class PlayerControls extends PointerLockControls {
   private onControlLockHandlerRef: () => void;
   private onControlUnlockHandlerRef: () => void;
 
-  constructor(terrain: Terrain, mode: PlayerControlsMode) {
+  constructor(
+    playerController: PlayerController,
+    terrain: Terrain,
+    mode: PlayerControlsMode
+  ) {
     super(GameCamera.getInstance(), Engine.getInstance().getCanvas());
+
+    this.playerController = playerController;
     this.terrain = terrain;
-    this.inputController = InputController.getInstance();
 
     this.mode = mode;
     this.state = "falling";
@@ -112,7 +116,7 @@ export default class PlayerControls extends PointerLockControls {
   private updateMode() {
     const currentMode = this.mode;
 
-    if (this.hasSwitchedMode()) {
+    if (this.playerController.hasSwitchedControls()) {
       this.mode = currentMode === "sim" ? "fly" : "sim";
       this.properties = this.getPlayerProperties();
     }
@@ -133,8 +137,9 @@ export default class PlayerControls extends PointerLockControls {
 
     switch (this.mode) {
       case "sim":
+        const hasJumped = this.playerController.hasJumped();
         // jump detected
-        if (this.state === "onGround" && this.hasJumped()) {
+        if (this.state === "onGround" && hasJumped) {
           this.state = "jumping";
           this.velocity.y += verticalSpeed * dt;
         }
@@ -1343,45 +1348,33 @@ export default class PlayerControls extends PointerLockControls {
     return horizontalSpeed * directionFactor * dt * 8;
   }
 
-  private hasJumped() {
-    return this.inputController.hasJustPressedKey(KeyBindings.JUMP_KEY);
-  }
-
-  private hasSwitchedMode() {
-    return this.inputController.hasJustPressedKey(
-      KeyBindings.SWITCH_PLAYER_CONTROLS_MODE
-    );
-  }
-
   private getForwardMovementDirection() {
     return (
-      (this.inputController.isPressingKey(KeyBindings.MOVE_FORWARD_KEY)
-        ? 1
-        : 0) +
-      (this.inputController.isPressingKey(KeyBindings.MOVE_BACK_KEY) ? -1 : 0)
+      (this.playerController.isMovingForward() ? 1 : 0) +
+      (this.playerController.isMovingBackward() ? -1 : 0)
     );
   }
 
   private getRightMovementDirection() {
     return (
-      (this.inputController.isPressingKey(KeyBindings.MOVE_RIGHT_KEY) ? 1 : 0) +
-      (this.inputController.isPressingKey(KeyBindings.MOVE_LEFT_KEY) ? -1 : 0)
+      (this.playerController.isMovingRight() ? 1 : 0) +
+      (this.playerController.isMovingLeft() ? -1 : 0)
     );
   }
 
   private getFlyUpMovementDirection() {
     return (
-      (this.inputController.isPressingKey(KeyBindings.JUMP_KEY) ? 1 : 0) +
-      (this.inputController.isPressingKey(KeyBindings.SPRINT_KEY) ? -1 : 0)
+      (this.playerController.isFlyingUp() ? 1 : 0) +
+      (this.playerController.isFlyingDown() ? -1 : 0)
     );
   }
 
   private onControlLockHandler() {
-    this.inputController.enable();
+    this.playerController.enableControls();
   }
 
   private onControlUnlockHandler() {
-    this.inputController.disable();
+    this.playerController.disableControls();
   }
 
   onLock(cb: () => void) {

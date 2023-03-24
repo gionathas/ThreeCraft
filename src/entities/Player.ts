@@ -3,6 +3,7 @@ import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
 import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerCollider from "../player/PlayerCollider";
+import PlayerController from "../player/PlayerController";
 import PlayerControls from "../player/PlayerControls";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
@@ -18,6 +19,7 @@ export default class Player {
   static readonly HEIGHT = 1.8;
 
   private terrain: Terrain;
+  private playerController: PlayerController;
   private collider: PlayerCollider;
   private controls: PlayerControls;
   private editingControls: EditingControls;
@@ -26,8 +28,10 @@ export default class Player {
   constructor(terrain: Terrain, inventory: InventoryState) {
     this.terrain = terrain;
 
+    this.playerController = new PlayerController();
     this.inventoryManager = new InventoryManager(inventory);
     this.controls = new PlayerControls(
+      this.playerController,
       terrain,
       EnvVars.PLAYER_DEFAULT_CONTROLS_MODE
     );
