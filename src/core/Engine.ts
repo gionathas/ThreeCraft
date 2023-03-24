@@ -3,6 +3,7 @@ import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
 
 export default class Engine {
+  // NOTE FPS are capped at 75, maybe make this configurable in the future
   private static readonly MAX_FPS = 75;
 
   private static instance: Engine;
@@ -40,7 +41,8 @@ export default class Engine {
   }
 
   start(update: (dt: number) => void) {
-    this.renderer.domElement.style.display = "block";
+    this.scene.init();
+    this.showCanvas();
 
     let previousTime = performance.now();
 
@@ -48,6 +50,7 @@ export default class Engine {
     const timestep = 1 / Engine.MAX_FPS;
     let accumulator = 0;
 
+    // start game loop
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) / 1000;
       previousTime = time;
@@ -74,11 +77,15 @@ export default class Engine {
     });
   }
 
+  private showCanvas() {
+    this.renderer.domElement.style.display = "block";
+  }
+
   dispose() {
     this.renderer.domElement.style.display = "none";
 
     this.renderer.setAnimationLoop(null);
-    this.scene.clear();
+    this.scene.dispose();
     this.camera.clear();
     this.renderer.dispose();
   }

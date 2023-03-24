@@ -6,7 +6,6 @@ import { InventoryState } from "../player/InventoryManager";
 import UI from "../ui/UI";
 import Engine from "./Engine";
 import GameCamera from "./GameCamera";
-import GameScene from "./GameScene";
 import GameState from "./GameState";
 import { Settings } from "./SettingsManager";
 
@@ -23,7 +22,6 @@ export type GameData = {
 
 export default class GameLoop {
   private engine: Engine;
-  private scene: GameScene;
   private camera: GameCamera;
 
   private gameState: GameState;
@@ -37,20 +35,7 @@ export default class GameLoop {
     this.engine = Engine.getInstance();
     this.gameState = GameState.getInstance();
     this.inputController = InputController.getInstance();
-    this.scene = GameScene.getInstance();
     this.camera = GameCamera.getInstance();
-
-    this.player = null;
-    this.terrain = null;
-    this.ui = null;
-  }
-
-  dispose() {
-    this.inputController.disable();
-    this.terrain?.dispose();
-    this.player?.dispose();
-    this.ui?.dispose();
-    this.engine.dispose();
 
     this.player = null;
     this.terrain = null;
@@ -62,7 +47,6 @@ export default class GameLoop {
 
     // init scene
     this.applySettings(settings);
-    this.initLights();
 
     // init game entities
     this.terrain = asyncStart
@@ -93,26 +77,6 @@ export default class GameLoop {
 
   private applySettings(settings: Settings) {
     this.camera.setFov(settings.fov);
-  }
-
-  /**
-   * //TODO implement a better light system (smooth lighting)
-   * //TODO dispose lights
-   */
-  private initLights() {
-    const sunLight = new THREE.DirectionalLight(0xffffff, 0.2);
-    sunLight.position.set(100, 100, 0);
-
-    // const helper = new THREE.DirectionalLightHelper(sunLight, 5);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-
-    // add lights
-    this.scene.add(sunLight, ambientLight);
-    // this.scene.add(helper);
-
-    // set sky color
-    this.scene.background = new THREE.Color("#87CEEB");
   }
 
   private async asyncInitTerrain(gameData: GameData, settings: Settings) {
@@ -163,5 +127,17 @@ export default class GameLoop {
     const ui = new UI(player, terrain);
 
     return ui;
+  }
+
+  dispose() {
+    this.inputController.disable();
+    this.terrain?.dispose();
+    this.player?.dispose();
+    this.ui?.dispose();
+    this.engine.dispose();
+
+    this.player = null;
+    this.terrain = null;
+    this.ui = null;
   }
 }
