@@ -1411,11 +1411,14 @@ export default class PlayerControls extends PointerLockControls {
     return this.velocity;
   }
 
-  getPosition() {
+  getCameraPosition() {
     return this.position;
   }
 
-  setPosition(x: number, y: number, z: number) {
+  /**
+   * Important: This method does not take into account the player's height
+   */
+  setCameraPosition(x: number, y: number, z: number) {
     this.position.set(x, y, z);
   }
 

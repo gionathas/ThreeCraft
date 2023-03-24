@@ -10,6 +10,9 @@ import Terrain from "./Terrain";
 
 export type PlayerControlsMode = "sim" | "fly";
 
+/**
+ * The player is represented by a moving camera in the world.
+ */
 export default class Player {
   static readonly WIDTH = 0.4;
   static readonly HEIGHT = 1.8;
@@ -48,14 +51,18 @@ export default class Player {
   setSpawnPosition(x: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
 
-    // set the player position above the surface height plus a small offset
+    // this will simulate the camera placed on the player's head
+    // and the player's feet being 1 block below the surface
     const y = surfaceHeight + Player.HEIGHT + 1;
 
-    this.setPosition(x, y, z);
+    this.controls.setCameraPosition(x, y, z);
   }
 
-  setPosition(x: number, y: number, z: number) {
-    this.controls.setPosition(x, y, z);
+  /**
+   * Corresponds to the player's head position
+   */
+  getPosition() {
+    return this.controls.getCameraPosition().clone();
   }
 
   controlsEnabled() {
@@ -80,10 +87,6 @@ export default class Player {
 
   getMode() {
     return this.controlsMode;
-  }
-
-  getPosition() {
-    return this.controls.getPosition().clone();
   }
 
   getVelocity() {
@@ -129,7 +132,7 @@ export default class Player {
   }
 
   get _currentChunkId() {
-    const currentPosition = this.controls.getPosition();
+    const currentPosition = this.controls.getCameraPosition();
     const chunkId = World.getChunkIdFromPosition(currentPosition);
 
     return chunkId;

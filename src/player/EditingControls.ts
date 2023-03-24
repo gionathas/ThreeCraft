@@ -168,7 +168,9 @@ export default class EditingControls {
   }
 
   /**
-   * Get the first intersected voxel by the screen coordinates
+   * Get the block targeted by the player crosshair
+   *
+   * @returns the block targeted by the player crosshair or null if no block is targeted
    */
   getTargetBlock() {
     const [cenX, cenY] = this.inputController.currentPointerCenterCoordinates;
