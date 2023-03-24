@@ -1,33 +1,41 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
+import GameCamera from "../core/GameCamera";
 import GameScene from "../core/GameScene";
-import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
-import InputController from "../io/InputController";
 import { Block, BlockData, BlockMarker, BlockType } from "../terrain/block";
 import InventoryManager from "./InventoryManager";
+import PlayerCollider from "./PlayerCollider";
+import PlayerController from "./PlayerController";
 
 export default class EditingControls {
   static readonly EDITING_DISTANCE = 7;
 
   private scene: GameScene;
-  private inputController: InputController;
+  private camera: GameCamera;
+  private playerController: PlayerController;
 
   private terrain: Terrain;
-  private player: Player;
+
   private blockMarker: BlockMarker | null;
 
+  private playerCollider: PlayerCollider;
   private inventory: InventoryManager;
 
-  constructor(player: Player, terrain: Terrain) {
-    this.inputController = InputController.getInstance();
+  constructor(
+    playerController: PlayerController,
+    playerCollider: PlayerCollider,
+    playerInventory: InventoryManager,
+    terrain: Terrain
+  ) {
     this.scene = GameScene.getInstance();
+    this.camera = GameCamera.getInstance();
+    this.playerController = playerController;
 
-    this.player = player;
     this.terrain = terrain;
+    this.playerCollider = playerCollider;
+    this.inventory = playerInventory;
     this.blockMarker = null;
-
-    this.inventory = player.getInventory();
   }
 
   dispose() {
@@ -45,11 +53,11 @@ export default class EditingControls {
   }
 
   private updateBlockPlacement() {
-    const isM1 = this.inputController.isLeftButtonJustPressed;
-    const isM2 = this.inputController.isRightButtonJustPressed;
+    const isErasing = this.playerController.isErasingBlock();
+    const isPlacing = this.playerController.isPlacingBlock();
 
     // erase block
-    if (isM1) {
+    if (isErasing) {
       const erasedBlock = this.eraseTargetBlock();
 
       // if a block was erased and it drops something
@@ -63,7 +71,7 @@ export default class EditingControls {
     }
 
     // place block
-    if (isM2) {
+    if (isPlacing) {
       const selectedItem = this.inventory.getSelectedItem();
 
       if (selectedItem) {
@@ -134,7 +142,8 @@ export default class EditingControls {
         new THREE.Vector3(x, y, z)
       );
 
-      const willBlockCollide = this.player.intersectWith(blockBoundingBox);
+      const willBlockCollide =
+        this.playerCollider.intersectsWith(blockBoundingBox);
 
       if (!willBlockCollide) {
         terrain.setBlock({ x, y, z }, block);
@@ -173,9 +182,9 @@ export default class EditingControls {
    * @returns the block targeted by the player crosshair or null if no block is targeted
    */
   getTargetBlock() {
-    const [cenX, cenY] = this.inputController.currentPointerCenterCoordinates;
+    const [cenX, cenY] = this.playerController.getCrosshairPosition();
     const { terrain } = this;
-    const camera = this.player.getCamera();
+    const playerCamera = this.camera;
 
     // normalize screen coordinate
     const x = (cenX / window.innerWidth) * 2 - 1;
@@ -183,8 +192,8 @@ export default class EditingControls {
 
     const rayStart = new THREE.Vector3();
     const rayEnd = new THREE.Vector3();
-    rayStart.setFromMatrixPosition(camera.matrixWorld);
-    rayEnd.set(x, y, 1).unproject(camera);
+    rayStart.setFromMatrixPosition(playerCamera.matrixWorld);
+    rayEnd.set(x, y, 1).unproject(playerCamera);
 
     const rayLength = new THREE.Vector3();
     rayLength.subVectors(rayEnd, rayStart).normalize();

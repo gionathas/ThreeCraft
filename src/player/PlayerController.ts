@@ -12,6 +12,10 @@ export default class PlayerController {
     return this.inputController.hasJustPressedKey(KeyBindings.JUMP_KEY);
   }
 
+  isRunning() {
+    return this.inputController.isPressingKey(KeyBindings.SPRINT_KEY);
+  }
+
   hasSwitchedControls() {
     return this.inputController.hasJustPressedKey(
       KeyBindings.SWITCH_PLAYER_CONTROLS_MODE
@@ -43,11 +47,15 @@ export default class PlayerController {
   }
 
   isPlacingBlock() {
-    return this.inputController.isLeftButtonJustPressed;
+    return this.inputController.isRightButtonJustPressed;
   }
 
   isErasingBlock() {
-    this.inputController.isRightButtonJustPressed;
+    return this.inputController.isLeftButtonJustPressed;
+  }
+
+  getCrosshairPosition() {
+    return this.inputController.crosshairCoordinates;
   }
 
   enableControls() {

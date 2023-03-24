@@ -36,7 +36,12 @@ export default class Player {
       EnvVars.PLAYER_DEFAULT_CONTROLS_MODE
     );
     this.collider = new PlayerCollider();
-    this.editingControls = new EditingControls(this, terrain);
+    this.editingControls = new EditingControls(
+      this.playerController,
+      this.collider,
+      this.inventoryManager,
+      terrain
+    );
   }
 
   update(dt: number) {

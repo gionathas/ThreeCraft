@@ -113,14 +113,16 @@ export default class InputController {
     );
   }
 
-  get currentPointerCenterCoordinates() {
+  get crosshairCoordinates(): THREE.Vector2Tuple {
     return [
       this.pointer.current.centeredMouseX,
       this.pointer.current.centeredMouseY,
     ];
   }
 
-  get previousPointerCenterCoordinates() {
+  get previousCrosshairCoordinates(): THREE.Vector2Tuple | null {
+    if (!this.pointer.previous) return null;
+
     return [
       this.pointer.previous?.centeredMouseX,
       this.pointer.previous?.centeredMouseY,
