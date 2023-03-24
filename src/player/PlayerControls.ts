@@ -22,8 +22,8 @@ export interface PlayerControlsProperties {
 const simProps: PlayerControlsProperties = {
   width: 0.4,
   height: 1.8,
-  horizontalSpeed: 0.8,
-  verticalSpeed: 6,
+  horizontalSpeed: 0.6,
+  verticalSpeed: 9.2,
   dampingFactor: 10,
   physicsEnabled: true,
 };
@@ -32,7 +32,7 @@ const flyProps: PlayerControlsProperties = {
   ...simProps,
   physicsEnabled: false,
   horizontalSpeed: 4,
-  verticalSpeed: 2,
+  verticalSpeed: 3,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
@@ -159,10 +159,10 @@ export default class PlayerControls extends PointerLockControls {
     this.updateMode();
 
     this.updateHorizontalVelocity(dt);
-    this.updateVerticalVelocity();
+    this.updateVerticalVelocity(dt);
 
-    this.detectHorizontalCollision(dt);
-    this.detectVerticalCollision();
+    this.applyHorizontalCollisionResponse(dt);
+    this.applyVerticalCollisionResponse();
 
     this.moveForward(this.velocity.z);
     this.moveUp(this.velocity.y);
@@ -199,7 +199,7 @@ export default class PlayerControls extends PointerLockControls {
     this.velocity.z += this.moveDirection.z * horizontalSpeed * dt;
   }
 
-  private updateVerticalVelocity() {
+  private updateVerticalVelocity(dt: number) {
     const { verticalSpeed } = this.properties;
 
     switch (this.mode) {
@@ -207,20 +207,43 @@ export default class PlayerControls extends PointerLockControls {
         // jump detected
         if (this.state === "onGround" && this.hasJumped()) {
           this.state = "jumping";
-          this.velocity.y += verticalSpeed;
+          this.velocity.y += verticalSpeed * dt;
         }
+
         break;
       case "fly":
-        const upDirection =
-          (this.inputController.isPressingKey(KeyBindings.JUMP_KEY) ? 1 : 0) +
-          (this.inputController.isPressingKey(KeyBindings.SPRINT_KEY) ? -1 : 0);
-
-        this.velocity.y += upDirection * verticalSpeed;
+        const upDirection = this.getFlyUpMovementDirection();
+        this.velocity.y += upDirection * verticalSpeed * dt;
         break;
     }
   }
 
-  private detectVerticalCollision() {
+  private applyVelocityDamping(dt: number) {
+    const { dampingFactor } = this.properties;
+
+    this.velocity.x -= this.velocity.x * dampingFactor * dt;
+    this.velocity.z -= this.velocity.z * dampingFactor * dt;
+
+    // if its flying, we have no forces that will slow the player down
+    // so we need to set one manually
+    if (this.mode === "fly") {
+      this.velocity.y -= this.velocity.y * dampingFactor * dt;
+    } else {
+      this.applyGravity(dt);
+    }
+  }
+
+  private applyGravity(dt: number) {
+    if (this.state === "falling") {
+      this.velocity.y -= Physics.FALLING_GRAVITY * dt;
+    }
+
+    if (this.state === "jumping") {
+      this.velocity.y -= Physics.JUMPING_GRAVITY * dt;
+    }
+  }
+
+  private applyVerticalCollisionResponse() {
     const { physicsEnabled, height } = this.properties;
 
     if (!physicsEnabled) return;
@@ -273,7 +296,7 @@ export default class PlayerControls extends PointerLockControls {
     return isBlockAboveSolid;
   }
 
-  private detectHorizontalCollision(dt: number) {
+  private applyHorizontalCollisionResponse(dt: number) {
     const { physicsEnabled } = this.properties;
 
     if (!physicsEnabled) return;
@@ -289,23 +312,23 @@ export default class PlayerControls extends PointerLockControls {
 
     const collisions = this.detectCollisions();
     if (collisions.front) {
-      this.checkFrontCollision(cameraDirectionAngle, dt, newVelocity);
+      this.applyFrontCollisionResponse(cameraDirectionAngle, dt, newVelocity);
     }
     if (collisions.back) {
-      this.checkBackCollision(cameraDirectionAngle, dt, newVelocity);
+      this.applyBackCollisionResponse(cameraDirectionAngle, dt, newVelocity);
     }
     if (collisions.right) {
-      this.checkRightCollision(cameraDirectionAngle, dt, newVelocity);
+      this.applyRightCollisionResponse(cameraDirectionAngle, dt, newVelocity);
     }
     if (collisions.left) {
-      this.checkLeftCollision(cameraDirectionAngle, dt, newVelocity);
+      this.applyLeftCollisionResponse(cameraDirectionAngle, dt, newVelocity);
     }
 
     //update the velocity
     this.velocity.copy(newVelocity);
   }
 
-  private checkFrontCollision(
+  private applyFrontCollisionResponse(
     cameraDirectionAngle: number,
     dt: number,
     newVelocity: THREE.Vector3
@@ -553,7 +576,7 @@ export default class PlayerControls extends PointerLockControls {
     }
   }
 
-  private checkBackCollision(
+  private applyBackCollisionResponse(
     cameraDirectionAngle: number,
     dt: number,
     newVelocity: THREE.Vector3
@@ -801,7 +824,7 @@ export default class PlayerControls extends PointerLockControls {
     }
   }
 
-  private checkRightCollision(
+  private applyRightCollisionResponse(
     cameraDirectionAngle: number,
     dt: number,
     newVelocity: THREE.Vector3
@@ -1049,7 +1072,7 @@ export default class PlayerControls extends PointerLockControls {
     }
   }
 
-  private checkLeftCollision(
+  private applyLeftCollisionResponse(
     cameraDirectionAngle: number,
     dt: number,
     newVelocity: THREE.Vector3
@@ -1379,33 +1402,9 @@ export default class PlayerControls extends PointerLockControls {
       return 0;
     }
 
-    // 2 is the sliding friction
-    return Math.abs(horizontalSpeed * Math.cos(angle) * dt) * 5;
-  }
-
-  private applyVelocityDamping(dt: number) {
-    const { dampingFactor, physicsEnabled } = this.properties;
-
-    this.velocity.x -= this.velocity.x * dampingFactor * dt;
-    this.velocity.z -= this.velocity.z * dampingFactor * dt;
-
-    // if physics is not enabled, we have no forces that will push the player down
-    // so we need to set one manually
-    if (!physicsEnabled) {
-      this.velocity.y -= this.velocity.y * dampingFactor * dt;
-    } else {
-      this.applyGravity(dt);
-    }
-  }
-
-  private applyGravity(dt: number) {
-    if (this.state === "falling") {
-      this.velocity.y -= Physics.FALLING_GRAVITY * dt;
-    }
-
-    if (this.state === "jumping") {
-      this.velocity.y -= Physics.JUMPING_GRAVITY * dt;
-    }
+    // NOTE a bit too much magic here (should be refactored)
+    const directionFactor = Math.abs(Math.cos(angle));
+    return horizontalSpeed * directionFactor * dt * 6;
   }
 
   private hasJumped() {
@@ -1431,6 +1430,13 @@ export default class PlayerControls extends PointerLockControls {
     return (
       (this.inputController.isPressingKey(KeyBindings.MOVE_RIGHT_KEY) ? 1 : 0) +
       (this.inputController.isPressingKey(KeyBindings.MOVE_LEFT_KEY) ? -1 : 0)
+    );
+  }
+
+  private getFlyUpMovementDirection() {
+    return (
+      (this.inputController.isPressingKey(KeyBindings.JUMP_KEY) ? 1 : 0) +
+      (this.inputController.isPressingKey(KeyBindings.SPRINT_KEY) ? -1 : 0)
     );
   }
 

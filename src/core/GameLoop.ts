@@ -74,12 +74,10 @@ export default class GameLoop {
     this.player.enableControls();
 
     // start game loop
-    this.engine.start((dt) => {
-      this.loop(dt);
-    });
+    this.engine.start(this.update.bind(this));
   }
 
-  private loop(dt: number) {
+  private update(dt: number) {
     const { inputController, player, terrain, ui } = this;
 
     if (this.gameState.isRunning()) {

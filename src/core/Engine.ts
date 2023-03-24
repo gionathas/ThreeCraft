@@ -4,7 +4,7 @@ export default class Engine {
   public static readonly DEFAULT_FOV = 75;
   private static readonly Z_NEAR = 0.01;
   private static readonly Z_FAR = 1000;
-  private static readonly TARGET_FRAME_RATE = 1 / 60;
+  private static readonly MAX_FPS = 75;
 
   private static instance: Engine;
 
@@ -65,24 +65,42 @@ export default class Engine {
 
     let previousTime = performance.now();
 
+    // fixed timestep
+    const timestep = 1 / Engine.MAX_FPS;
+    let accumulator = 0;
+
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) / 1000;
+      previousTime = time;
 
-      update(dt);
+      // Track the accumulated time that hasn't been simulated yet
+      accumulator += dt;
+
+      // Simulate the total elapsed time in fixed-size chunks
+      let numUpdateSteps = 0;
+      while (accumulator >= timestep) {
+        update(timestep);
+        accumulator -= timestep;
+
+        // Prevent spiral of death
+        if (++numUpdateSteps >= 240) {
+          console.warn("Too many update steps");
+          // discard the unsimulated time
+          accumulator = 0;
+          break;
+        }
+      }
 
       this.renderer.render(this.scene, this.camera);
-
-      previousTime = time;
     });
   }
 
   dispose() {
     this.renderer.domElement.style.display = "none";
 
+    this.renderer.setAnimationLoop(null);
     this.scene.clear();
     this.camera.clear();
-
-    this.renderer.setAnimationLoop(null);
     this.renderer.dispose();
   }
 
