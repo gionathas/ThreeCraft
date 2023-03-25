@@ -5,6 +5,7 @@ import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerCollider from "../player/PlayerCollider";
 import PlayerController from "../player/PlayerController";
 import PlayerControls from "../player/PlayerControls";
+import PlayerPhysics from "../player/PlayerPhysics";
 import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
@@ -13,64 +14,55 @@ export type PlayerControlsMode = "sim" | "fly";
 
 /**
  * The player is represented by a moving camera in the world.
+ *
+ * //TODO add DebugInfo dependency
  */
 export default class Player {
   static readonly WIDTH = 0.4;
   static readonly HEIGHT = 1.8;
 
   private terrain: Terrain;
-  private playerController: PlayerController;
-  private collider: PlayerCollider;
+
+  private controller: PlayerController;
   private controls: PlayerControls;
+  private collider: PlayerCollider;
+  private physics: PlayerPhysics;
+
+  private inventory: InventoryManager;
   private editingControls: EditingControls;
-  private inventoryManager: InventoryManager;
 
   constructor(terrain: Terrain, inventory: InventoryState) {
     this.terrain = terrain;
 
-    this.playerController = new PlayerController();
-    this.inventoryManager = new InventoryManager(inventory);
-    this.controls = new PlayerControls(
-      this.playerController,
+    this.controller = new PlayerController();
+    this.controls = new PlayerControls(this.controller);
+    this.physics = new PlayerPhysics(
+      this.controller,
+      this.controls,
       terrain,
       EnvVars.PLAYER_DEFAULT_CONTROLS_MODE
     );
     this.collider = new PlayerCollider();
+    this.inventory = new InventoryManager(inventory);
     this.editingControls = new EditingControls(
-      this.playerController,
+      this.controller,
       this.collider,
-      this.inventoryManager,
+      this.inventory,
       terrain
     );
   }
 
   update(dt: number) {
-    this.controls.update(dt);
+    this.physics.update(dt);
     this.collider.update(this.getPosition());
     this.editingControls.update();
+    //TODO DebugInfo.updatePlayerInfo(this);
   }
 
   dispose() {
     this.collider.dispose();
     this.controls.dispose();
     this.editingControls.dispose();
-  }
-
-  setSpawnPosition(x: number, z: number) {
-    const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
-
-    // this will simulate the camera placed on the player's head
-    // and the player's feet being 1 block below the surface
-    const y = surfaceHeight + Player.HEIGHT + 1;
-
-    this.controls.setCameraPosition(x, y, z);
-  }
-
-  /**
-   * Corresponds to the player's head position
-   */
-  getPosition() {
-    return this.controls.getCameraPosition().clone();
   }
 
   controlsEnabled() {
@@ -93,16 +85,33 @@ export default class Player {
     this.controls.onUnlock(cb);
   }
 
+  setSpawnPosition(x: number, z: number) {
+    const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
+
+    // this will simulate the camera placed on the player's head
+    // and the player's feet being 1 block below the surface
+    const y = surfaceHeight + Player.HEIGHT + 1;
+
+    this.controls.position.set(x, y, z);
+  }
+
+  /**
+   * Corresponds to the player's head position
+   */
+  getPosition() {
+    return this.controls.position.clone();
+  }
+
   getMode() {
-    return this.controls.getMode();
+    return this.physics.getMode();
   }
 
   getVelocity() {
-    return this.controls.getVelocity().clone();
+    return this.physics.getVelocity().clone();
   }
 
   getCamera() {
-    return this.controls.getCamera();
+    return this.controls.camera;
   }
 
   getTargetBlock() {
@@ -114,19 +123,19 @@ export default class Player {
   }
 
   getQuaternion() {
-    return this.controls.getCamera().quaternion.clone();
+    return this.controls.quaternion.clone();
   }
 
   setQuaternion(quaternion: THREE.Quaternion) {
-    this.controls.getCamera().quaternion.copy(quaternion);
+    this.controls.quaternion.copy(quaternion);
   }
 
   getLookDirection() {
-    return this.controls.getCamera().getWorldDirection(new THREE.Vector3());
+    return this.controls.getLookDirection();
   }
 
   lookAt(direction: THREE.Vector3) {
-    this.controls.getCamera().lookAt(direction);
+    this.controls.lookAt(direction);
   }
 
   getOrientation() {
@@ -136,11 +145,11 @@ export default class Player {
   }
 
   getInventory() {
-    return this.inventoryManager;
+    return this.inventory;
   }
 
   get _currentChunkId() {
-    const currentPosition = this.controls.getCameraPosition();
+    const currentPosition = this.getPosition();
     const chunkId = World.getChunkIdFromPosition(currentPosition);
 
     return chunkId;
