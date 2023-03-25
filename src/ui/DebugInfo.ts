@@ -87,6 +87,7 @@ export default class DebugInfo {
     const [px, py, pz] = this.player.getPosition().toArray();
     const [vx, vy, vz] = this.player.getVelocity().toArray();
     const orientation = this.player.getOrientation();
+    const state = this.player.getState();
 
     const currentChunkId = this.player._currentChunkId;
     const totalChunks = this.terrain._totalChunks;
@@ -99,6 +100,7 @@ export default class DebugInfo {
     //FIXME this will run every frame
     // it's not ideal since it's a DOM operation
     this.debugPanel.innerHTML = `
+    <p>State: ${state}</p>
     <p>Orientation: ${orientation}</p>
     <p>x: ${px.toFixed(2)} y: ${py.toFixed(2)} z: ${pz.toFixed(2)}</p>
     <p>vx: ${vx.toFixed(2)} vy: ${vy.toFixed(2)} vz: ${vz.toFixed(2)}</p>

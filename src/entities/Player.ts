@@ -106,6 +106,10 @@ export default class Player {
     return this.physics.getMode();
   }
 
+  getState() {
+    return this.physics.getState();
+  }
+
   getVelocity() {
     return this.physics.getVelocity().clone();
   }

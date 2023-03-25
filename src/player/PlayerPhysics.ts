@@ -11,25 +11,24 @@ export interface PlayerProperties {
   horizontalSpeed: number;
   verticalSpeed: number;
   dampingFactor: number;
-  physicsEnabled: boolean;
 }
 
 const simProps: PlayerProperties = {
   horizontalSpeed: 0.6,
   verticalSpeed: 9.2,
   dampingFactor: 10,
-  physicsEnabled: true,
 };
 
 const flyProps: PlayerProperties = {
   ...simProps,
-  physicsEnabled: false,
   horizontalSpeed: 4,
   verticalSpeed: 3,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
 const MIN_VELOCITY = 0.001;
+
+type PlayerState = "falling" | "jumping" | "onGround";
 
 /**
  * //TODO improve bottom collision detection or the area when the player
@@ -50,9 +49,11 @@ export default class PlayerPhysics {
 
   private playerControls: PlayerControls;
   private playerController: PlayerController;
-  private mode: PlayerControlsMode;
   private properties: PlayerProperties;
-  private state: "onGround" | "falling" | "jumping";
+
+  private mode: PlayerControlsMode;
+  private state: PlayerState;
+  private prevState: PlayerState;
 
   constructor(
     playerController: PlayerController,
@@ -65,7 +66,9 @@ export default class PlayerPhysics {
     this.terrain = terrain;
 
     this.mode = initialMode;
+    this.prevState = "falling";
     this.state = "falling";
+
     this.properties = this.getPlayerProperties();
 
     this.moveDirection = new THREE.Vector3();
@@ -75,6 +78,7 @@ export default class PlayerPhysics {
   update(dt: number) {
     const { playerControls } = this;
     this.updateMode();
+    this.updateState();
 
     this.updateHorizontalVelocity(dt);
     this.updateVerticalVelocity(dt);
@@ -88,6 +92,7 @@ export default class PlayerPhysics {
     playerControls.moveRight(this.velocity.x);
 
     this.applyVelocityDamping(dt);
+    this.prevState = this.state;
   }
 
   private updateMode() {
@@ -96,6 +101,17 @@ export default class PlayerPhysics {
     if (this.playerController.hasSwitchedControls()) {
       this.mode = currentMode === "sim" ? "fly" : "sim";
       this.properties = this.getPlayerProperties();
+    }
+  }
+
+  private updateState() {
+    const hittingGround = this.isHittingGround();
+
+    if (!hittingGround) {
+      this.state = this.velocity.y <= 0 ? "falling" : "jumping";
+    } else {
+      const hasJumped = this.playerController.hasJumped();
+      this.state = hasJumped ? "jumping" : "onGround";
     }
   }
 
@@ -114,13 +130,10 @@ export default class PlayerPhysics {
 
     switch (this.mode) {
       case "sim":
-        const hasJumped = this.playerController.hasJumped();
-        // jump detected
-        if (this.state === "onGround" && hasJumped) {
-          this.state = "jumping";
+        // jump detection
+        if (this.state === "jumping" && this.prevState !== "jumping") {
           this.velocity.y += verticalSpeed * dt;
         }
-
         break;
       case "fly":
         const upDirection = this.getFlyUpMovementDirection();
@@ -155,37 +168,31 @@ export default class PlayerPhysics {
   }
 
   private applyVerticalCollisionResponse() {
-    const { physicsEnabled } = this.properties;
-    const height = this.height;
+    const { height, isFlyMode } = this;
 
-    if (!physicsEnabled) return;
+    if (isFlyMode) return;
 
-    const isHittingGround = this.isHittingGround();
     const isTopColliding = this.isTopColliding();
 
-    if (!isHittingGround) {
-      this.state = this.velocity.y <= 0 ? "falling" : "jumping";
+    // if we were falling and we have hit the ground
+    if (this.state === "onGround" && this.prevState === "falling") {
+      // stop the player from falling
+      this.velocity.y = 0;
 
-      // top collision after jumping
-      if (this.state === "jumping" && isTopColliding) {
-        this.velocity.y = 0;
-      }
-    } else {
-      // if we have hit the ground after falling
-      if (this.state === "falling") {
-        this.state = "onGround";
-        // move slightly below the surface to keep the collision with the ground
-        const groundY =
-          Math.floor(this.position.y - height) + Block.SIZE - 0.01;
-        this.position.y = groundY + height;
-        this.velocity.y = 0;
-      }
+      // move slightly below the surface to keep the collision with the ground
+      const groundY = Math.floor(this.position.y - height) + Block.SIZE - 0.01;
+      this.position.y = groundY + height;
+    }
+
+    if (isTopColliding) {
+      this.velocity.y = 0;
+      // move slightly below the top block we are colliding with
+      this.position.y = Math.floor(this.position.y + 0.1) - 0.15;
     }
   }
 
   private isHittingGround() {
-    const height = this.height;
-    const position = this.position;
+    const { height, position } = this;
 
     const isBlockBeneathSolid = this.terrain.isSolidBlock({
       x: position.x,
@@ -197,11 +204,11 @@ export default class PlayerPhysics {
   }
 
   private isTopColliding() {
-    const position = this.position;
+    const { position } = this;
 
     const isBlockAboveSolid = this.terrain.isSolidBlock({
       x: position.x,
-      y: position.y,
+      y: position.y + 0.1,
       z: position.z,
     });
 
@@ -209,9 +216,9 @@ export default class PlayerPhysics {
   }
 
   private applyHorizontalCollisionResponse(dt: number) {
-    const { physicsEnabled } = this.properties;
+    const { isFlyMode } = this;
 
-    if (!physicsEnabled) return;
+    if (isFlyMode) return;
 
     const lookDirection = this.playerControls.getLookDirection();
     let lookDirAngle = Math.atan2(lookDirection.z, lookDirection.x);
@@ -1322,6 +1329,14 @@ export default class PlayerPhysics {
 
   getMode() {
     return this.mode;
+  }
+
+  getState() {
+    return this.state;
+  }
+
+  private get isFlyMode() {
+    return this.mode === "fly";
   }
 
   private get position() {
