@@ -7,6 +7,15 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
 
+/**
+ * //TODO: add GUI threejs interactive panel
+ *
+ * //TODO: make this class a singleton, so that every class that need to display
+ * some debug info can just call DebugInfo.getInstance().addDebugInfo("some info")
+ *
+ * //TODO: (refactor) instead of knowing about the player and terrain,
+ * the debug info should take in input only the data it needs to display
+ */
 export default class DebugInfo {
   private scene: GameScene;
   private inputController: InputController;
