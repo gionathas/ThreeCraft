@@ -168,7 +168,7 @@ export default class PlayerPhysics {
   }
 
   private applyVerticalCollisionResponse() {
-    const { height, isFlyMode } = this;
+    const { playerControls, isFlyMode } = this;
 
     if (isFlyMode) return;
 
@@ -176,27 +176,35 @@ export default class PlayerPhysics {
 
     // if we were falling and we have hit the ground
     if (this.state === "onGround" && this.prevState === "falling") {
-      // stop the player from falling
+      // stop the player from keeping going down
       this.velocity.y = 0;
 
+      const feetY = playerControls.getFeetHeight();
+
       // move slightly below the surface to keep the collision with the ground
-      const groundY = Math.floor(this.position.y - height) + Block.SIZE - 0.01;
-      this.position.y = groundY + height;
+      const groundY = Math.floor(feetY) + Block.SIZE - 0.01;
+      this.position.y = PlayerControls.getEyeHeightFromGround(groundY);
     }
 
     if (isTopColliding) {
+      // stop the player from keeping going up
       this.velocity.y = 0;
-      // move slightly below the top block we are colliding with
-      this.position.y = Math.floor(this.position.y + 0.1) - 0.15;
+
+      const headY = this.playerControls.getHeadHeight();
+      // move the player slightly below the top block it's colliding with
+      const newHeadY = Math.floor(headY) - 0.01;
+      this.position.y = PlayerControls.getEyeHeightFromHead(newHeadY);
     }
   }
 
   private isHittingGround() {
-    const { height, position } = this;
+    const { position, playerControls } = this;
+
+    const feetY = playerControls.getFeetHeight();
 
     const isBlockBeneathSolid = this.terrain.isSolidBlock({
       x: position.x,
-      y: position.y - height,
+      y: feetY,
       z: position.z,
     });
 
@@ -204,11 +212,13 @@ export default class PlayerPhysics {
   }
 
   private isTopColliding() {
-    const { position } = this;
+    const { position, playerControls } = this;
+
+    const headY = playerControls.getHeadHeight();
 
     const isBlockAboveSolid = this.terrain.isSolidBlock({
       x: position.x,
-      y: position.y + 0.1,
+      y: headY,
       z: position.z,
     });
 
@@ -248,11 +258,11 @@ export default class PlayerPhysics {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { playerControls, width, height } = this;
+    const { playerControls, width } = this;
     const position = this.position.clone();
 
-    const top = position.y;
-    const bottom = position.y - height + 0.1;
+    const top = playerControls.getHeadHeight();
+    const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
     if (this.velocity.z > MIN_VELOCITY) {
@@ -496,11 +506,11 @@ export default class PlayerPhysics {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height, playerControls } = this;
+    const { width, playerControls } = this;
     const position = this.position.clone();
 
-    const top = position.y;
-    const bottom = position.y - height + 0.1;
+    const top = playerControls.getHeadHeight();
+    const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
     if (this.velocity.z > MIN_VELOCITY) {
@@ -744,11 +754,11 @@ export default class PlayerPhysics {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height, playerControls } = this;
+    const { width, playerControls } = this;
     const position = this.position.clone();
 
-    const top = position.y;
-    const bottom = position.y - height + 0.1;
+    const top = playerControls.getHeadHeight();
+    const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
     if (this.velocity.z > MIN_VELOCITY) {
@@ -980,11 +990,11 @@ export default class PlayerPhysics {
     dt: number,
     newVelocity: THREE.Vector3
   ) {
-    const { width, height, playerControls } = this;
+    const { width, playerControls } = this;
     const position = this.position.clone();
 
-    const top = position.y;
-    const bottom = position.y - height + 0.1;
+    const top = playerControls.getHeadHeight();
+    const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
     if (this.velocity.z > MIN_VELOCITY) {
@@ -1221,7 +1231,7 @@ export default class PlayerPhysics {
   }
 
   private isZSideColliding(side: "back" | "front") {
-    const { width, height } = this;
+    const { width, playerControls } = this;
     const position = this.position.clone();
 
     // slightly offset to distinguish from left or right collisions
@@ -1230,8 +1240,8 @@ export default class PlayerPhysics {
     const xInc = left - right;
 
     // add an offset to avoid fake horizontal collision with the ground
-    const bottom = position.y - height + 0.1;
-    const top = position.y;
+    const top = playerControls.getHeadHeight();
+    const bottom = playerControls.getFeetHeight() + 0.1;
     const yInc = top - bottom;
 
     for (let y = bottom; y <= top; y += yInc) {
@@ -1252,7 +1262,7 @@ export default class PlayerPhysics {
   }
 
   private isXSideColliding(side: "right" | "left") {
-    const { width, height } = this;
+    const { width, playerControls } = this;
     const position = this.position.clone();
 
     // slightly offset to distinguish from front or back collisions
@@ -1261,8 +1271,8 @@ export default class PlayerPhysics {
     const zInc = front - back;
 
     // add an offset to avoid fake horizontal collision with the ground
-    const bottom = position.y - height + 0.1;
-    const top = position.y;
+    const top = playerControls.getHeadHeight();
+    const bottom = playerControls.getFeetHeight() + 0.1;
     const yInc = top - bottom;
 
     for (let y = bottom; y <= top; y += yInc) {

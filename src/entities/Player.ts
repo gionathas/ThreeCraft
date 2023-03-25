@@ -20,6 +20,7 @@ export type PlayerControlsMode = "sim" | "fly";
 export default class Player {
   static readonly WIDTH = 0.4;
   static readonly HEIGHT = 1.8;
+  static readonly CAMERA_EYE_OFFSET_FROM_HEAD = 0.1;
 
   private terrain: Terrain;
 
@@ -42,7 +43,7 @@ export default class Player {
       terrain,
       EnvVars.PLAYER_DEFAULT_CONTROLS_MODE
     );
-    this.collider = new PlayerCollider();
+    this.collider = new PlayerCollider(this.controls);
     this.inventory = new InventoryManager(inventory);
     this.editingControls = new EditingControls(
       this.controller,
@@ -54,7 +55,7 @@ export default class Player {
 
   update(dt: number) {
     this.physics.update(dt);
-    this.collider.update(this.getPosition());
+    this.collider.update();
     this.editingControls.update();
     //TODO DebugInfo.updatePlayerInfo(this);
   }
@@ -88,9 +89,9 @@ export default class Player {
   setSpawnPosition(x: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
 
-    // this will simulate the camera placed on the player's head
-    // and the player's feet being 1 block below the surface
-    const y = surfaceHeight + Player.HEIGHT + 1;
+    // this will simulate the camera placed on the player's eyes
+    // and the player's feet being 1 block above the surface
+    const y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 1;
 
     this.controls.position.set(x, y, z);
   }

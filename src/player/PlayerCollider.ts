@@ -2,14 +2,18 @@ import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
 import GameScene from "../core/GameScene";
 import Player from "../entities/Player";
+import PlayerControls from "./PlayerControls";
 
 export default class PlayerCollider {
   private scene: GameScene;
 
   private collider: THREE.LineSegments;
+  private playerControls: PlayerControls;
 
-  constructor() {
+  constructor(playerControls: PlayerControls) {
     this.scene = GameScene.getInstance();
+    this.playerControls = playerControls;
+
     this.collider = this.initCollider();
   }
 
@@ -32,14 +36,13 @@ export default class PlayerCollider {
     return collider;
   }
 
-  update(playerPosition: THREE.Vector3) {
+  update() {
+    const playerPosition = this.playerControls.position;
+    const centerY = this.playerControls.getCenterOfMassHeight();
+
     // update the collider position to the current player position,
     // except for the y axis which is set to the player's center of mass
-    this.collider.position.set(
-      playerPosition.x,
-      playerPosition.y - Player.HEIGHT / 2,
-      playerPosition.z
-    );
+    this.collider.position.set(playerPosition.x, centerY, playerPosition.z);
   }
 
   intersectsWith(entityCollider: THREE.Box3) {
