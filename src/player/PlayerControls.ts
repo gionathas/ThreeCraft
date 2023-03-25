@@ -6,6 +6,8 @@ import Player from "../entities/Player";
 import PlayerController from "./PlayerController";
 
 export default class PlayerControls extends PointerLockControls {
+  private static readonly CAMERA_EYE_OFFSET_FROM_HEAD = 0.1;
+
   private playerController: PlayerController;
 
   private lockCbs: (() => void)[];
@@ -83,7 +85,7 @@ export default class PlayerControls extends PointerLockControls {
 
   getHeadHeight() {
     const eyeY = this.getEyeHeight();
-    return eyeY + Player.CAMERA_EYE_OFFSET_FROM_HEAD;
+    return eyeY + PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
   }
 
   getEyeHeight() {
@@ -91,11 +93,11 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   static getEyeHeightFromGround(groundY: number) {
-    return groundY + Player.HEIGHT - Player.CAMERA_EYE_OFFSET_FROM_HEAD;
+    return groundY + Player.HEIGHT - PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
   }
 
   static getEyeHeightFromHead(headY: number) {
-    return headY - Player.CAMERA_EYE_OFFSET_FROM_HEAD;
+    return headY - PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
   }
 
   /**

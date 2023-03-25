@@ -20,7 +20,6 @@ export type PlayerControlsMode = "sim" | "fly";
 export default class Player {
   static readonly WIDTH = 0.4;
   static readonly HEIGHT = 1.8;
-  static readonly CAMERA_EYE_OFFSET_FROM_HEAD = 0.1;
 
   private terrain: Terrain;
 
