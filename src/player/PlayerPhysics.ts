@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import EnvVars from "../config/EnvVars";
 import Player, { PlayerControlsMode } from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import { Block } from "../terrain/block";
@@ -7,28 +8,16 @@ import Physics from "../utils/Physics";
 import PlayerController from "./PlayerController";
 import PlayerControls from "./PlayerControls";
 
-export interface PlayerProperties {
-  horizontalSpeed: number;
-  verticalSpeed: number;
-  dampingFactor: number;
-}
+type PlayerState = "falling" | "jumping" | "walking" | "running";
 
-const simProps: PlayerProperties = {
-  horizontalSpeed: 0.6,
-  verticalSpeed: 9.2,
-  dampingFactor: 10,
-};
-
-const flyProps: PlayerProperties = {
-  ...simProps,
-  horizontalSpeed: 4,
-  verticalSpeed: 3,
+const speedMultipliers: Record<PlayerState, number> = {
+  falling: 0.8,
+  jumping: 0.8,
+  walking: 1,
+  running: 1.8,
 };
 
 const SLIDING_DEAD_ANGLE = 0.1;
-const MIN_VELOCITY = 0.001;
-
-type PlayerState = "falling" | "jumping" | "onGround";
 
 /**
  * //TODO improve bottom collision detection or the area when the player
@@ -42,6 +31,16 @@ type PlayerState = "falling" | "jumping" | "onGround";
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerPhysics {
+  // Fly mode
+  private static readonly FLY_HORIZONTAL_SPEED = 4;
+  private static readonly FLY_VERTICAL_SPEED = 3;
+
+  // Sim mode
+  private static readonly HORIZONTAL_SPEED = 0.6;
+  private static readonly JUMP_SPEED = 9.2;
+  private static readonly BASE_DAMPING_FACTOR = 10;
+  private static readonly SLIDING_FACTOR = 7;
+
   private terrain: Terrain;
 
   private velocity: THREE.Vector3;
@@ -49,27 +48,25 @@ export default class PlayerPhysics {
 
   private playerControls: PlayerControls;
   private playerController: PlayerController;
-  private properties: PlayerProperties;
 
-  private mode: PlayerControlsMode;
+  private controlsMode: PlayerControlsMode;
   private state: PlayerState;
   private prevState: PlayerState;
+  private dampingFactor: number;
 
   constructor(
     playerController: PlayerController,
     playerControls: PlayerControls,
-    terrain: Terrain,
-    initialMode: PlayerControlsMode
+    terrain: Terrain
   ) {
     this.playerController = playerController;
     this.playerControls = playerControls;
     this.terrain = terrain;
 
-    this.mode = initialMode;
+    this.controlsMode = EnvVars.PLAYER_DEFAULT_CONTROLS_MODE;
     this.prevState = "falling";
     this.state = "falling";
-
-    this.properties = this.getPlayerProperties();
+    this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
 
     this.moveDirection = new THREE.Vector3();
     this.velocity = new THREE.Vector3();
@@ -96,11 +93,10 @@ export default class PlayerPhysics {
   }
 
   private updateMode() {
-    const currentMode = this.mode;
+    const currentMode = this.controlsMode;
 
     if (this.playerController.hasSwitchedControls()) {
-      this.mode = currentMode === "sim" ? "fly" : "sim";
-      this.properties = this.getPlayerProperties();
+      this.controlsMode = currentMode === "sim" ? "fly" : "sim";
     }
   }
 
@@ -111,12 +107,13 @@ export default class PlayerPhysics {
       this.state = this.velocity.y <= 0 ? "falling" : "jumping";
     } else {
       const hasJumped = this.playerController.hasJumped();
-      this.state = hasJumped ? "jumping" : "onGround";
+      const isRunning = this.playerController.isRunning();
+      this.state = hasJumped ? "jumping" : isRunning ? "running" : "walking";
     }
   }
 
   private updateHorizontalVelocity(dt: number) {
-    const { horizontalSpeed } = this.properties;
+    const { horizontalSpeed } = this;
 
     this.moveDirection.x = this.getRightMovementDirection();
     this.moveDirection.z = this.getForwardMovementDirection();
@@ -126,34 +123,49 @@ export default class PlayerPhysics {
   }
 
   private updateVerticalVelocity(dt: number) {
-    const { verticalSpeed } = this.properties;
+    const { controlsMode, state, prevState } = this;
 
-    switch (this.mode) {
+    switch (controlsMode) {
       case "sim":
         // jump detection
-        if (this.state === "jumping" && this.prevState !== "jumping") {
-          this.velocity.y += verticalSpeed * dt;
+        if (state === "jumping" && prevState !== "jumping") {
+          this.velocity.y += PlayerPhysics.JUMP_SPEED * dt;
         }
         break;
       case "fly":
         const upDirection = this.getFlyUpMovementDirection();
-        this.velocity.y += upDirection * verticalSpeed * dt;
+        this.velocity.y += upDirection * PlayerPhysics.FLY_VERTICAL_SPEED * dt;
         break;
     }
   }
 
   private applyVelocityDamping(dt: number) {
-    const { dampingFactor } = this.properties;
+    const { isFlyMode } = this;
 
-    this.velocity.x -= this.velocity.x * dampingFactor * dt;
-    this.velocity.z -= this.velocity.z * dampingFactor * dt;
+    this.updateDampingFactor();
+
+    this.velocity.x -= this.velocity.x * this.dampingFactor * dt;
+    this.velocity.z -= this.velocity.z * this.dampingFactor * dt;
 
     // if its flying, we have no forces that will slow the player down
     // so we need to set one manually
-    if (this.mode === "fly") {
-      this.velocity.y -= this.velocity.y * dampingFactor * dt;
+    if (isFlyMode) {
+      this.velocity.y -= this.velocity.y * this.dampingFactor * dt;
     } else {
       this.applyGravity(dt);
+    }
+  }
+
+  private updateDampingFactor() {
+    // special inertia when jumping from running
+    if (this.state === "jumping" && this.prevState === "running") {
+      this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR / 2;
+    } else {
+      // reset the damping factor while on ground and keep the current one
+      // while in the air
+      if (this.hitGround) {
+        this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
+      }
     }
   }
 
@@ -170,12 +182,13 @@ export default class PlayerPhysics {
   private applyVerticalCollisionResponse() {
     const { playerControls, isFlyMode } = this;
 
+    // no collision response in fly mode
     if (isFlyMode) return;
 
     const isTopColliding = this.isTopColliding();
 
     // if we were falling and we have hit the ground
-    if (this.state === "onGround" && this.prevState === "falling") {
+    if (this.hitGround && this.prevState === "falling") {
       // stop the player from keeping going down
       this.velocity.y = 0;
 
@@ -228,6 +241,7 @@ export default class PlayerPhysics {
   private applyHorizontalCollisionResponse(dt: number) {
     const { isFlyMode } = this;
 
+    // no collision response in fly mode
     if (isFlyMode) return;
 
     const lookDirection = this.playerControls.getLookDirection();
@@ -265,7 +279,7 @@ export default class PlayerPhysics {
     const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
-    if (this.velocity.z > MIN_VELOCITY) {
+    if (this.velocity.z > Physics.MIN_VELOCITY) {
       // front right slide
       if (determineAngleQuadrant(cameraDirectionAngle) === 4) {
         newVelocity.z = 0;
@@ -321,7 +335,7 @@ export default class PlayerPhysics {
     }
 
     // moving backward
-    if (this.velocity.z < -MIN_VELOCITY) {
+    if (this.velocity.z < -Physics.MIN_VELOCITY) {
       // back right slide
       if (determineAngleQuadrant(cameraDirectionAngle) === 3) {
         newVelocity.z = 0;
@@ -380,7 +394,7 @@ export default class PlayerPhysics {
     }
 
     // right side walking
-    if (this.velocity.x > MIN_VELOCITY) {
+    if (this.velocity.x > Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(cameraDirectionAngle) === 2) {
         newVelocity.x = 0;
@@ -441,7 +455,7 @@ export default class PlayerPhysics {
     }
 
     // left side walking
-    if (this.velocity.x < -MIN_VELOCITY) {
+    if (this.velocity.x < -Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(cameraDirectionAngle) === 3) {
         newVelocity.x = 0;
@@ -513,7 +527,7 @@ export default class PlayerPhysics {
     const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
-    if (this.velocity.z > MIN_VELOCITY) {
+    if (this.velocity.z > Physics.MIN_VELOCITY) {
       // front right slide
       if (determineAngleQuadrant(cameraDirectionAngle) === 2) {
         newVelocity.z = 0;
@@ -569,7 +583,7 @@ export default class PlayerPhysics {
     }
 
     // moving backward
-    if (this.velocity.z < -MIN_VELOCITY) {
+    if (this.velocity.z < -Physics.MIN_VELOCITY) {
       // back right slide
       if (determineAngleQuadrant(cameraDirectionAngle) === 1) {
         newVelocity.z = 0;
@@ -628,7 +642,7 @@ export default class PlayerPhysics {
     }
 
     // right side walking
-    if (this.velocity.x > MIN_VELOCITY) {
+    if (this.velocity.x > Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(cameraDirectionAngle) === 4) {
         newVelocity.x = 0;
@@ -689,7 +703,7 @@ export default class PlayerPhysics {
     }
 
     // left side walking
-    else if (this.velocity.x < -MIN_VELOCITY) {
+    else if (this.velocity.x < -Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(cameraDirectionAngle) === 1) {
         newVelocity.x = 0;
@@ -761,7 +775,7 @@ export default class PlayerPhysics {
     const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
-    if (this.velocity.z > MIN_VELOCITY) {
+    if (this.velocity.z > Physics.MIN_VELOCITY) {
       // front right slide
       if (determineAngleQuadrant(lookDirAngle) === 3) {
         newVelocity.z = 0;
@@ -817,7 +831,7 @@ export default class PlayerPhysics {
     }
 
     // moving backward
-    if (this.velocity.z < -MIN_VELOCITY) {
+    if (this.velocity.z < -Physics.MIN_VELOCITY) {
       // back right slide
       if (determineAngleQuadrant(lookDirAngle) === 2) {
         newVelocity.z = 0;
@@ -876,7 +890,7 @@ export default class PlayerPhysics {
     }
 
     // right side walking
-    if (this.velocity.x > MIN_VELOCITY) {
+    if (this.velocity.x > Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(lookDirAngle) === 1) {
         newVelocity.x = 0;
@@ -931,7 +945,7 @@ export default class PlayerPhysics {
     }
 
     // left side walking
-    else if (this.velocity.x < -MIN_VELOCITY) {
+    else if (this.velocity.x < -Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(lookDirAngle) === 2) {
         newVelocity.x = 0;
@@ -997,7 +1011,7 @@ export default class PlayerPhysics {
     const bottom = playerControls.getFeetHeight() + 0.1;
 
     // moving forward
-    if (this.velocity.z > MIN_VELOCITY) {
+    if (this.velocity.z > Physics.MIN_VELOCITY) {
       // front right slide
       if (determineAngleQuadrant(lookDirAngle) === 1) {
         newVelocity.z = 0;
@@ -1053,7 +1067,7 @@ export default class PlayerPhysics {
     }
 
     // moving backward
-    if (this.velocity.z < -MIN_VELOCITY) {
+    if (this.velocity.z < -Physics.MIN_VELOCITY) {
       // back right slide
       if (determineAngleQuadrant(lookDirAngle) === 4) {
         newVelocity.z = 0;
@@ -1112,7 +1126,7 @@ export default class PlayerPhysics {
     }
 
     // right side walking
-    if (this.velocity.x > MIN_VELOCITY) {
+    if (this.velocity.x > Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(lookDirAngle) === 3) {
         newVelocity.x = 0;
@@ -1167,7 +1181,7 @@ export default class PlayerPhysics {
     }
 
     // left side walking
-    if (this.velocity.x < -MIN_VELOCITY) {
+    if (this.velocity.x < -Physics.MIN_VELOCITY) {
       // move forward
       if (determineAngleQuadrant(lookDirAngle) === 4) {
         newVelocity.x = 0;
@@ -1293,7 +1307,9 @@ export default class PlayerPhysics {
   }
 
   private calculateSlidingVelocity(lookDirAngle: number, dt: number) {
-    const { horizontalSpeed } = this.properties;
+    const hSpeed = PlayerPhysics.HORIZONTAL_SPEED;
+    const slidingFactor = PlayerPhysics.SLIDING_FACTOR;
+
     // even when the angle is near 90 degree or Math.PI
     // we still keep the player freezed against the wall
     if (
@@ -1305,7 +1321,7 @@ export default class PlayerPhysics {
 
     // NOTE a bit too much magic here (should be refactored)
     const directionFactor = Math.abs(Math.cos(lookDirAngle));
-    return horizontalSpeed * directionFactor * dt * 8;
+    return hSpeed * directionFactor * slidingFactor * dt;
   }
 
   private getForwardMovementDirection() {
@@ -1329,28 +1345,33 @@ export default class PlayerPhysics {
     );
   }
 
-  getPlayerProperties() {
-    return this.mode === "sim" ? simProps : flyProps;
+  getState() {
+    return this.state;
   }
 
   getVelocity() {
     return this.velocity.clone();
   }
 
-  getMode() {
-    return this.mode;
-  }
-
-  getState() {
-    return this.state;
+  private get position() {
+    return this.playerControls.position;
   }
 
   private get isFlyMode() {
-    return this.mode === "fly";
+    return this.controlsMode === "fly";
   }
 
-  private get position() {
-    return this.playerControls.position;
+  private get hitGround() {
+    return this.state === "walking" || this.state === "running";
+  }
+
+  private get horizontalSpeed() {
+    if (this.controlsMode === "fly") {
+      return PlayerPhysics.FLY_HORIZONTAL_SPEED;
+    }
+
+    const speedFactor = speedMultipliers[this.state];
+    return PlayerPhysics.HORIZONTAL_SPEED * speedFactor;
   }
 
   private get width() {

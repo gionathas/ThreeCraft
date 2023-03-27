@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import EnvVars from "../config/EnvVars";
 import EditingControls from "../player/EditingControls";
 import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerCollider from "../player/PlayerCollider";
@@ -36,12 +35,7 @@ export default class Player {
 
     this.controller = new PlayerController();
     this.controls = new PlayerControls(this.controller);
-    this.physics = new PlayerPhysics(
-      this.controller,
-      this.controls,
-      terrain,
-      EnvVars.PLAYER_DEFAULT_CONTROLS_MODE
-    );
+    this.physics = new PlayerPhysics(this.controller, this.controls, terrain);
     this.collider = new PlayerCollider(this.controls);
     this.inventory = new InventoryManager(inventory);
     this.editingControls = new EditingControls(
@@ -100,10 +94,6 @@ export default class Player {
    */
   getPosition() {
     return this.controls.position.clone();
-  }
-
-  getMode() {
-    return this.physics.getMode();
   }
 
   getState() {
