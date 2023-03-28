@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import EnvVars from "../config/EnvVars";
-import Player, { PlayerControlsMode } from "../entities/Player";
+import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import { Block } from "../terrain/block";
 import { determineAngleQuadrant } from "../utils/helpers";
@@ -8,9 +8,10 @@ import Physics from "../utils/Physics";
 import PlayerController from "./PlayerController";
 import PlayerControls from "./PlayerControls";
 
-type PlayerState = "falling" | "jumping" | "walking" | "running";
+export type PhysicsMode = "sim" | "fly";
+export type GroundState = "falling" | "jumping" | "walking" | "running";
 
-const speedMultipliers: Record<PlayerState, number> = {
+const speedMultipliers: Record<GroundState, number> = {
   falling: 0.8,
   jumping: 0.8,
   walking: 1,
@@ -18,13 +19,11 @@ const speedMultipliers: Record<PlayerState, number> = {
 };
 
 /**
- * //TODO improve bottom collision detection or the area when the player
- * is currently hitting the ground
  *
  * //TODO detect collision in the mid area of the player hit box, currenyly a collision
  * is detected only when one of his bounding box apex hit a block
  *
- * //TODO sliding need to be improved, the ideal would be using vector projection onto a plane
+ * //TODO sliding response need to be improved, the ideal would be using vector projection onto a plane
  *
  * //TODO extract some classes like one for managing collision detection
  */
@@ -41,16 +40,16 @@ export default class PlayerPhysics {
   private static readonly SLIDING_DEAD_ANGLE = 0.1;
 
   private terrain: Terrain;
-
-  private velocity: THREE.Vector3;
-  private moveDirection: THREE.Vector3;
-
   private playerControls: PlayerControls;
   private playerController: PlayerController;
 
-  private controlsMode: PlayerControlsMode;
-  private state: PlayerState;
-  private prevState: PlayerState;
+  // state
+  private mode: PhysicsMode;
+  private groundState: GroundState;
+  private prevGroundState: GroundState;
+
+  private velocity: THREE.Vector3;
+  private moveDirection: THREE.Vector3;
   private dampingFactor: number;
 
   constructor(
@@ -62,9 +61,9 @@ export default class PlayerPhysics {
     this.playerControls = playerControls;
     this.terrain = terrain;
 
-    this.controlsMode = EnvVars.PLAYER_DEFAULT_CONTROLS_MODE;
-    this.prevState = "falling";
-    this.state = "falling";
+    this.mode = EnvVars.PLAYER_DEFAULT_PHYSICS_MODE;
+    this.prevGroundState = "falling";
+    this.groundState = "falling";
     this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
 
     this.moveDirection = new THREE.Vector3();
@@ -73,8 +72,9 @@ export default class PlayerPhysics {
 
   update(dt: number) {
     const { playerControls } = this;
-    this.updateMode();
-    this.updateState();
+
+    this.updatePhysicsMode();
+    this.updateGroundState();
 
     this.updateHorizontalVelocity(dt);
     this.updateVerticalVelocity(dt);
@@ -88,26 +88,31 @@ export default class PlayerPhysics {
     playerControls.moveRight(this.velocity.x);
 
     this.applyVelocityDamping(dt);
-    this.prevState = this.state;
+    this.prevGroundState = this.groundState;
   }
 
-  private updateMode() {
-    const currentMode = this.controlsMode;
+  private updatePhysicsMode() {
+    const currentMode = this.mode;
 
-    if (this.playerController.hasSwitchedControls()) {
-      this.controlsMode = currentMode === "sim" ? "fly" : "sim";
+    if (this.playerController.hasSwitchedPhysicsMode()) {
+      this.mode = currentMode === "sim" ? "fly" : "sim";
     }
   }
 
-  private updateState() {
+  private updateGroundState() {
     const isOnGround = this.isHittingGround();
 
     if (!isOnGround) {
-      this.state = this.velocity.y <= 0 ? "falling" : "jumping";
+      this.groundState = this.velocity.y <= 0 ? "falling" : "jumping";
     } else {
       const hasJumped = this.playerController.hasJumped();
       const isRunning = this.playerController.isRunning();
-      this.state = hasJumped ? "jumping" : isRunning ? "running" : "walking";
+
+      this.groundState = hasJumped
+        ? "jumping"
+        : isRunning
+        ? "running"
+        : "walking";
     }
   }
 
@@ -122,12 +127,15 @@ export default class PlayerPhysics {
   }
 
   private updateVerticalVelocity(dt: number) {
-    const { controlsMode } = this;
+    const { mode: controlsMode } = this;
 
     switch (controlsMode) {
       case "sim":
+        const isJumping = this.groundState === "jumping";
+        const wasJumping = this.prevGroundState === "jumping";
+
         // jump detection
-        if (this.state === "jumping" && this.prevState !== "jumping") {
+        if (isJumping && !wasJumping) {
           this.velocity.y += PlayerPhysics.JUMP_SPEED * dt;
         }
         break;
@@ -156,12 +164,15 @@ export default class PlayerPhysics {
   }
 
   private updateDampingFactor() {
-    // special inertia when jumping from running
-    if (this.state === "jumping" && this.prevState === "running") {
+    const isJumping = this.groundState === "jumping";
+    const wasRunning = this.prevGroundState === "running";
+
+    // set a reduced damping factor when the player jumps after running
+    if (isJumping && wasRunning) {
       this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR / 2;
     } else {
       // reset the damping factor while on ground and keep the current one
-      // while in the air
+      // while in air
       if (this.onGround) {
         this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
       }
@@ -169,11 +180,11 @@ export default class PlayerPhysics {
   }
 
   private applyGravity(dt: number) {
-    if (this.state === "falling") {
+    if (this.groundState === "falling") {
       this.velocity.y -= Physics.FALLING_GRAVITY * dt;
     }
 
-    if (this.state === "jumping") {
+    if (this.groundState === "jumping") {
       this.velocity.y -= Physics.JUMPING_GRAVITY * dt;
     }
   }
@@ -191,7 +202,7 @@ export default class PlayerPhysics {
       this.velocity.y = 0;
 
       // hit ground after falling
-      if (this.prevState === "falling") {
+      if (this.prevGroundState === "falling") {
         const feetY = playerControls.getFeetHeight();
 
         // move slightly below the surface to keep the collision with the ground
@@ -1379,8 +1390,8 @@ export default class PlayerPhysics {
     );
   }
 
-  getState() {
-    return this.state;
+  getGroundState() {
+    return this.groundState;
   }
 
   getVelocity() {
@@ -1391,21 +1402,25 @@ export default class PlayerPhysics {
     return this.playerControls.position;
   }
 
-  private get isFlyMode() {
-    return this.controlsMode === "fly";
-  }
-
-  private get onGround() {
-    return this.state === "walking" || this.state === "running";
-  }
-
   private get horizontalSpeed() {
-    if (this.controlsMode === "fly") {
+    if (this.isFlyMode) {
       return PlayerPhysics.FLY_HORIZONTAL_SPEED;
     }
 
-    const speedFactor = speedMultipliers[this.state];
+    const speedFactor = speedMultipliers[this.groundState];
     return PlayerPhysics.HORIZONTAL_SPEED * speedFactor;
+  }
+
+  private get onGround() {
+    if (this.isFlyMode) {
+      return false;
+    }
+
+    return this.groundState === "walking" || this.groundState === "running";
+  }
+
+  private get isFlyMode() {
+    return this.mode === "fly";
   }
 
   private get feetWidth() {

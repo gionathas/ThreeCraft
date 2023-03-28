@@ -38,7 +38,7 @@ interface ImportMetaEnv {
   readonly VITE_STARTING_HOTBAR_ITEMS: number;
 
   // Player
-  readonly VITE_PLAYER_DEFAULT_CONTROLS_MODE: string;
+  readonly VITE_PLAYER_DEFAULT_PHYSICS_MODE: string;
   readonly VITE_PLAYER_SHOW_BOUNDING_BOX: string;
 }
 

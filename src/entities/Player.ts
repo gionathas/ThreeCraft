@@ -9,8 +9,6 @@ import World from "../terrain/World";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
-export type PlayerControlsMode = "sim" | "fly";
-
 /**
  * The player is represented by a moving camera in the world.
  *
@@ -99,8 +97,8 @@ export default class Player {
     return this.controls.position.clone();
   }
 
-  getState() {
-    return this.physics.getState();
+  getGroundState() {
+    return this.physics.getGroundState();
   }
 
   getVelocity() {

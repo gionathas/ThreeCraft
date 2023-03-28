@@ -87,7 +87,7 @@ export default class DebugInfo {
     const [px, py, pz] = this.player.getPosition().toArray();
     const [vx, vy, vz] = this.player.getVelocity().toArray();
     const orientation = this.player.getOrientation();
-    const state = this.player.getState();
+    const state = this.player.getGroundState();
 
     const currentChunkId = this.player._currentChunkId;
     const totalChunks = this.terrain._totalChunks;

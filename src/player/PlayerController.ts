@@ -16,9 +16,9 @@ export default class PlayerController {
     return this.inputController.isPressingKey(KeyBindings.SPRINT_KEY);
   }
 
-  hasSwitchedControls() {
+  hasSwitchedPhysicsMode() {
     return this.inputController.hasJustPressedKey(
-      KeyBindings.SWITCH_PLAYER_CONTROLS_MODE
+      KeyBindings.SWITCH_PLAYER_PHYSICS_MODE
     );
   }
 
