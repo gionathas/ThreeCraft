@@ -11,8 +11,6 @@ import Terrain from "./Terrain";
 
 /**
  * The player is represented by a moving camera in the world.
- *
- * //TODO add DebugInfo dependency
  */
 export default class Player {
   static readonly Body = {
