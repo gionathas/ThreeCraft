@@ -18,8 +18,8 @@ export default class PlayerCollider {
   }
 
   private initCollider() {
-    const width = Player.WIDTH;
-    const height = Player.HEIGHT;
+    const width = Player.Body.WIDTH;
+    const height = Player.Body.HEIGHT;
 
     const boxGeom = new THREE.BoxGeometry(width, height, width);
     const mat = new THREE.LineBasicMaterial({ color: "white" });

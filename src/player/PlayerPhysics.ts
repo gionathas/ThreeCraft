@@ -17,8 +17,6 @@ const speedMultipliers: Record<PlayerState, number> = {
   running: 1.8,
 };
 
-const SLIDING_DEAD_ANGLE = 0.1;
-
 /**
  * //TODO improve bottom collision detection or the area when the player
  * is currently hitting the ground
@@ -40,6 +38,7 @@ export default class PlayerPhysics {
   private static readonly JUMP_SPEED = 9.2;
   private static readonly BASE_DAMPING_FACTOR = 10;
   private static readonly SLIDING_FACTOR = 7;
+  private static readonly SLIDING_DEAD_ANGLE = 0.1;
 
   private terrain: Terrain;
 
@@ -101,9 +100,9 @@ export default class PlayerPhysics {
   }
 
   private updateState() {
-    const hittingGround = this.isHittingGround();
+    const isOnGround = this.isHittingGround();
 
-    if (!hittingGround) {
+    if (!isOnGround) {
       this.state = this.velocity.y <= 0 ? "falling" : "jumping";
     } else {
       const hasJumped = this.playerController.hasJumped();
@@ -123,12 +122,12 @@ export default class PlayerPhysics {
   }
 
   private updateVerticalVelocity(dt: number) {
-    const { controlsMode, state, prevState } = this;
+    const { controlsMode } = this;
 
     switch (controlsMode) {
       case "sim":
         // jump detection
-        if (state === "jumping" && prevState !== "jumping") {
+        if (this.state === "jumping" && this.prevState !== "jumping") {
           this.velocity.y += PlayerPhysics.JUMP_SPEED * dt;
         }
         break;
@@ -163,7 +162,7 @@ export default class PlayerPhysics {
     } else {
       // reset the damping factor while on ground and keep the current one
       // while in the air
-      if (this.hitGround) {
+      if (this.onGround) {
         this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
       }
     }
@@ -187,16 +186,18 @@ export default class PlayerPhysics {
 
     const isTopColliding = this.isTopColliding();
 
-    // if we were falling and we have hit the ground
-    if (this.hitGround && this.prevState === "falling") {
+    if (this.onGround) {
       // stop the player from keeping going down
       this.velocity.y = 0;
 
-      const feetY = playerControls.getFeetHeight();
+      // hit ground after falling
+      if (this.prevState === "falling") {
+        const feetY = playerControls.getFeetHeight();
 
-      // move slightly below the surface to keep the collision with the ground
-      const groundY = Math.floor(feetY) + Block.SIZE - 0.01;
-      this.position.y = PlayerControls.getEyeHeightFromGround(groundY);
+        // move slightly below the surface to keep the collision with the ground
+        const groundY = Math.floor(feetY) + Block.SIZE - 0.01;
+        this.position.y = PlayerControls.getEyeHeightFromGround(groundY);
+      }
     }
 
     if (isTopColliding) {
@@ -211,17 +212,35 @@ export default class PlayerPhysics {
   }
 
   private isHittingGround() {
-    const { position, playerControls } = this;
+    const { playerControls, position, feetWidth, width } = this;
 
     const feetY = playerControls.getFeetHeight();
 
-    const isBlockBeneathSolid = this.terrain.isSolidBlock({
-      x: position.x,
-      y: feetY,
-      z: position.z,
-    });
+    // slightly offset to distinguish from left or right collisions
+    const left = position.x + feetWidth / 2;
+    const right = position.x - feetWidth / 2;
+    const xInc = left - right;
 
-    return isBlockBeneathSolid;
+    // slightly offset to distinguish from front or back collisions
+    const front = position.z + feetWidth / 2;
+    const back = position.z - feetWidth / 2;
+    const zInc = front - back;
+
+    for (let x = right; x <= left; x += xInc) {
+      for (let z = back; z <= front; z += zInc) {
+        const isColliding = this.terrain.isSolidBlock({
+          x,
+          y: feetY,
+          z,
+        });
+
+        if (isColliding) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   private isTopColliding() {
@@ -277,6 +296,10 @@ export default class PlayerPhysics {
 
     const top = playerControls.getHeadHeight();
     const bottom = playerControls.getFeetHeight() + 0.1;
+
+    // push it backward but keep the collision with the block
+    const blockZ = Math.floor(position.z + width / 2);
+    this.position.z = blockZ - width / 2 + 0.01;
 
     // moving forward
     if (this.velocity.z > Physics.MIN_VELOCITY) {
@@ -526,6 +549,10 @@ export default class PlayerPhysics {
     const top = playerControls.getHeadHeight();
     const bottom = playerControls.getFeetHeight() + 0.1;
 
+    // push it forward but keep the collision with the block
+    const blockZ = Math.ceil(position.z - width / 2);
+    this.position.z = blockZ + width / 2 - 0.01;
+
     // moving forward
     if (this.velocity.z > Physics.MIN_VELOCITY) {
       // front right slide
@@ -774,6 +801,10 @@ export default class PlayerPhysics {
     const top = playerControls.getHeadHeight();
     const bottom = playerControls.getFeetHeight() + 0.1;
 
+    // push it back but keep the collision with the block
+    const blockX = Math.ceil(position.x - width / 2);
+    this.position.x = blockX + width / 2 - 0.01;
+
     // moving forward
     if (this.velocity.z > Physics.MIN_VELOCITY) {
       // front right slide
@@ -1009,6 +1040,9 @@ export default class PlayerPhysics {
 
     const top = playerControls.getHeadHeight();
     const bottom = playerControls.getFeetHeight() + 0.1;
+
+    const blockX = Math.floor(position.x + width / 2);
+    this.position.x = blockX - width / 2 + 0.01;
 
     // moving forward
     if (this.velocity.z > Physics.MIN_VELOCITY) {
@@ -1249,12 +1283,12 @@ export default class PlayerPhysics {
     const position = this.position.clone();
 
     // slightly offset to distinguish from left or right collisions
-    const left = position.x + width / 2 - 0.05;
-    const right = position.x - width / 2 + 0.05;
+    const left = position.x + width / 2 - 0.1;
+    const right = position.x - width / 2 + 0.1;
     const xInc = left - right;
 
     // add an offset to avoid fake horizontal collision with the ground
-    const top = playerControls.getHeadHeight();
+    const top = playerControls.getHeadHeight() - 0.1;
     const bottom = playerControls.getFeetHeight() + 0.1;
     const yInc = top - bottom;
 
@@ -1280,12 +1314,12 @@ export default class PlayerPhysics {
     const position = this.position.clone();
 
     // slightly offset to distinguish from front or back collisions
-    const front = position.z + width / 2 - 0.05;
-    const back = position.z - width / 2 + 0.05;
+    const front = position.z + width / 2 - 0.1;
+    const back = position.z - width / 2 + 0.1;
     const zInc = front - back;
 
     // add an offset to avoid fake horizontal collision with the ground
-    const top = playerControls.getHeadHeight();
+    const top = playerControls.getHeadHeight() - 0.1;
     const bottom = playerControls.getFeetHeight() + 0.1;
     const yInc = top - bottom;
 
@@ -1309,12 +1343,12 @@ export default class PlayerPhysics {
   private calculateSlidingVelocity(lookDirAngle: number, dt: number) {
     const hSpeed = PlayerPhysics.HORIZONTAL_SPEED;
     const slidingFactor = PlayerPhysics.SLIDING_FACTOR;
+    const slidingDeadAngle = PlayerPhysics.SLIDING_DEAD_ANGLE;
 
-    // even when the angle is near 90 degree or Math.PI
-    // we still keep the player freezed against the wall
+    // if the player is directly facing the wall, don't slide
     if (
-      Math.abs(lookDirAngle - Math.PI / 2) <= SLIDING_DEAD_ANGLE ||
-      Math.abs(lookDirAngle + Math.PI / 2) <= SLIDING_DEAD_ANGLE
+      Math.abs(lookDirAngle - Math.PI / 2) <= slidingDeadAngle ||
+      Math.abs(lookDirAngle + Math.PI / 2) <= slidingDeadAngle
     ) {
       return 0;
     }
@@ -1361,7 +1395,7 @@ export default class PlayerPhysics {
     return this.controlsMode === "fly";
   }
 
-  private get hitGround() {
+  private get onGround() {
     return this.state === "walking" || this.state === "running";
   }
 
@@ -1374,11 +1408,11 @@ export default class PlayerPhysics {
     return PlayerPhysics.HORIZONTAL_SPEED * speedFactor;
   }
 
-  private get width() {
-    return Player.WIDTH;
+  private get feetWidth() {
+    return Player.Body.FEET_WIDTH;
   }
 
-  private get height() {
-    return Player.HEIGHT;
+  private get width() {
+    return Player.Body.WIDTH;
   }
 }

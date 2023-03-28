@@ -17,8 +17,11 @@ export type PlayerControlsMode = "sim" | "fly";
  * //TODO add DebugInfo dependency
  */
 export default class Player {
-  static readonly WIDTH = 0.4;
-  static readonly HEIGHT = 1.8;
+  static readonly Body = {
+    WIDTH: 0.4,
+    HEIGHT: 1.8,
+    FEET_WIDTH: 0.25,
+  };
 
   private terrain: Terrain;
 

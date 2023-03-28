@@ -75,12 +75,16 @@ export default class PlayerControls extends PointerLockControls {
 
   getFeetHeight() {
     const headY = this.getHeadHeight();
-    return headY - Player.HEIGHT;
+    const height = Player.Body.HEIGHT;
+
+    return headY - height;
   }
 
   getCenterOfMassHeight() {
     const headY = this.getHeadHeight();
-    return headY - Player.HEIGHT / 2;
+    const height = Player.Body.HEIGHT;
+
+    return headY - height / 2;
   }
 
   getHeadHeight() {
@@ -93,11 +97,16 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   static getEyeHeightFromGround(groundY: number) {
-    return groundY + Player.HEIGHT - PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
+    const height = Player.Body.HEIGHT;
+    const eyeOffset = PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
+
+    return groundY + height - eyeOffset;
   }
 
   static getEyeHeightFromHead(headY: number) {
-    return headY - PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
+    const eyeOffset = PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
+
+    return headY - eyeOffset;
   }
 
   /**
