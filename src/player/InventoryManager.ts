@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+import { EventEmitter } from "events";
 import * as THREE from "three";
 import GameDataManager from "../io/GameDataManager";
 import { BlockType } from "../terrain/block";

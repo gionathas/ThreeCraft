@@ -11,14 +11,15 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/three": "^0.148.0",
+    "@types/events": "^3.0.0",
+    "@types/stats": "^0.16.30",
+    "@types/three": "^0.148.1",
     "alea": "^1.0.1",
     "lil-gui": "^0.17.0",
     "typescript": "^4.9.3",
     "vite": "^4.0.0"
   },
   "dependencies": {
-    "@types/stats": "^0.16.30",
     "dexie": "^3.2.3",
     "events": "^3.3.0",
     "perlin-noise": "^0.0.1",
