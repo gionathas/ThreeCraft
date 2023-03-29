@@ -11,6 +11,10 @@ This is a Minecraft clone built using Three.js and TypeScript. It is a 3D sandbo
 - Trees and foliage generation
 - Caves and Ores generation
 
+## Known Issues
+
+- Sometimes opening and closing the inventory too quickly can cause the camera to behave weirdly.
+
 ## Technologies Used
 
 - Three.js: a lightweight 3D graphics library for creating WebGL applications.
