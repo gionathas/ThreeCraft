@@ -1,4 +1,4 @@
-import { PlayerControlsMode } from "../entities/Player";
+import { PhysicsMode } from "../player/PlayerPhysics";
 
 export default class EnvVars {
   /**
@@ -10,8 +10,8 @@ export default class EnvVars {
   );
 
   /** Player */
-  static readonly PLAYER_DEFAULT_CONTROLS_MODE = import.meta.env
-    .VITE_PLAYER_DEFAULT_CONTROLS_MODE as PlayerControlsMode;
+  static readonly PLAYER_DEFAULT_PHYSICS_MODE = import.meta.env
+    .VITE_PLAYER_DEFAULT_PHYSICS_MODE as PhysicsMode;
   static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
     import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
   );
