@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";

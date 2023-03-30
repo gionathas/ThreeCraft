@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector3 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Engine from "../core/Engine";
 import GameCamera from "../core/GameCamera";
@@ -66,7 +66,7 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   getLookDirection() {
-    return this.camera.getWorldDirection(new THREE.Vector3());
+    return this.camera.getWorldDirection(new Vector3());
   }
 
   lookAt(direction: THREE.Vector3) {

@@ -1,6 +1,6 @@
-import * as THREE from "three";
+import { PerspectiveCamera } from "three";
 
-export default class GameCamera extends THREE.PerspectiveCamera {
+export default class GameCamera extends PerspectiveCamera {
   public static readonly DEFAULT_FOV = 75;
   private static readonly Z_NEAR = 0.01;
   private static readonly Z_FAR = 1000;

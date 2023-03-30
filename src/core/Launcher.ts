@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Quaternion, Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
 import InventoryManager from "../player/InventoryManager";
@@ -13,8 +13,8 @@ const newGameData: GameData = {
     seed: EnvVars.CUSTOM_SEED ? EnvVars.CUSTOM_SEED : randomString(10),
   },
   player: {
-    spawnPosition: new THREE.Vector3(0, 0, 0),
-    quaternion: new THREE.Quaternion(0, 0, 0, 0),
+    spawnPosition: new Vector3(0, 0, 0),
+    quaternion: new Quaternion(0, 0, 0, 0),
     inventory: {
       hotbar: EnvVars.STARTING_HOTBAR_ITEMS.map((item) => {
         return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
@@ -158,10 +158,10 @@ export default class Launcher {
       },
       player: {
         spawnPosition: playerData?.position
-          ? new THREE.Vector3().fromArray(playerData.position)
+          ? new Vector3().fromArray(playerData.position)
           : newGameData.player.spawnPosition,
         quaternion: playerData?.quaternion
-          ? new THREE.Quaternion().fromArray(playerData?.quaternion)
+          ? new Quaternion().fromArray(playerData?.quaternion)
           : newGameData.player.quaternion,
         inventory: {
           hotbar: inventory?.hotbar ?? newGameData.player.inventory.hotbar,

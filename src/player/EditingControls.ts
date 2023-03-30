@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
 import GameCamera from "../core/GameCamera";
 import GameScene from "../core/GameScene";
@@ -139,7 +139,7 @@ export default class EditingControls {
       });
 
       const blockBoundingBox = Block.getBlockBoundingBoxFromPosition(
-        new THREE.Vector3(x, y, z)
+        new Vector3(x, y, z)
       );
 
       const willBlockCollide =
@@ -163,8 +163,8 @@ export default class EditingControls {
     }
 
     if (targetBlock) {
-      const blockNormal = new THREE.Vector3().fromArray(targetBlock.normal);
-      const blockPosition = new THREE.Vector3().fromArray(targetBlock.position);
+      const blockNormal = new Vector3().fromArray(targetBlock.normal);
+      const blockPosition = new Vector3().fromArray(targetBlock.position);
 
       this.blockMarker = this.blockMarker ?? new BlockMarker();
       this.blockMarker.adaptToBlock(blockPosition, blockNormal);
@@ -190,12 +190,12 @@ export default class EditingControls {
     const x = (cenX / window.innerWidth) * 2 - 1;
     const y = -(cenY / window.innerHeight) * 2 + 1;
 
-    const rayStart = new THREE.Vector3();
-    const rayEnd = new THREE.Vector3();
+    const rayStart = new Vector3();
+    const rayEnd = new Vector3();
     rayStart.setFromMatrixPosition(playerCamera.matrixWorld);
     rayEnd.set(x, y, 1).unproject(playerCamera);
 
-    const rayLength = new THREE.Vector3();
+    const rayLength = new Vector3();
     rayLength.subVectors(rayEnd, rayStart).normalize();
     rayLength.multiplyScalar(EditingControls.EDITING_DISTANCE);
     rayEnd.copy(rayStart).add(rayLength);

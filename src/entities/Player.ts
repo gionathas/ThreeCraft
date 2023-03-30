@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import EditingControls from "../player/EditingControls";
 import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerCollider from "../player/PlayerCollider";

@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -66,8 +66,8 @@ export default class PlayerPhysics {
     this.groundState = "falling";
     this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
 
-    this.moveDirection = new THREE.Vector3();
-    this.velocity = new THREE.Vector3();
+    this.moveDirection = new Vector3();
+    this.velocity = new Vector3();
   }
 
   update(dt: number) {

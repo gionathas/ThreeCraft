@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";

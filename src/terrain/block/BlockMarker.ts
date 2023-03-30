@@ -1,7 +1,12 @@
-import * as THREE from "three";
+import {
+  EdgesGeometry,
+  LineBasicMaterial,
+  LineSegments,
+  PlaneGeometry,
+} from "three";
 import { Block } from ".";
 
-export default class BlockMarker extends THREE.LineSegments {
+export default class BlockMarker extends LineSegments {
   private edgesMaterial!: THREE.LineBasicMaterial;
 
   constructor() {
@@ -11,7 +16,7 @@ export default class BlockMarker extends THREE.LineSegments {
   }
 
   private initMaterials() {
-    this.edgesMaterial = new THREE.LineBasicMaterial({
+    this.edgesMaterial = new LineBasicMaterial({
       color: 0x00000,
       depthWrite: true,
     });
@@ -19,8 +24,8 @@ export default class BlockMarker extends THREE.LineSegments {
 
   private initGeometries() {
     const { edgesMaterial } = this;
-    const markerPlaneGeom = new THREE.PlaneGeometry(Block.SIZE, Block.SIZE);
-    const markerEdgesGeom = new THREE.EdgesGeometry(markerPlaneGeom);
+    const markerPlaneGeom = new PlaneGeometry(Block.SIZE, Block.SIZE);
+    const markerEdgesGeom = new EdgesGeometry(markerPlaneGeom);
     this.geometry = markerEdgesGeom;
     this.material = edgesMaterial;
   }

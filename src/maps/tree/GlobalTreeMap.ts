@@ -1,5 +1,5 @@
 import alea from "alea";
-import { lerp } from "three/src/math/MathUtils";
+import { MathUtils } from "three";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
@@ -159,13 +159,13 @@ export default class GlobalTreeMap extends Global2DMap<TreeMap> {
       const max = PVMap.NoiseRange.Plateau.min;
 
       const t = (pv - min) / (max - min);
-      return lerp(noTreesDensity, maxTreeDensity, t);
+      return MathUtils.lerp(noTreesDensity, maxTreeDensity, t);
     } else {
       const min = PVMap.NoiseRange.Plateau.max;
       const max = PVMap.NoiseRange.High.max;
 
       const invT = (max - pv) / (max - min);
-      return lerp(noTreesDensity, maxTreeDensity, invT);
+      return MathUtils.lerp(noTreesDensity, maxTreeDensity, invT);
     }
   }
 
