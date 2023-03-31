@@ -116,7 +116,7 @@ export default class GameLoop {
     const { spawnPosition: spawn, quaternion, inventory } = gameData.player;
 
     const player = new Player(terrain, inventory);
-    player.setSpawnPosition(spawn.x, spawn.z);
+    player.setSpawnPosition(spawn.x, spawn.y, spawn.z);
     player.setQuaternion(quaternion);
 
     return player;

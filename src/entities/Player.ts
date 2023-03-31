@@ -71,12 +71,14 @@ export default class Player {
     this.controls.onUnlock(cb);
   }
 
-  setSpawnPosition(x: number, z: number) {
+  setSpawnPosition(x: number, y: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
 
-    // this will simulate the camera placed on the player's eyes
-    // and the player's feet being 1 block above the surface
-    const y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 1;
+    if (y <= surfaceHeight) {
+      // this will simulate the camera placed on the player's eyes
+      // and the player's feet being 1 block above the surface
+      y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 1;
+    }
 
     this.controls.position.set(x, y, z);
   }
