@@ -7,7 +7,7 @@ import {
 } from "three";
 import EnvVars from "../config/EnvVars";
 import GameScene from "../core/GameScene";
-import Player from "../entities/Player";
+import PlayerConstants from "./PlayerConstants";
 import PlayerControls from "./PlayerControls";
 
 export default class PlayerCollider {
@@ -24,8 +24,8 @@ export default class PlayerCollider {
   }
 
   private initCollider() {
-    const width = Player.Body.WIDTH;
-    const height = Player.Body.HEIGHT;
+    const width = PlayerConstants.WIDTH;
+    const height = PlayerConstants.HEIGHT;
 
     const boxGeom = new BoxGeometry(width, height, width);
     const mat = new LineBasicMaterial({ color: "white" });

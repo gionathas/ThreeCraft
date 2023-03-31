@@ -10,7 +10,7 @@ import {
   PVMap,
   TerrainMap,
 } from "./terrain";
-import { GlobalTreeMap } from "./tree";
+import GlobalTreeMap from "./tree/GlobalTreeMap";
 
 export default class GlobalMapManager extends MapManager {
   private static instance: GlobalMapManager;

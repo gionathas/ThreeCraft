@@ -1,23 +1,11 @@
 import EnvVars from "../../config/EnvVars";
-import { Chunk } from "../../terrain/chunk";
+import Chunk from "../../terrain/chunk/Chunk";
 import Tree from "../../terrain/Tree";
 import { isInRange, probability } from "../../utils/helpers";
 import { Map2D } from "../AbstractMap";
 import Local2DMap from "../Local2DMap";
-import TreeMapValueEncoder from "./TreeMapValueEncoder";
+import TreeMapValueEncoder, { TreeMapType } from "./TreeMapValueEncoder";
 
-export enum TreeMapType {
-  EMPTY = 0,
-  TRUNK = 1,
-  LEAF = 2,
-}
-
-export type TreeMapValue = {
-  type: TreeMapType;
-  trunkHeight: number;
-  trunkSurfaceY: number;
-  trunkDistance: number;
-};
 export default class TreeMap extends Local2DMap implements Map2D {
   /**
    * The size of the tree map is the size of the chunk + the radius of the tree

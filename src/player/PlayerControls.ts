@@ -2,7 +2,7 @@ import { Vector3 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Engine from "../core/Engine";
 import GameCamera from "../core/GameCamera";
-import Player from "../entities/Player";
+import PlayerConstants from "./PlayerConstants";
 import PlayerController from "./PlayerController";
 
 export default class PlayerControls extends PointerLockControls {
@@ -75,14 +75,14 @@ export default class PlayerControls extends PointerLockControls {
 
   getFeetHeight() {
     const headY = this.getHeadHeight();
-    const height = Player.Body.HEIGHT;
+    const height = PlayerConstants.HEIGHT;
 
     return headY - height;
   }
 
   getCenterOfMassHeight() {
     const headY = this.getHeadHeight();
-    const height = Player.Body.HEIGHT;
+    const height = PlayerConstants.HEIGHT;
 
     return headY - height / 2;
   }
@@ -97,7 +97,7 @@ export default class PlayerControls extends PointerLockControls {
   }
 
   static getEyeHeightFromGround(groundY: number) {
-    const height = Player.Body.HEIGHT;
+    const height = PlayerConstants.HEIGHT;
     const eyeOffset = PlayerControls.CAMERA_EYE_OFFSET_FROM_HEAD;
 
     return groundY + height - eyeOffset;

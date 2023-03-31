@@ -1,16 +1,14 @@
 import { Pool, spawn, Transfer } from "threads";
-import * as THREE from "three";
 import GameDataManager from "../../io/GameDataManager";
 import GlobalMapManager from "../../maps/GlobalMapManager";
 import { TerrainMap } from "../../maps/terrain";
-import { GlobalTreeMap } from "../../maps/tree";
+import GlobalTreeMap from "../../maps/tree/GlobalTreeMap";
 import {
   BufferGeometryData,
   Coordinate,
   isEmptyGeometry,
 } from "../../utils/helpers";
 import { Block } from "../block";
-import World from "../World";
 import Chunk, { ChunkID, ChunkModel } from "./Chunk";
 import { ChunkGeneratorWorkerType } from "./ChunkGeneratorWorker";
 import ChunkGeneratorWorker from "./ChunkGeneratorWorker?worker";
@@ -52,7 +50,7 @@ export default class ChunkManager implements ChunkModel {
     position: Coordinate,
     onComplete: (chunkMesh: THREE.Mesh[]) => void
   ) {
-    const chunkId = World.getChunkIdFromPosition(position);
+    const chunkId = Chunk.getChunkIdFromPosition(position);
 
     const isChunkLoaded = this.loadedChunks.has(chunkId);
     const isChunkBeingProcessed = this.processingChunks.has(chunkId);
@@ -101,7 +99,9 @@ export default class ChunkManager implements ChunkModel {
         const blocks = new Uint8Array(...newChunk.blocksBuffer.transferables);
         this.loadChunk(chunkId, blocks);
 
+        //@ts-ignore
         solidGeometry = newChunk.solidGeometry;
+        //@ts-ignore
         transparentGeometry = newChunk.transparentGeometry;
       }
 
@@ -152,7 +152,7 @@ export default class ChunkManager implements ChunkModel {
       const oy = y + blockOffset[1];
       const oz = z + blockOffset[2];
 
-      const chunkId = World.getChunkIdFromPosition({ x: ox, y: oy, z: oz });
+      const chunkId = Chunk.getChunkIdFromPosition({ x: ox, y: oy, z: oz });
 
       if (!visitedChunks[chunkId]) {
         // mark the current chunk as visited
@@ -282,7 +282,7 @@ export default class ChunkManager implements ChunkModel {
   }
 
   getBlock(blockCoord: Coordinate) {
-    const chunkId = World.getChunkIdFromPosition(blockCoord);
+    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
     const chunk = this.getChunk(chunkId);
 
     if (!chunk) {

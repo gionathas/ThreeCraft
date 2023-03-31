@@ -1,6 +1,6 @@
 import { BufferAttribute, BufferGeometry, Mesh } from "three";
 import { BufferGeometryData } from "../../utils/helpers";
-import { BlockMaterial } from "../block";
+import BlockMaterial from "../block/BlockMaterial";
 import { ChunkID } from "./Chunk";
 
 // WARN this value seems to affect the memory usage, keep it as low as possible

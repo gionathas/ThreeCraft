@@ -4,7 +4,7 @@ import {
   LineSegments,
   PlaneGeometry,
 } from "three";
-import { Block } from ".";
+import Block from "./Block";
 
 export default class BlockMarker extends LineSegments {
   private edgesMaterial!: THREE.LineBasicMaterial;
