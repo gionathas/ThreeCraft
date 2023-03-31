@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "build:debug": "tsc && vite build --debug",
     "build:force": "tsc && vite build --force",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize": "tsc && vite optimize"
   },
   "devDependencies": {
     "@types/events": "^3.0.0",
@@ -17,7 +18,8 @@
     "alea": "^1.0.1",
     "lil-gui": "^0.17.0",
     "typescript": "^4.9.3",
-    "vite": "^4.0.0"
+    "vite": "^4.2.1",
+    "vite-plugin-circular-dependency": "^0.2.1"
   },
   "dependencies": {
     "dexie": "^3.2.3",
