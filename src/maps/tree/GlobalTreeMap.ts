@@ -31,6 +31,11 @@ export default class GlobalTreeMap extends Global2DMap<TreeMap> {
     this.chunksTreeMapDataCache = new Map();
   }
 
+  hasTreeAt(x: number, z: number): boolean {
+    const treeType = this.getTreeMapTypeAt(x, z);
+    return treeType === TreeMapType.TRUNK || treeType === TreeMapType.LEAF;
+  }
+
   /**
    * //WARN This method create a new Array each time it is called
    */

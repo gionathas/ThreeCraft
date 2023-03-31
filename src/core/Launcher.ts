@@ -1,30 +1,13 @@
 import { Quaternion, Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
 import GameDataManager from "../io/GameDataManager";
-import InventoryManager from "../player/InventoryManager";
+import PlayerConstants from "../player/PlayerConstants";
+import World from "../terrain/World";
 import MainMenu from "../ui/MainMenu";
-import { randomString } from "../utils/helpers";
 import GameLoop, { GameData } from "./GameLoop";
 import GameState from "./GameState";
 import SettingsManager, { Settings } from "./SettingsManager";
 
-const newGameData: GameData = {
-  world: {
-    seed: EnvVars.CUSTOM_SEED ? EnvVars.CUSTOM_SEED : randomString(10),
-  },
-  player: {
-    spawnPosition: new Vector3(0, 0, 0),
-    quaternion: new Quaternion(0, 0, 0, 0),
-    inventory: {
-      hotbar: EnvVars.STARTING_HOTBAR_ITEMS.map((item) => {
-        return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
-      }),
-      inventory: EnvVars.STARTING_INVENTORY_ITEMS.map((item) => {
-        return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
-      }),
-    },
-  },
-};
 export default class Launcher {
   private gameState: GameState;
   private gameLoop: GameLoop;
@@ -64,7 +47,7 @@ export default class Launcher {
     });
 
     this.mainMenu.onPlayWorld(async () => {
-      await this.loadGame();
+      await this.startGame();
       this.mainMenu.hide();
     });
 
@@ -104,29 +87,19 @@ export default class Launcher {
 
   start() {
     if (EnvVars.JUMP_START) {
-      this.loadGame();
+      this.startGame();
     } else {
       this.mainMenu.show();
     }
   }
 
   private async newGame() {
-    const showTerrainGeneration = EnvVars.SHOW_INITIAL_TERRAIN_GENERATION;
-
-    // clear previous data
+    // clear previous saved data
     await this.dataManager.clearGameData();
-
-    // load saved settings
-    const settings = await this.loadSettings();
-
-    if (showTerrainGeneration) {
-      this.gameLoop.start(newGameData, settings, false);
-    } else {
-      await this.gameLoop.start(newGameData, settings, true);
-    }
+    await this.startGame();
   }
 
-  private async loadGame() {
+  private async startGame() {
     const showTerrainGeneration = EnvVars.SHOW_INITIAL_TERRAIN_GENERATION;
 
     // load saved data
@@ -147,28 +120,39 @@ export default class Launcher {
     return this.settingsManager.getSettings();
   }
 
+  // TODO: this method should be moved into another class
   private async loadGameData(): Promise<GameData> {
     const worldData = await this.dataManager.getSavedWorldData();
     const playerData = await this.dataManager.getSavedPlayerData();
-    const inventory = await this.dataManager.getSavedInventory();
+    const inventoryData = await this.dataManager.getSavedInventory();
 
-    return {
+    const seed = worldData?.seed
+      ? worldData.seed
+      : EnvVars.CUSTOM_SEED || World.generateSeed();
+
+    const spawnPosition = playerData?.position
+      ? new Vector3().fromArray(playerData.position)
+      : PlayerConstants.DEFAULT_SPAWN_POSITION;
+
+    const quaternion = playerData?.quaternion
+      ? new Quaternion().fromArray(playerData.quaternion)
+      : PlayerConstants.DEFAULT_LOOK_ROTATION;
+
+    const inventory: GameData["player"]["inventory"] = inventoryData
+      ? { hotbar: inventoryData.hotbar, inventory: inventoryData.inventory }
+      : PlayerConstants.DEFAULT_INVENTORY_STATE;
+
+    const gameData: GameData = {
       world: {
-        seed: worldData?.seed ?? newGameData.world.seed,
+        seed,
       },
       player: {
-        spawnPosition: playerData?.position
-          ? new Vector3().fromArray(playerData.position)
-          : newGameData.player.spawnPosition,
-        quaternion: playerData?.quaternion
-          ? new Quaternion().fromArray(playerData?.quaternion)
-          : newGameData.player.quaternion,
-        inventory: {
-          hotbar: inventory?.hotbar ?? newGameData.player.inventory.hotbar,
-          inventory:
-            inventory?.inventory ?? newGameData.player.inventory.inventory,
-        },
+        spawnPosition,
+        quaternion,
+        inventory,
       },
     };
+
+    return gameData;
   }
 }

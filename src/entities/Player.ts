@@ -74,6 +74,12 @@ export default class Player {
   setSpawnPosition(x: number, y: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
 
+    // move rightward until we find a free spot
+    while (this.terrain.hasTreeAt(x, z)) {
+      x += 1;
+    }
+
+    // adjust the player's y position to be above the surface
     if (y <= surfaceHeight) {
       // this will simulate the camera placed on the player's eyes
       // and the player's feet being 1 block above the surface

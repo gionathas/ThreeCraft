@@ -35,4 +35,8 @@ export default class World {
   static readonly SAND_LEVEL = World.SEA_LEVEL + 6;
 
   static readonly BEDROCK_LEVEL = World.MIN_WORLD_HEIGHT / 6;
+
+  static generateSeed() {
+    return Math.random().toString(36).substring(2, 15);
+  }
 }

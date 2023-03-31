@@ -13,7 +13,7 @@ import {
 import GlobalTreeMap from "./tree/GlobalTreeMap";
 
 export default class GlobalMapManager extends MapManager {
-  private static instance: GlobalMapManager;
+  private static instance: GlobalMapManager | null;
 
   // global maps
   private continentalMap: Global2DMap<ContinentalMap> | null;
@@ -133,6 +133,8 @@ export default class GlobalMapManager extends MapManager {
     this.heightMap?.dispose();
     this.densityMap?.dispose();
     this.globalTreeMap?.dispose();
+
+    GlobalMapManager.instance = null;
   }
 
   _logTotalRegionCount() {

@@ -1,6 +1,7 @@
 import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
+import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
 import { BlockType } from "../terrain/block";
 import { Chunk } from "../terrain/chunk";
 import ChunkManager from "../terrain/chunk/ChunkManager";
@@ -17,6 +18,7 @@ export default class Terrain {
 
   private globalMapManager: GlobalMapManager;
   private terrainMap: TerrainMap;
+  private treeMap: GlobalTreeMap;
 
   constructor(seed: string, renderDistanceInChunks: number) {
     this.scene = GameScene.getInstance();
@@ -24,6 +26,7 @@ export default class Terrain {
 
     this.globalMapManager = GlobalMapManager.getInstance(seed);
     this.terrainMap = this.globalMapManager.getTerrainMap();
+    this.treeMap = this.globalMapManager.getTreeMap();
 
     this.chunksManager = new ChunkManager(this.globalMapManager);
     this.terrainLoader = new TerrainLoader(
@@ -83,7 +86,6 @@ export default class Terrain {
     this.chunksManager.dispose();
 
     // dispose all the global maps
-    console.debug("Unloading map data...");
     this.globalMapManager.dispose();
   }
 
@@ -103,6 +105,10 @@ export default class Terrain {
 
   getSurfaceHeight(x: number, z: number) {
     return this.terrainMap.getSurfaceHeightAt(x, z);
+  }
+
+  hasTreeAt(x: number, z: number) {
+    return this.treeMap.hasTreeAt(x, z);
   }
 
   getSeed() {

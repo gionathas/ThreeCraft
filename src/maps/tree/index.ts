@@ -1,2 +1,3 @@
 export { default as TreeMap } from "./TreeMap";
-export type { TreeMapType, TreeMapValue } from "./TreeMapValueEncoder";
+export { TreeMapType } from "./TreeMapValueEncoder";
+export type { TreeMapValue } from "./TreeMapValueEncoder";
