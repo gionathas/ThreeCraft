@@ -112,7 +112,6 @@ export default class ChunkMeshManager {
   }
 
   dispose() {
-    console.debug("Disposing chunk meshes...");
     this.solidMesh.forEach((mesh) => {
       mesh.geometry.dispose();
       // @ts-ignore

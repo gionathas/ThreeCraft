@@ -293,8 +293,6 @@ export default class ChunkManager implements ChunkModel {
   }
 
   dispose() {
-    console.debug("Unloading chunks...");
-
     // unload all the currently loaded chunks
     for (const chunk of this.loadedChunks.values()) {
       this.unloadChunk(chunk.getId());
@@ -304,7 +302,6 @@ export default class ChunkManager implements ChunkModel {
     this.processingChunks.clear();
     this.chunkMeshManager.dispose();
 
-    console.debug("Terminating workers...");
     this.generatorsPool.terminate(true);
   }
 
