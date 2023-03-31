@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { MathUtils } from "three";
 import EnvVars from "../../config/EnvVars";
 import { Coordinate } from "../../utils/helpers";
 import { BlockData, BlockRegistry, BlockType } from "../block";
@@ -86,9 +86,9 @@ export default class Chunk implements ChunkModel {
   }
 
   private getBlockLocalCoordinates(x: number, y: number, z: number) {
-    const blockX = THREE.MathUtils.euclideanModulo(x, Chunk.WIDTH) | 0;
-    const blockY = THREE.MathUtils.euclideanModulo(y, Chunk.HEIGHT) | 0;
-    const blockZ = THREE.MathUtils.euclideanModulo(z, Chunk.WIDTH) | 0;
+    const blockX = MathUtils.euclideanModulo(x, Chunk.WIDTH) | 0;
+    const blockY = MathUtils.euclideanModulo(y, Chunk.HEIGHT) | 0;
+    const blockZ = MathUtils.euclideanModulo(z, Chunk.WIDTH) | 0;
 
     return [blockX, blockY, blockZ];
   }
