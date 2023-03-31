@@ -1,5 +1,5 @@
-import EventEmitter from "events";
-import * as THREE from "three";
+import { EventEmitter } from "events";
+import { MathUtils } from "three";
 import GameDataManager from "../io/GameDataManager";
 import { BlockType } from "../terrain/block";
 
@@ -330,7 +330,7 @@ export default class InventoryManager {
   }
 
   setSelectedIndex(index: number) {
-    this.selectedHotbarIndex = THREE.MathUtils.euclideanModulo(
+    this.selectedHotbarIndex = MathUtils.euclideanModulo(
       index,
       InventoryManager.HOTBAR_SLOTS
     );

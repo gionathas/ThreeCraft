@@ -1,6 +1,6 @@
-import * as THREE from "three";
+import { AmbientLight, Color, DirectionalLight, Scene } from "three";
 
-export default class GameScene extends THREE.Scene {
+export default class GameScene extends Scene {
   private static instance: GameScene | null;
 
   private static readonly SkyColor: string = "#87CEEB";
@@ -37,12 +37,12 @@ export default class GameScene extends THREE.Scene {
    * //TODO implement a better light system (smooth lighting)
    */
   private initLights() {
-    const sunLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    const sunLight = new DirectionalLight(0xffffff, 0.2);
     sunLight.position.set(100, 100, 0);
 
     // const helper = new THREE.DirectionalLightHelper(sunLight, 5);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new AmbientLight(0xffffff, 0.8);
 
     // add lights
     this.add(sunLight, ambientLight);
@@ -53,7 +53,7 @@ export default class GameScene extends THREE.Scene {
 
   private initBackground() {
     // set sky color
-    this.background = new THREE.Color(GameScene.SkyColor);
+    this.background = new Color(GameScene.SkyColor);
   }
 
   dispose() {

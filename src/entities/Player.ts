@@ -1,11 +1,10 @@
-import * as THREE from "three";
 import EditingControls from "../player/EditingControls";
 import InventoryManager, { InventoryState } from "../player/InventoryManager";
 import PlayerCollider from "../player/PlayerCollider";
 import PlayerController from "../player/PlayerController";
 import PlayerControls from "../player/PlayerControls";
 import PlayerPhysics from "../player/PlayerPhysics";
-import World from "../terrain/World";
+import { Chunk } from "../terrain/chunk";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
@@ -13,12 +12,6 @@ import Terrain from "./Terrain";
  * The player is represented by a moving camera in the world.
  */
 export default class Player {
-  static readonly Body = {
-    WIDTH: 0.4,
-    HEIGHT: 1.8,
-    FEET_WIDTH: 0.25,
-  };
-
   private terrain: Terrain;
 
   private controller: PlayerController;
@@ -143,7 +136,7 @@ export default class Player {
 
   get _currentChunkId() {
     const currentPosition = this.getPosition();
-    const chunkId = World.getChunkIdFromPosition(currentPosition);
+    const chunkId = Chunk.getChunkIdFromPosition(currentPosition);
 
     return chunkId;
   }

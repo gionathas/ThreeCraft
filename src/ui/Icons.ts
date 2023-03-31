@@ -1,9 +1,10 @@
+import iconsImageUrl from "../assets/icons.png?url";
 import { BlockRegistry, BlockType } from "../terrain/block";
 
 export default class Icons {
   private static readonly ICON_SIZE = 32;
 
-  private static readonly URL_PATH = "src/assets/icons.png";
+  private static readonly URL_PATH = iconsImageUrl;
 
   static getBlockIconUrlPath(block: BlockType) {
     return Icons.URL_PATH;

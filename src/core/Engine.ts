@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { WebGLRenderer } from "three";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
 
@@ -26,7 +26,7 @@ export default class Engine {
   }
 
   private initRenderer() {
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 

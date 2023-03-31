@@ -1,7 +1,13 @@
-import * as THREE from "three";
+import {
+  AxesHelper,
+  BoxGeometry,
+  EdgesGeometry,
+  LineBasicMaterial,
+  LineSegments,
+} from "three";
 import EnvVars from "../config/EnvVars";
 import GameScene from "../core/GameScene";
-import Player from "../entities/Player";
+import PlayerConstants from "./PlayerConstants";
 import PlayerControls from "./PlayerControls";
 
 export default class PlayerCollider {
@@ -18,15 +24,15 @@ export default class PlayerCollider {
   }
 
   private initCollider() {
-    const width = Player.Body.WIDTH;
-    const height = Player.Body.HEIGHT;
+    const width = PlayerConstants.WIDTH;
+    const height = PlayerConstants.HEIGHT;
 
-    const boxGeom = new THREE.BoxGeometry(width, height, width);
-    const mat = new THREE.LineBasicMaterial({ color: "white" });
-    const edges = new THREE.EdgesGeometry(boxGeom);
-    const axesHelpers = new THREE.AxesHelper();
+    const boxGeom = new BoxGeometry(width, height, width);
+    const mat = new LineBasicMaterial({ color: "white" });
+    const edges = new EdgesGeometry(boxGeom);
+    const axesHelpers = new AxesHelper();
 
-    const collider = new THREE.LineSegments(edges, mat);
+    const collider = new LineSegments(edges, mat);
     collider.add(axesHelpers);
 
     // add the collider to the scene and update its visibility

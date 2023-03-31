@@ -1,4 +1,15 @@
-import { TreeMapType, TreeMapValue } from "./TreeMap";
+export enum TreeMapType {
+  EMPTY = 0,
+  TRUNK = 1,
+  LEAF = 2,
+}
+
+export type TreeMapValue = {
+  type: TreeMapType;
+  trunkHeight: number;
+  trunkSurfaceY: number;
+  trunkDistance: number;
+};
 
 /**
  * This class is used to encode and decode a tree map value

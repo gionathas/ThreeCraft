@@ -1,12 +1,15 @@
 import alea from "alea";
-import { lerp } from "three/src/math/MathUtils";
+import { MathUtils } from "three";
 import { Chunk, ChunkID } from "../../terrain/chunk";
 import Tree from "../../terrain/Tree";
 import World from "../../terrain/World";
 import Global2DMap from "../Global2DMap";
 import { ContinentalMap, ErosionMap, PVMap, TerrainMap } from "../terrain";
-import TreeMap, { TreeMapType, TreeMapValue } from "./TreeMap";
-import TreeMapValueEncoder from "./TreeMapValueEncoder";
+import TreeMap from "./TreeMap";
+import TreeMapValueEncoder, {
+  TreeMapType,
+  TreeMapValue,
+} from "./TreeMapValueEncoder";
 
 /**
  * This class is responsible for generating on demand the tree map data for a given chunk.
@@ -32,7 +35,7 @@ export default class GlobalTreeMap extends Global2DMap<TreeMap> {
    * //WARN This method create a new Array each time it is called
    */
   loadChunkTreeMapData(chunkId: ChunkID): Uint16Array {
-    const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
+    const { x: originX, z: originZ } = Chunk.getChunkOriginPosition(chunkId);
 
     const chunkCacheKey = this.computeChunkCacheKey(originX, originZ);
 
@@ -69,7 +72,7 @@ export default class GlobalTreeMap extends Global2DMap<TreeMap> {
   }
 
   unloadChunkTreeMapData(chunkId: ChunkID) {
-    const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
+    const { x: originX, z: originZ } = Chunk.getChunkOriginPosition(chunkId);
 
     const chunkCacheKey = this.computeChunkCacheKey(originX, originZ);
     this.chunksTreeMapDataCache.delete(chunkCacheKey);
@@ -159,13 +162,13 @@ export default class GlobalTreeMap extends Global2DMap<TreeMap> {
       const max = PVMap.NoiseRange.Plateau.min;
 
       const t = (pv - min) / (max - min);
-      return lerp(noTreesDensity, maxTreeDensity, t);
+      return MathUtils.lerp(noTreesDensity, maxTreeDensity, t);
     } else {
       const min = PVMap.NoiseRange.Plateau.max;
       const max = PVMap.NoiseRange.High.max;
 
       const invT = (max - pv) / (max - min);
-      return lerp(noTreesDensity, maxTreeDensity, invT);
+      return MathUtils.lerp(noTreesDensity, maxTreeDensity, invT);
     }
   }
 

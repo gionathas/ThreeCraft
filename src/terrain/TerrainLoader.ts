@@ -33,7 +33,7 @@ export default class TerrainLoader {
 
     const tasks = this.loadTerrain(terrainBoundaries);
     await Promise.all(tasks);
-    this.prevCenterChunk = World.getChunkIdFromPosition(centerPosition);
+    this.prevCenterChunk = Chunk.getChunkIdFromPosition(centerPosition);
   }
 
   init(centerPosition: THREE.Vector3) {
@@ -41,13 +41,13 @@ export default class TerrainLoader {
       this.getTerrainBoundariesFromPosition(centerPosition);
 
     this.loadTerrain(terrainBoundaries);
-    this.prevCenterChunk = World.getChunkIdFromPosition(centerPosition);
+    this.prevCenterChunk = Chunk.getChunkIdFromPosition(centerPosition);
   }
 
   update(centerPosition: THREE.Vector3) {
     const isGenerationEnabled = EnvVars.TERRAIN_GENERATION_ENABLED;
 
-    const currCenterChunk = World.getChunkIdFromPosition(centerPosition);
+    const currCenterChunk = Chunk.getChunkIdFromPosition(centerPosition);
     const isSameChunk = this.prevCenterChunk === currCenterChunk;
 
     if (!isSameChunk && isGenerationEnabled) {

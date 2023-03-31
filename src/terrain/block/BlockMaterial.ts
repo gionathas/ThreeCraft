@@ -1,9 +1,15 @@
-import * as THREE from "three";
+import {
+  FrontSide,
+  MeshStandardMaterial,
+  NearestFilter,
+  TextureLoader,
+} from "three";
+import blockAtlasUrl from "../../assets/textures/block_atlas.png?url";
 
-const TEXTURE_RELATIVE_PATH = "src/assets/textures/block_atlas.png";
-export const TILE_SIZE = 16;
-export const TILE_TEXTURES_WIDTH = 128;
-export const TILE_TEXTURE_HEIGHT = 128;
+const TEXTURE_ATLAS_PATH = blockAtlasUrl;
+export const TEXTURE_TILE_SIZE = 16;
+export const TEXTURE_TILE_WIDTH = 128;
+export const TEXTURE_TILE_HEIGHT = 128;
 export default class BlockMaterial {
   private static instance: BlockMaterial | null;
 
@@ -25,17 +31,17 @@ export default class BlockMaterial {
   }
 
   private initTextureAtlas() {
-    const texture = new THREE.TextureLoader().load(TEXTURE_RELATIVE_PATH);
-    texture.minFilter = THREE.NearestFilter;
-    texture.magFilter = THREE.NearestFilter;
+    const texture = new TextureLoader().load(TEXTURE_ATLAS_PATH);
+    texture.minFilter = NearestFilter;
+    texture.magFilter = NearestFilter;
 
     return texture;
   }
 
   private initBlockSolidMaterial() {
-    return new THREE.MeshStandardMaterial({
+    return new MeshStandardMaterial({
       map: this.blockTexture,
-      side: THREE.FrontSide,
+      side: FrontSide,
       vertexColors: true,
     });
   }
@@ -47,9 +53,9 @@ export default class BlockMaterial {
    * A potential solution could be using a custom shader or a specific material for water
    */
   private initBlockTransparentMaterial() {
-    return new THREE.MeshStandardMaterial({
+    return new MeshStandardMaterial({
       map: this.blockTexture,
-      side: THREE.FrontSide,
+      side: FrontSide,
       alphaTest: 0.1,
       transparent: true,
     });

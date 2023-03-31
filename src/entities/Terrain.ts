@@ -1,11 +1,10 @@
-import * as THREE from "three";
 import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
 import { BlockType } from "../terrain/block";
-import { ChunkManager } from "../terrain/chunk";
+import { Chunk } from "../terrain/chunk";
+import ChunkManager from "../terrain/chunk/ChunkManager";
 import TerrainLoader from "../terrain/TerrainLoader";
-import World from "../terrain/World";
 import { Coordinate } from "../utils/helpers";
 
 export default class Terrain {
@@ -48,7 +47,7 @@ export default class Terrain {
   }
 
   setBlock(blockCoord: Coordinate, block: BlockType) {
-    const chunkId = World.getChunkIdFromPosition(blockCoord);
+    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
 
     let chunk = this.chunksManager.getChunk(chunkId);
 

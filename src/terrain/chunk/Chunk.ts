@@ -1,9 +1,8 @@
-import * as THREE from "three";
+import { MathUtils } from "three";
 import EnvVars from "../../config/EnvVars";
 import { Coordinate } from "../../utils/helpers";
 import { BlockData, BlockRegistry, BlockType } from "../block";
 import BlockGenerator from "../block/generators/BlockGenerator";
-import World from "../World";
 
 export type ChunkID = string;
 
@@ -21,7 +20,7 @@ export default class Chunk implements ChunkModel {
 
   constructor(chunkId: ChunkID, blocks?: Uint8Array) {
     this.chunkId = chunkId;
-    this.worldOriginPosition = World.getChunkOriginPosition(chunkId);
+    this.worldOriginPosition = Chunk.getChunkOriginPosition(chunkId);
     this.isDirt = false;
     this.blocks =
       blocks ?? new Uint8Array(Chunk.HEIGHT * Chunk.WIDTH * Chunk.WIDTH);
@@ -51,7 +50,7 @@ export default class Chunk implements ChunkModel {
   }
 
   isBlockInChunk(blockCoord: Coordinate) {
-    const blockChunkId = World.getChunkIdFromPosition(blockCoord);
+    const blockChunkId = Chunk.getChunkIdFromPosition(blockCoord);
 
     return blockChunkId === this.chunkId;
   }
@@ -86,9 +85,9 @@ export default class Chunk implements ChunkModel {
   }
 
   private getBlockLocalCoordinates(x: number, y: number, z: number) {
-    const blockX = THREE.MathUtils.euclideanModulo(x, Chunk.WIDTH) | 0;
-    const blockY = THREE.MathUtils.euclideanModulo(y, Chunk.HEIGHT) | 0;
-    const blockZ = THREE.MathUtils.euclideanModulo(z, Chunk.WIDTH) | 0;
+    const blockX = MathUtils.euclideanModulo(x, Chunk.WIDTH) | 0;
+    const blockY = MathUtils.euclideanModulo(y, Chunk.HEIGHT) | 0;
+    const blockZ = MathUtils.euclideanModulo(z, Chunk.WIDTH) | 0;
 
     return [blockX, blockY, blockZ];
   }
@@ -105,6 +104,44 @@ export default class Chunk implements ChunkModel {
 
     const [_, x, y, z] = matches;
     return { x: Number(x), y: Number(y), z: Number(z) };
+  }
+
+  /**
+   * Return the chunkID of the chunk that is supposed to contain the specified position
+   *
+   * e.g. if we ask for the coordinates (35,0,0) which is located in the chunk with id (1,0,0)
+   * its corresponding chunk id will be "1,0,0".
+   */
+  static getChunkIdFromPosition({ x, y, z }: Coordinate): ChunkID {
+    const chunkX = Math.floor(x / Chunk.WIDTH);
+    const chunkY = Math.floor(y / Chunk.HEIGHT);
+    const chunkZ = Math.floor(z / Chunk.WIDTH);
+
+    return Chunk.buildChunkId({
+      x: chunkX,
+      y: chunkY,
+      z: chunkZ,
+    });
+  }
+
+  /**
+   * Compute the chunk origin position from the its chunk id
+   *
+   * e.g. if we ask for the chunkId (1,0,0) with a chunkWidth of 32,
+   * we will get back the following chunkId (32,0,0)
+   */
+  static getChunkOriginPosition(chunkID: ChunkID): Coordinate {
+    const {
+      x: chunkX,
+      y: chunkY,
+      z: chunkZ,
+    } = Chunk.chunkIdAsCoordinate(chunkID);
+
+    const offsetStartX = chunkX * Chunk.WIDTH;
+    const offsetStartY = chunkY * Chunk.HEIGHT;
+    const offsetStartZ = chunkZ * Chunk.WIDTH;
+
+    return { x: offsetStartX, y: offsetStartY, z: offsetStartZ };
   }
 
   markAsDirt() {

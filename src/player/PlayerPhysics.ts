@@ -1,10 +1,10 @@
-import * as THREE from "three";
+import { Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
-import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import { Block } from "../terrain/block";
 import { determineAngleQuadrant } from "../utils/helpers";
 import Physics from "../utils/Physics";
+import PlayerConstants from "./PlayerConstants";
 import PlayerController from "./PlayerController";
 import PlayerControls from "./PlayerControls";
 
@@ -28,13 +28,6 @@ const speedMultipliers: Record<GroundState, number> = {
  * //TODO extract some classes like one for managing collision detection
  */
 export default class PlayerPhysics {
-  // Fly mode
-  private static readonly FLY_HORIZONTAL_SPEED = 4;
-  private static readonly FLY_VERTICAL_SPEED = 3;
-
-  // Sim mode
-  private static readonly HORIZONTAL_SPEED = 0.6;
-  private static readonly JUMP_SPEED = 9.2;
   private static readonly BASE_DAMPING_FACTOR = 10;
   private static readonly SLIDING_FACTOR = 7;
   private static readonly SLIDING_DEAD_ANGLE = 0.1;
@@ -66,8 +59,8 @@ export default class PlayerPhysics {
     this.groundState = "falling";
     this.dampingFactor = PlayerPhysics.BASE_DAMPING_FACTOR;
 
-    this.moveDirection = new THREE.Vector3();
-    this.velocity = new THREE.Vector3();
+    this.moveDirection = new Vector3();
+    this.velocity = new Vector3();
   }
 
   update(dt: number) {
@@ -136,12 +129,13 @@ export default class PlayerPhysics {
 
         // jump detection
         if (isJumping && !wasJumping) {
-          this.velocity.y += PlayerPhysics.JUMP_SPEED * dt;
+          this.velocity.y += PlayerConstants.JUMP_SPEED * dt;
         }
         break;
       case "fly":
         const upDirection = this.getFlyUpMovementDirection();
-        this.velocity.y += upDirection * PlayerPhysics.FLY_VERTICAL_SPEED * dt;
+        this.velocity.y +=
+          upDirection * PlayerConstants.FLY_VERTICAL_SPEED * dt;
         break;
     }
   }
@@ -1352,7 +1346,7 @@ export default class PlayerPhysics {
   }
 
   private calculateSlidingVelocity(lookDirAngle: number, dt: number) {
-    const hSpeed = PlayerPhysics.HORIZONTAL_SPEED;
+    const hSpeed = PlayerConstants.HORIZONTAL_SPEED;
     const slidingFactor = PlayerPhysics.SLIDING_FACTOR;
     const slidingDeadAngle = PlayerPhysics.SLIDING_DEAD_ANGLE;
 
@@ -1404,11 +1398,11 @@ export default class PlayerPhysics {
 
   private get horizontalSpeed() {
     if (this.isFlyMode) {
-      return PlayerPhysics.FLY_HORIZONTAL_SPEED;
+      return PlayerConstants.FLY_HORIZONTAL_SPEED;
     }
 
     const speedFactor = speedMultipliers[this.groundState];
-    return PlayerPhysics.HORIZONTAL_SPEED * speedFactor;
+    return PlayerConstants.HORIZONTAL_SPEED * speedFactor;
   }
 
   private get onGround() {
@@ -1424,10 +1418,10 @@ export default class PlayerPhysics {
   }
 
   private get feetWidth() {
-    return Player.Body.FEET_WIDTH;
+    return PlayerConstants.FEET_WIDTH;
   }
 
   private get width() {
-    return Player.Body.WIDTH;
+    return PlayerConstants.WIDTH;
   }
 }

@@ -1,8 +1,9 @@
-import { TransferDescriptor } from "threads";
-import { expose, Transfer } from "threads/worker";
+import { Transfer, TransferDescriptor } from "threads";
+import { expose } from "threads/worker";
 import WorkerMapManager from "../../maps/WorkerMapManager";
-import { BlockGeneratorFactory } from "../block";
-import { Phase } from "../block/generators/BlockGeneratorFactory";
+import BlockGeneratorFactory, {
+  Phase,
+} from "../block/generators/BlockGeneratorFactory";
 import Chunk, { ChunkID } from "./Chunk";
 import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
 

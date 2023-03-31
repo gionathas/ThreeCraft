@@ -1,6 +1,2 @@
-import Chunk from "./Chunk";
-import ChunkGeometryBuilder from "./ChunkGeometryBuilder";
-import ChunkManager from "./ChunkManager";
-
+export { default as Chunk } from "./Chunk";
 export type { ChunkID, ChunkModel } from "./Chunk";
-export { Chunk, ChunkGeometryBuilder, ChunkManager };

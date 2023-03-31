@@ -1,6 +1,6 @@
-import * as THREE from "three";
+import { BufferAttribute, BufferGeometry, Mesh } from "three";
 import { BufferGeometryData } from "../../utils/helpers";
-import { BlockMaterial } from "../block";
+import BlockMaterial from "../block/BlockMaterial";
 import { ChunkID } from "./Chunk";
 
 // WARN this value seems to affect the memory usage, keep it as low as possible
@@ -49,25 +49,19 @@ export default class ChunkMeshManager {
     // update chunk geometry attributes
     chunkGeometry.setAttribute(
       "position",
-      new THREE.BufferAttribute(
-        new Float32Array(positions),
-        POSITION_NUM_COMPONENTS
-      )
+      new BufferAttribute(new Float32Array(positions), POSITION_NUM_COMPONENTS)
     );
     chunkGeometry.setAttribute(
       "normal",
-      new THREE.BufferAttribute(
-        new Float32Array(normals),
-        NORMAL_NUM_COMPONENTS
-      )
+      new BufferAttribute(new Float32Array(normals), NORMAL_NUM_COMPONENTS)
     );
     chunkGeometry.setAttribute(
       "uv",
-      new THREE.BufferAttribute(new Float32Array(uvs), UV_NUM_COMPONENTS)
+      new BufferAttribute(new Float32Array(uvs), UV_NUM_COMPONENTS)
     );
     chunkGeometry.setAttribute(
       "color",
-      new THREE.BufferAttribute(new Float32Array(colors), COLOR_NUM_COMPONENTS)
+      new BufferAttribute(new Float32Array(colors), COLOR_NUM_COMPONENTS)
     );
 
     chunkGeometry.setIndex(indices);
@@ -96,18 +90,15 @@ export default class ChunkMeshManager {
     // update chunk geometry attributes
     chunkGeometry.setAttribute(
       "position",
-      new THREE.BufferAttribute(
-        new Float32Array(positions),
-        positionNumComponents
-      )
+      new BufferAttribute(new Float32Array(positions), positionNumComponents)
     );
     chunkGeometry.setAttribute(
       "normal",
-      new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents)
+      new BufferAttribute(new Float32Array(normals), normalNumComponents)
     );
     chunkGeometry.setAttribute(
       "uv",
-      new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents)
+      new BufferAttribute(new Float32Array(uvs), uvNumComponents)
     );
 
     chunkGeometry.setIndex(indices);
@@ -161,7 +152,7 @@ export default class ChunkMeshManager {
     // pool is empty create a new mesh
     if (!newMesh) {
       const solidMaterial = this.blockMaterials.getBlockSolidMaterial();
-      newMesh = new THREE.Mesh(new THREE.BufferGeometry(), solidMaterial);
+      newMesh = new Mesh(new BufferGeometry(), solidMaterial);
     }
 
     return newMesh;
@@ -187,7 +178,7 @@ export default class ChunkMeshManager {
     if (!newMesh) {
       const transparentMaterial =
         this.blockMaterials.getBlockTransparentMaterial();
-      newMesh = new THREE.Mesh(new THREE.BufferGeometry(), transparentMaterial);
+      newMesh = new Mesh(new BufferGeometry(), transparentMaterial);
     }
 
     return newMesh;

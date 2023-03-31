@@ -1,4 +1,2 @@
-import GlobalTreeMap from "./GlobalTreeMap";
-import TreeMap from "./TreeMap";
-
-export { TreeMap, GlobalTreeMap };
+export { default as TreeMap } from "./TreeMap";
+export type { TreeMapType, TreeMapValue } from "./TreeMapValueEncoder";

@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Box3, Vector3 } from "three";
 import { ChunkModel } from "../chunk";
 import {
   BlockFace,
@@ -6,9 +6,9 @@ import {
   BlockFacesGeometry,
 } from "./BlockGeometry";
 import {
-  TILE_SIZE,
-  TILE_TEXTURES_WIDTH,
-  TILE_TEXTURE_HEIGHT,
+  TEXTURE_TILE_HEIGHT,
+  TEXTURE_TILE_SIZE,
+  TEXTURE_TILE_WIDTH,
 } from "./BlockMaterial";
 import { BlockRegistry, BlockType } from "./BlockType";
 
@@ -105,14 +105,14 @@ export default class Block {
     const { row, col } = BlockRegistry[block].texture[textureFace];
 
     return {
-      u: ((col + uOff) * TILE_SIZE) / TILE_TEXTURES_WIDTH,
-      v: 1 - ((row + 1 - vOff) * TILE_SIZE) / TILE_TEXTURE_HEIGHT,
+      u: ((col + uOff) * TEXTURE_TILE_SIZE) / TEXTURE_TILE_WIDTH,
+      v: 1 - ((row + 1 - vOff) * TEXTURE_TILE_SIZE) / TEXTURE_TILE_HEIGHT,
     };
   }
 
   static getBlockFaceFromNormal(normal: THREE.Vector3): BlockFace | null {
     for (const [face, faceNormal] of Object.entries(BlockFaceNormal)) {
-      if (new THREE.Vector3().fromArray(faceNormal).equals(normal)) {
+      if (new Vector3().fromArray(faceNormal).equals(normal)) {
         return face as BlockFace;
       }
     }
@@ -126,14 +126,11 @@ export default class Block {
   }
 
   static getBlockBoundingBox(blockOrigin: THREE.Vector3) {
-    return new THREE.Box3(
-      blockOrigin,
-      blockOrigin.clone().addScalar(Block.SIZE)
-    );
+    return new Box3(blockOrigin, blockOrigin.clone().addScalar(Block.SIZE));
   }
 
   static getBlockOriginFromPosition(position: THREE.Vector3) {
-    return new THREE.Vector3(
+    return new Vector3(
       Math.floor(position.x),
       Math.floor(position.y),
       Math.floor(position.z)
@@ -147,7 +144,7 @@ export default class Block {
     blockOrigin: THREE.Vector3,
     position: THREE.Vector3
   ) {
-    const blockCenter = new THREE.Vector3(
+    const blockCenter = new Vector3(
       blockOrigin.x + 0.5,
       blockOrigin.y + 0.5,
       blockOrigin.z + 0.5
@@ -155,7 +152,7 @@ export default class Block {
     const xDiff = Math.abs(position.x - blockCenter.x);
     const yDiff = Math.abs(position.y - blockCenter.y);
     const zDiff = Math.abs(position.z - blockCenter.z);
-    const normal = new THREE.Vector3();
+    const normal = new Vector3();
 
     if (xDiff > yDiff && xDiff > zDiff) {
       normal.set(position.x > blockCenter.x ? 1 : -1, 0, 0);

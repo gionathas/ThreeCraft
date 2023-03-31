@@ -1,6 +1,5 @@
-import { ChunkID } from "../terrain/chunk";
+import { Chunk, ChunkID } from "../terrain/chunk";
 import Tree from "../terrain/Tree";
-import World from "../terrain/World";
 import { MapData } from "./AbstractMap";
 import MapManager from "./MapManager";
 import {
@@ -54,7 +53,7 @@ export default class WorkerMapManager extends MapManager {
   }
 
   getTreeMapFromBuffer(chunkId: ChunkID, buffer: Uint16Array): TreeMap {
-    const { x: originX, z: originZ } = World.getChunkOriginPosition(chunkId);
+    const { x: originX, z: originZ } = Chunk.getChunkOriginPosition(chunkId);
 
     const treeMap = new TreeMap(this.seed);
     const treeMapData: MapData = new Map();
