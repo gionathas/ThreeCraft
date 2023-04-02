@@ -12,6 +12,7 @@ export enum BlockType {
   GLASS,
   OAK_LOG,
   OAK_LEAVES,
+  PLANKS,
   COAL_ORE,
 }
 
@@ -195,6 +196,29 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       side: {
         row: 1,
         col: 5,
+      },
+    },
+  },
+  [BlockType.PLANKS]: {
+    isTransparent: false,
+    isSolid: true,
+    drop: BlockType.PLANKS,
+    icon: {
+      row: 25,
+      col: 10,
+    },
+    texture: {
+      top: {
+        row: 1,
+        col: 4,
+      },
+      bottom: {
+        row: 1,
+        col: 4,
+      },
+      side: {
+        row: 1,
+        col: 4,
       },
     },
   },
