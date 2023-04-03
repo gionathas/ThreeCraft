@@ -60,7 +60,7 @@ export default class GameLoop {
     this.player.enableControls();
 
     // start game loop
-    this.engine.start(this.update.bind(this));
+    this.engine.start(settings, this.update.bind(this));
   }
 
   private update(dt: number) {

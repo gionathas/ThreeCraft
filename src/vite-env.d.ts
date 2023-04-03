@@ -4,13 +4,14 @@ interface ImportMetaEnv {
   // Game settings
   readonly VITE_JUMP_START: string;
 
+  // Gameplay settings
+  readonly VITE_FOG_ENABLED: string;
+  readonly VITE_EDITING_ENABLED: string;
+
   // UI
   readonly VITE_SHOW_INITIAL_TERRAIN_GENERATION: string;
   readonly VITE_SHOW_DEBUG_UI: string;
   readonly VITE_SHOW_WINDOW_CLOSE_ALERT: string;
-
-  // Editing settings
-  readonly VITE_EDITING_ENABLED: string;
 
   // Terrain Generation
   readonly VITE_CUSTOM_SEED?: string;

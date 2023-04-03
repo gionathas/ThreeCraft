@@ -1,11 +1,17 @@
-import { AmbientLight, Color, DirectionalLight, Scene } from "three";
+import { AmbientLight, Color, DirectionalLight, Fog, Scene } from "three";
+import EnvVars from "../config/EnvVars";
+import { Chunk } from "../terrain/chunk";
+import DebugControls from "../tools/DebugControls";
+import { Settings } from "./SettingsManager";
 
 export default class GameScene extends Scene {
-  private static instance: GameScene | null;
-
+  private static readonly DEFAULT_FOG_FACTOR = 3;
   private static readonly SkyColor: string = "#87CEEB";
 
+  private static instance: GameScene | null;
+
   private initialized: boolean;
+  private gui!: DebugControls;
 
   private lights: THREE.Light[];
 
@@ -22,13 +28,15 @@ export default class GameScene extends Scene {
     return this.instance;
   }
 
-  init() {
+  init(settings: Settings) {
     if (this.initialized) {
       return;
     }
 
+    this.gui = DebugControls.getInstance();
     this.lights = this.initLights();
     this.initBackground();
+    this.initFog(settings.renderDistance);
 
     this.initialized = true;
   }
@@ -54,6 +62,23 @@ export default class GameScene extends Scene {
   private initBackground() {
     // set sky color
     this.background = new Color(GameScene.SkyColor);
+  }
+
+  /**
+   * This will apply a fog fading effect
+   * starting from one chunk before the rendering distance
+   */
+  private initFog(renderingDistanceInChunks: number) {
+    if (!EnvVars.FOG_ENABLED) {
+      return;
+    }
+
+    const renderingDistance = renderingDistanceInChunks * Chunk.WIDTH;
+    const far = renderingDistance - Chunk.WIDTH;
+    // not a too intrusive fog fading effect, just 2 blocks long
+    const near = far - 2;
+
+    this.fog = new Fog(GameScene.SkyColor, near, far);
   }
 
   dispose() {

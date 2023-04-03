@@ -6,6 +6,7 @@ import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { ContinentalMap, ErosionMap, PVMap } from "../maps/terrain";
+import DebugControls from "../tools/DebugControls";
 
 /**
  * //TODO: add GUI threejs interactive panel
@@ -26,6 +27,7 @@ export default class DebugInfo {
   private isVisible: boolean;
 
   private debugPanel: HTMLElement;
+  private debugControls: DebugControls;
   private fps: Stats;
   private mem: Stats;
 
@@ -39,6 +41,7 @@ export default class DebugInfo {
     this.isVisible = EnvVars.SHOW_DEBUG_INFO;
 
     this.debugPanel = this.initPanel();
+    this.debugControls = this.initDebugControls();
     this.fps = this.initFpsStats();
     this.mem = this.initMemStats();
   }
@@ -68,6 +71,13 @@ export default class DebugInfo {
     document.body.appendChild(mem.dom);
 
     return mem;
+  }
+
+  private initDebugControls() {
+    const debugControls = DebugControls.getInstance();
+    this.isVisible ? debugControls.show() : debugControls.hide();
+
+    return debugControls;
   }
 
   update() {
@@ -131,6 +141,7 @@ export default class DebugInfo {
     this.debugPanel.style.display = "block";
     this.fps.dom.style.display = "block";
     this.mem.dom.style.display = "block";
+    this.debugControls.show();
   }
 
   hide() {
@@ -139,6 +150,7 @@ export default class DebugInfo {
     this.debugPanel.style.display = "none";
     this.fps.dom.style.display = "none";
     this.mem.dom.style.display = "none";
+    this.debugControls.hide();
   }
 
   dispose() {
@@ -148,5 +160,6 @@ export default class DebugInfo {
     this.debugPanel.childNodes.forEach((node) => node.remove());
     this.fps.dom.remove();
     this.mem.dom.remove();
+    this.debugControls.dispose();
   }
 }

@@ -5,15 +5,13 @@ export default class EnvVars {
    * Game Settings
    */
   static readonly JUMP_START = this.getBoolean(import.meta.env.VITE_JUMP_START);
+
+  /** Gameplay Settings */
+  static readonly FOG_ENABLED = this.getBoolean(
+    import.meta.env.VITE_FOG_ENABLED
+  );
   static readonly EDITING_ENABLED = this.getBoolean(
     import.meta.env.VITE_EDITING_ENABLED
-  );
-
-  /** Player */
-  static readonly PLAYER_DEFAULT_PHYSICS_MODE = import.meta.env
-    .VITE_PLAYER_DEFAULT_PHYSICS_MODE as PhysicsMode;
-  static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
-    import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
   );
 
   /**
@@ -27,6 +25,13 @@ export default class EnvVars {
   );
   static readonly SHOW_WINDOW_CLOSE_ALERT = this.getBoolean(
     import.meta.env.VITE_SHOW_WINDOW_CLOSE_ALERT
+  );
+
+  /** Player */
+  static readonly PLAYER_DEFAULT_PHYSICS_MODE = import.meta.env
+    .VITE_PLAYER_DEFAULT_PHYSICS_MODE as PhysicsMode;
+  static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = this.getBoolean(
+    import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
   );
 
   /**

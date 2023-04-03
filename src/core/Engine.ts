@@ -1,6 +1,7 @@
 import { WebGLRenderer } from "three";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
+import { Settings } from "./SettingsManager";
 
 export default class Engine {
   // NOTE FPS are capped at 75, maybe make this configurable in the future
@@ -40,8 +41,8 @@ export default class Engine {
     return renderer;
   }
 
-  start(update: (dt: number) => void) {
-    this.scene.init();
+  start(settings: Settings, update: (dt: number) => void) {
+    this.scene.init(settings);
     this.showCanvas();
 
     let previousTime = performance.now();
