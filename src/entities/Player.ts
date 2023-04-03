@@ -83,7 +83,7 @@ export default class Player {
     if (y <= surfaceHeight) {
       // this will simulate the camera placed on the player's eyes
       // and the player's feet being 1 block above the surface
-      y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 1;
+      y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 2;
     }
 
     this.controls.position.set(x, y, z);
