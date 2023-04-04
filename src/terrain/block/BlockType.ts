@@ -18,6 +18,7 @@ export enum BlockType {
 
 export const BlockRegistry: Record<BlockType, BlockMetadata> = {
   [BlockType.AIR]: {
+    name: "_air",
     isTransparent: true,
     isSolid: false,
     icon: {
@@ -40,6 +41,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.STONE]: {
+    name: "Stone",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.COBBLESTONE,
@@ -63,6 +65,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.COBBLESTONE]: {
+    name: "Cobblestone",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.COBBLESTONE,
@@ -86,6 +89,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.GRASS]: {
+    name: "Grass",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.DIRT,
@@ -107,8 +111,24 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 0,
       },
     },
+    sounds: {
+      dig: [
+        "Grass_dig1.ogg",
+        "Grass_dig2.ogg",
+        "Grass_dig3.ogg",
+        "Grass_dig4.ogg",
+      ],
+      hit: [
+        "Grass_hit1.ogg",
+        "Grass_hit2.ogg",
+        "Grass_hit3.ogg",
+        "Grass_hit4.ogg",
+        "Grass_hit5.ogg",
+      ],
+    },
   },
   [BlockType.GRASS_SNOW]: {
+    name: "Snow",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.DIRT,
@@ -132,6 +152,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.DIRT]: {
+    name: "Dirt",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.DIRT,
@@ -153,8 +174,18 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 2,
       },
     },
+    sounds: {
+      dig: [
+        "Gravel_dig1.ogg",
+        "Gravel_dig2.ogg",
+        "Gravel_dig3.ogg",
+        "Gravel_dig4.ogg",
+      ],
+      hit: ["Grass_hit1.ogg"],
+    },
   },
   [BlockType.OAK_LOG]: {
+    name: "Oak_Log",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.OAK_LOG,
@@ -178,6 +209,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.OAK_LEAVES]: {
+    name: "Oak_Leaves",
     isTransparent: true,
     isSolid: true,
     icon: {
@@ -200,6 +232,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.PLANKS]: {
+    name: "Planks",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.PLANKS,
@@ -223,6 +256,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.SAND]: {
+    name: "Sand",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.SAND,
@@ -246,6 +280,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.WATER]: {
+    name: "Water",
     isTransparent: true,
     isSolid: false,
     icon: {
@@ -268,6 +303,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.GLASS]: {
+    name: "Glass",
     isTransparent: true,
     isSolid: true,
     icon: {
@@ -290,6 +326,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
     },
   },
   [BlockType.COAL_ORE]: {
+    name: "Coal_Ore",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.COAL_ORE,

@@ -15,6 +15,7 @@ import { BlockRegistry, BlockType } from "./BlockType";
 export type BlockTextureFace = "top" | "bottom" | "side";
 
 export type BlockMetadata = {
+  name: string;
   isTransparent: boolean;
   isSolid: boolean;
   drop?: BlockType;
@@ -27,6 +28,11 @@ export type BlockMetadata = {
       row: number;
       col: number;
     };
+  };
+  sounds?: {
+    dig?: string[];
+    hit?: string[];
+    step?: string[];
   };
 };
 
@@ -94,6 +100,10 @@ export default class Block {
 
   static getNeighbourBlockOffsets() {
     return NeighbourBlockOffsets;
+  }
+
+  static getBlockSounds(block: BlockType) {
+    return BlockRegistry[block].sounds;
   }
 
   static getBlockUVCoordinates(
