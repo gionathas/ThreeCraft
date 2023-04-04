@@ -63,6 +63,14 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 5,
       },
     },
+    sounds: {
+      dig: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
+    },
   },
   [BlockType.COBBLESTONE]: {
     name: "Cobblestone",
@@ -86,6 +94,14 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         row: 0,
         col: 4,
       },
+    },
+    sounds: {
+      dig: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
     },
   },
   [BlockType.GRASS]: {
