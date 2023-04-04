@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
+import DigSoundEffect from "../audio/DigSoundEffect";
 import EnvVars from "../config/EnvVars";
-import AudioManager from "../core/AudioManager";
 import GameCamera from "../core/GameCamera";
 import GameScene from "../core/GameScene";
 import Terrain from "../entities/Terrain";
@@ -16,14 +16,15 @@ export default class EditingControls {
   private scene: GameScene;
   private camera: GameCamera;
   private playerController: PlayerController;
-  private audioManager: AudioManager;
-
   private terrain: Terrain;
 
   private blockMarker: BlockMarker | null;
 
   private playerCollider: PlayerCollider;
   private inventory: InventoryManager;
+
+  // sounds
+  private digSoundEffect: DigSoundEffect;
 
   constructor(
     playerController: PlayerController,
@@ -34,7 +35,7 @@ export default class EditingControls {
     this.scene = GameScene.getInstance();
     this.camera = GameCamera.getInstance();
     this.playerController = playerController;
-    this.audioManager = AudioManager.getInstance();
+    this.digSoundEffect = new DigSoundEffect();
 
     this.terrain = terrain;
     this.playerCollider = playerCollider;
@@ -65,12 +66,8 @@ export default class EditingControls {
       const erasedBlock = this.eraseTargetBlock();
 
       if (erasedBlock) {
-        const digSounds = erasedBlock.sounds?.dig;
-
-        // play sound
-        if (digSounds) {
-          this.audioManager.playSoundFromSet(digSounds);
-        }
+        // sound effect
+        this.digSoundEffect.playBlockDestroySound(erasedBlock);
 
         // if it drops something, add it to the inventory
         if (erasedBlock.drop) {
@@ -91,13 +88,10 @@ export default class EditingControls {
         const isPlaced = this.placeBlock(block);
 
         if (isPlaced) {
-          const sounds = Block.getBlockSounds(block);
-          const placeSounds = sounds?.dig;
+          const blockData = Block.getBlockMetadata(block);
 
-          // reproduce place sound
-          if (placeSounds) {
-            this.audioManager.playSoundFromSet(placeSounds);
-          }
+          // sound effect
+          this.digSoundEffect.playBlockPlacementSound(blockData);
 
           // decrement item amount
           this.inventory.decrementSelectedItemAmount();

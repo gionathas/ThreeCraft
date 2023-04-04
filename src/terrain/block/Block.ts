@@ -32,7 +32,6 @@ export type BlockMetadata = {
   sounds?: {
     dig?: string[];
     hit?: string[];
-    step?: string[];
   };
 };
 
@@ -102,8 +101,8 @@ export default class Block {
     return NeighbourBlockOffsets;
   }
 
-  static getBlockSounds(block: BlockType) {
-    return BlockRegistry[block].sounds;
+  static getBlockMetadata(block: BlockType): BlockMetadata {
+    return BlockRegistry[block];
   }
 
   static getBlockUVCoordinates(
