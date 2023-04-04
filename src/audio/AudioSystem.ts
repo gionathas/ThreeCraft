@@ -23,13 +23,11 @@ export default class AudioSystem {
   private audioLoader: AudioLoader;
 
   private sounds: Map<string, Audio>;
-  private index: number;
 
   private constructor() {
     this.audioListener = GameCamera.getInstance().getAudioListener();
     this.audioLoader = new AudioLoader();
 
-    this.index = 0;
     this.sounds = this.loadSounds();
   }
 
@@ -64,24 +62,6 @@ export default class AudioSystem {
     Logger.debug("Sounds loaded");
     return sounds;
   }
-
-  // playSoundFromSet(
-  //   set: string[],
-  //   options?: { volume?: VolumeLevel; playbackRate?: PlaybackRate }
-  // ) {
-  //   this.index %= set.length;
-  //   const volume = options?.volume ?? AudioSystem.DEFAULT_VOLUME;
-  //   const pbRate = options?.playbackRate ?? AudioSystem.DEFAULT_PLAYBACK_RATE;
-
-  //   const sound = this.sounds.get(set[this.index]);
-
-  //   if (sound) {
-  //     sound.setVolume(volume);
-  //     sound.setPlaybackRate(pbRate);
-  //     sound.play();
-  //     this.index += 1;
-  //   }
-  // }
 
   playSound(
     soundFile: string,

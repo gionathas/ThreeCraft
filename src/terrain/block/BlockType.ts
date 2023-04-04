@@ -124,6 +124,7 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         "Grass_hit3.ogg",
         "Grass_hit4.ogg",
         "Grass_hit5.ogg",
+        "Grass_hit6.ogg",
       ],
     },
   },
