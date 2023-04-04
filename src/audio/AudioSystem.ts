@@ -1,8 +1,7 @@
 import { Audio, AudioListener, AudioLoader } from "three";
+import * as soundSrcSet from "../assets/sounds";
 import GameCamera from "../core/GameCamera";
 import Logger from "../core/Logger";
-
-const srcSet = import.meta.glob("/src/assets/sounds/*.ogg");
 
 export enum VolumeLevel {
   VERY_LOW = 0.05,
@@ -43,7 +42,8 @@ export default class AudioSystem {
 
     const sounds = new Map();
 
-    for (const src of Object.keys(srcSet)) {
+    for (const src of Object.values(soundSrcSet)) {
+      Logger.debug(`Loading sound: ${src}`);
       const filename = src.split("/").pop() as string;
 
       this.audioLoader.load(
@@ -80,6 +80,7 @@ export default class AudioSystem {
   }
 
   dispose() {
+    Logger.debug("Disposing AudioSystem...");
     this.sounds.clear();
     AudioSystem.instance = null;
   }
