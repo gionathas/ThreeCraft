@@ -386,5 +386,21 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 6,
       },
     },
+    sounds: {
+      dig: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
+      hit: [
+        "Stone_hit1.ogg",
+        "Stone_hit2.ogg",
+        "Stone_hit3.ogg",
+        "Stone_hit4.ogg",
+        "Stone_hit5.ogg",
+        "Stone_hit6.ogg",
+      ],
+    },
   },
 };
