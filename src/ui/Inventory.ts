@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import { Vector2 } from "three";
 import InventoryManager, { Slot } from "../player/InventoryManager";
 import SlotGrid from "./SlotGrid";
 import { UIComponent } from "./UIComponent";
@@ -191,7 +191,7 @@ export default class Inventory implements UIComponent {
     }
 
     if (slotElem) {
-      const cursor = new THREE.Vector2(e.pageX, e.pageY);
+      const cursor = new Vector2(e.pageX, e.pageY);
       const slotIndex = SlotGrid.getSlotIndex(slotElem);
 
       switch (e.button) {
