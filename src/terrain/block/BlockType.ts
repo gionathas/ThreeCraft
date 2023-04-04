@@ -182,7 +182,12 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         "Gravel_dig3.ogg",
         "Gravel_dig4.ogg",
       ],
-      hit: ["Grass_hit1.ogg"],
+      hit: [
+        "Gravel_hit1.ogg",
+        "Gravel_hit2.ogg",
+        "Gravel_hit3.ogg",
+        "Gravel_hit4.ogg",
+      ],
     },
   },
   [BlockType.OAK_LOG]: {

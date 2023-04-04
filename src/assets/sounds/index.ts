@@ -15,6 +15,11 @@ import Gravel_dig2 from "./Gravel_dig2.ogg";
 import Gravel_dig3 from "./Gravel_dig3.ogg";
 import Gravel_dig4 from "./Gravel_dig4.ogg";
 
+import Gravel_hit1 from "./Gravel_hit1.ogg";
+import Gravel_hit2 from "./Gravel_hit2.ogg";
+import Gravel_hit3 from "./Gravel_hit3.ogg";
+import Gravel_hit4 from "./Gravel_hit4.ogg";
+
 export { Grass_dig1, Grass_dig2, Grass_dig3, Grass_dig4 };
 export {
   Grass_hit1,
@@ -25,3 +30,4 @@ export {
   Grass_hit6,
 };
 export { Gravel_dig1, Gravel_dig2, Gravel_dig3, Gravel_dig4 };
+export { Gravel_hit1, Gravel_hit2, Gravel_hit3, Gravel_hit4 };

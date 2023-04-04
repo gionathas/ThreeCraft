@@ -10,8 +10,10 @@ export abstract class SoundEffect {
   }
 
   protected selectSoundFromSet(set: string[]) {
+    this.soundIndex %= set.length;
     const sound = set[this.soundIndex];
-    this.soundIndex = (this.soundIndex + 1) % set.length;
+
+    this.soundIndex = this.soundIndex + 1;
     return sound;
   }
 }
