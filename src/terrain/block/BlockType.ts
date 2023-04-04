@@ -279,6 +279,22 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 5,
       },
     },
+    sounds: {
+      dig: [
+        "Grass_dig1.ogg",
+        "Grass_dig2.ogg",
+        "Grass_dig3.ogg",
+        "Grass_dig4.ogg",
+      ],
+      hit: [
+        "Grass_hit1.ogg",
+        "Grass_hit2.ogg",
+        "Grass_hit3.ogg",
+        "Grass_hit4.ogg",
+        "Grass_hit5.ogg",
+        "Grass_hit6.ogg",
+      ],
+    },
   },
   [BlockType.PLANKS]: {
     name: "Planks",
@@ -393,6 +409,14 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         row: 2,
         col: 0,
       },
+    },
+    sounds: {
+      dig: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
     },
   },
   [BlockType.COAL_ORE]: {
