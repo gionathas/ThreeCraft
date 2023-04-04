@@ -1,5 +1,6 @@
 import { Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
+import AudioManager from "../core/AudioManager";
 import GameCamera from "../core/GameCamera";
 import GameScene from "../core/GameScene";
 import Terrain from "../entities/Terrain";
@@ -15,6 +16,7 @@ export default class EditingControls {
   private scene: GameScene;
   private camera: GameCamera;
   private playerController: PlayerController;
+  private audioManager: AudioManager;
 
   private terrain: Terrain;
 
@@ -32,6 +34,7 @@ export default class EditingControls {
     this.scene = GameScene.getInstance();
     this.camera = GameCamera.getInstance();
     this.playerController = playerController;
+    this.audioManager = AudioManager.getInstance();
 
     this.terrain = terrain;
     this.playerCollider = playerCollider;
@@ -61,13 +64,21 @@ export default class EditingControls {
     if (isErasing) {
       const erasedBlock = this.eraseTargetBlock();
 
-      // if a block was erased and it drops something
-      // add it to the inventory
-      if (erasedBlock && erasedBlock.drop) {
-        this.inventory.addItem({
-          block: erasedBlock.drop,
-          amount: 1,
-        });
+      if (erasedBlock) {
+        const digSounds = erasedBlock.sounds?.dig;
+
+        // play sound
+        if (digSounds) {
+          this.audioManager.playSoundFromSet(digSounds);
+        }
+
+        // if it drops something, add it to the inventory
+        if (erasedBlock.drop) {
+          this.inventory.addItem({
+            block: erasedBlock.drop,
+            amount: 1,
+          });
+        }
       }
     }
 
@@ -76,9 +87,19 @@ export default class EditingControls {
       const selectedItem = this.inventory.getSelectedItem();
 
       if (selectedItem) {
-        const isPlaced = this.placeBlock(selectedItem.block);
+        const block = selectedItem.block;
+        const isPlaced = this.placeBlock(block);
 
         if (isPlaced) {
+          const sounds = Block.getBlockSounds(block);
+          const placeSounds = sounds?.dig;
+
+          // reproduce place sound
+          if (placeSounds) {
+            this.audioManager.playSoundFromSet(placeSounds);
+          }
+
+          // decrement item amount
           this.inventory.decrementSelectedItemAmount();
         }
       }
