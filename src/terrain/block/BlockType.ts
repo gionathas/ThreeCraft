@@ -245,6 +245,17 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 3,
       },
     },
+    sounds: {
+      dig: ["Wood_dig1.ogg", "Wood_dig2.ogg", "Wood_dig3.ogg", "Wood_dig4.ogg"],
+      hit: [
+        "Wood_hit1.ogg",
+        "Wood_hit2.ogg",
+        "Wood_hit3.ogg",
+        "Wood_hit4.ogg",
+        "Wood_hit5.ogg",
+        "Wood_hit6.ogg",
+      ],
+    },
   },
   [BlockType.OAK_LEAVES]: {
     name: "Oak_Leaves",
@@ -291,6 +302,17 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         row: 1,
         col: 4,
       },
+    },
+    sounds: {
+      dig: ["Wood_dig1.ogg", "Wood_dig2.ogg", "Wood_dig3.ogg", "Wood_dig4.ogg"],
+      hit: [
+        "Wood_hit1.ogg",
+        "Wood_hit2.ogg",
+        "Wood_hit3.ogg",
+        "Wood_hit4.ogg",
+        "Wood_hit5.ogg",
+        "Wood_hit6.ogg",
+      ],
     },
   },
   [BlockType.SAND]: {
