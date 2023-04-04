@@ -4,6 +4,8 @@ import SlotGrid from "./SlotGrid";
 import { UIComponent } from "./UIComponent";
 
 export default class Hotbar implements UIComponent {
+  private static readonly WHEEL_SENSITIVITY = 10;
+
   private gameState: GameState;
   private inventoryManager: InventoryManager;
 
@@ -94,8 +96,8 @@ export default class Hotbar implements UIComponent {
       return;
     }
 
-    const isScrollingUp = event.deltaY < 0;
-    const isScrollingDown = event.deltaY > 0;
+    const isScrollingUp = event.deltaY < -Hotbar.WHEEL_SENSITIVITY;
+    const isScrollingDown = event.deltaY > Hotbar.WHEEL_SENSITIVITY;
     const selectedIndex = this.inventoryManager.getSelectedIndex();
 
     if (isScrollingUp) {
