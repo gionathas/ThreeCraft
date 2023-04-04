@@ -25,6 +25,13 @@ import Stone_dig2 from "./Stone_dig2.ogg";
 import Stone_dig3 from "./Stone_dig3.ogg";
 import Stone_dig4 from "./Stone_dig4.ogg";
 
+import Stone_hit1 from "./Stone_hit1.ogg";
+import Stone_hit2 from "./Stone_hit2.ogg";
+import Stone_hit3 from "./Stone_hit3.ogg";
+import Stone_hit4 from "./Stone_hit4.ogg";
+import Stone_hit5 from "./Stone_hit5.ogg";
+import Stone_hit6 from "./Stone_hit6.ogg";
+
 export { Grass_dig1, Grass_dig2, Grass_dig3, Grass_dig4 };
 export {
   Grass_hit1,
@@ -37,3 +44,11 @@ export {
 export { Gravel_dig1, Gravel_dig2, Gravel_dig3, Gravel_dig4 };
 export { Gravel_hit1, Gravel_hit2, Gravel_hit3, Gravel_hit4 };
 export { Stone_dig1, Stone_dig2, Stone_dig3, Stone_dig4 };
+export {
+  Stone_hit1,
+  Stone_hit2,
+  Stone_hit3,
+  Stone_hit4,
+  Stone_hit5,
+  Stone_hit6,
+};
