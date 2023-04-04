@@ -338,6 +338,16 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
         col: 6,
       },
     },
+    sounds: {
+      dig: ["Sand_dig1.ogg", "Sand_dig2.ogg", "Sand_dig3.ogg", "Sand_dig4.ogg"],
+      hit: [
+        "Sand_hit1.ogg",
+        "Sand_hit2.ogg",
+        "Sand_hit3.ogg",
+        "Sand_hit4.ogg",
+        "Sand_hit5.ogg",
+      ],
+    },
   },
   [BlockType.WATER]: {
     name: "Water",
