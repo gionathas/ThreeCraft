@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+import StepSoundEffect from "../audio/StepSoundEffect";
 import EnvVars from "../config/EnvVars";
 import Terrain from "../entities/Terrain";
 import { Block } from "../terrain/block";
@@ -9,13 +10,19 @@ import PlayerController from "./PlayerController";
 import PlayerControls from "./PlayerControls";
 
 export type PhysicsMode = "sim" | "fly";
-export type GroundState = "falling" | "jumping" | "walking" | "running";
+export type GroundState =
+  | "falling"
+  | "jumping"
+  | "still"
+  | "walking"
+  | "running";
 
 const speedMultipliers: Record<GroundState, number> = {
   falling: 0.8,
   jumping: 0.8,
   walking: 1,
   running: 1.8,
+  still: 1,
 };
 
 /**
@@ -36,6 +43,9 @@ export default class PlayerPhysics {
   private playerControls: PlayerControls;
   private playerController: PlayerController;
 
+  // sounds
+  private stepSoundEffect: StepSoundEffect;
+
   // state
   private mode: PhysicsMode;
   private groundState: GroundState;
@@ -53,6 +63,7 @@ export default class PlayerPhysics {
     this.playerController = playerController;
     this.playerControls = playerControls;
     this.terrain = terrain;
+    this.stepSoundEffect = new StepSoundEffect();
 
     this.mode = EnvVars.PLAYER_DEFAULT_PHYSICS_MODE;
     this.prevGroundState = "falling";
@@ -93,19 +104,27 @@ export default class PlayerPhysics {
   }
 
   private updateGroundState() {
-    const isOnGround = this.isHittingGround();
+    const groundBlock = this.isHittingGround();
+    const isOnGround = groundBlock !== null;
 
     if (!isOnGround) {
       this.groundState = this.velocity.y <= 0 ? "falling" : "jumping";
     } else {
+      // player is above a solid block
       const hasJumped = this.playerController.hasJumped();
-      const isRunning = this.playerController.isRunning();
+      const isStill = this.isStill();
 
-      this.groundState = hasJumped
-        ? "jumping"
-        : isRunning
-        ? "running"
-        : "walking";
+      if (hasJumped) {
+        this.groundState = "jumping";
+      } else if (isStill) {
+        this.groundState = "still";
+      } else {
+        const isRunning = this.playerController.isRunning();
+        this.groundState = isRunning ? "running" : "walking";
+
+        // play step sounds over the ground block
+        this.stepSoundEffect.playStepSound(groundBlock, isRunning);
+      }
     }
   }
 
@@ -216,8 +235,14 @@ export default class PlayerPhysics {
     }
   }
 
+  /**
+   * Checks if the player is colliding with a solid block below its feet
+   * and returns the block if it is.
+   *
+   * @returns the solid block below the player's feet or null if there is no solid block
+   */
   private isHittingGround() {
-    const { playerControls, position, feetWidth, width } = this;
+    const { playerControls, position, feetWidth } = this;
 
     const feetY = playerControls.getFeetHeight();
 
@@ -233,19 +258,19 @@ export default class PlayerPhysics {
 
     for (let x = right; x <= left; x += xInc) {
       for (let z = back; z <= front; z += zInc) {
-        const isColliding = this.terrain.isSolidBlock({
+        const groundBlock = this.terrain.getBlock({
           x,
           y: feetY,
           z,
         });
 
-        if (isColliding) {
-          return true;
+        if (groundBlock?.isSolid) {
+          return groundBlock;
         }
       }
     }
 
-    return false;
+    return null;
   }
 
   private isTopColliding() {
@@ -1361,6 +1386,10 @@ export default class PlayerPhysics {
     // NOTE a bit too much magic here (should be refactored)
     const directionFactor = Math.abs(Math.cos(lookDirAngle));
     return hSpeed * directionFactor * slidingFactor * dt;
+  }
+
+  private isStill() {
+    return this.velocity.length() < Physics.MIN_VELOCITY;
   }
 
   private getForwardMovementDirection() {

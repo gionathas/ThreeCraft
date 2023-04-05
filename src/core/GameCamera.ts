@@ -1,4 +1,4 @@
-import { PerspectiveCamera } from "three";
+import { AudioListener, PerspectiveCamera } from "three";
 
 export default class GameCamera extends PerspectiveCamera {
   public static readonly DEFAULT_FOV = 75;
@@ -9,6 +9,8 @@ export default class GameCamera extends PerspectiveCamera {
 
   private onResizeRef: () => void;
 
+  private audioListener: AudioListener;
+
   private constructor() {
     super(
       GameCamera.DEFAULT_FOV,
@@ -17,6 +19,9 @@ export default class GameCamera extends PerspectiveCamera {
       GameCamera.Z_FAR
     );
 
+    this.audioListener = this.initAudioListener();
+
+    // listeners
     this.onResizeRef = this.onResize.bind(this);
     window.addEventListener("resize", this.onResizeRef);
   }
@@ -32,9 +37,20 @@ export default class GameCamera extends PerspectiveCamera {
     return window.innerWidth / window.innerHeight;
   }
 
+  private initAudioListener() {
+    const audioListener = new AudioListener();
+    this.add(audioListener);
+
+    return audioListener;
+  }
+
   setFov(fov: number) {
     this.fov = fov;
     this.updateProjectionMatrix();
+  }
+
+  getAudioListener() {
+    return this.audioListener;
   }
 
   private onResize() {

@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+import DigSoundEffect from "../audio/DigSoundEffect";
 import EnvVars from "../config/EnvVars";
 import GameCamera from "../core/GameCamera";
 import GameScene from "../core/GameScene";
@@ -15,13 +16,15 @@ export default class EditingControls {
   private scene: GameScene;
   private camera: GameCamera;
   private playerController: PlayerController;
-
   private terrain: Terrain;
 
   private blockMarker: BlockMarker | null;
 
   private playerCollider: PlayerCollider;
   private inventory: InventoryManager;
+
+  // sounds
+  private digSoundEffect: DigSoundEffect;
 
   constructor(
     playerController: PlayerController,
@@ -32,6 +35,7 @@ export default class EditingControls {
     this.scene = GameScene.getInstance();
     this.camera = GameCamera.getInstance();
     this.playerController = playerController;
+    this.digSoundEffect = new DigSoundEffect();
 
     this.terrain = terrain;
     this.playerCollider = playerCollider;
@@ -61,13 +65,17 @@ export default class EditingControls {
     if (isErasing) {
       const erasedBlock = this.eraseTargetBlock();
 
-      // if a block was erased and it drops something
-      // add it to the inventory
-      if (erasedBlock && erasedBlock.drop) {
-        this.inventory.addItem({
-          block: erasedBlock.drop,
-          amount: 1,
-        });
+      if (erasedBlock) {
+        // sound effect
+        this.digSoundEffect.playBlockDestroySound(erasedBlock);
+
+        // if it drops something, add it to the inventory
+        if (erasedBlock.drop) {
+          this.inventory.addItem({
+            block: erasedBlock.drop,
+            amount: 1,
+          });
+        }
       }
     }
 
@@ -76,9 +84,16 @@ export default class EditingControls {
       const selectedItem = this.inventory.getSelectedItem();
 
       if (selectedItem) {
-        const isPlaced = this.placeBlock(selectedItem.block);
+        const block = selectedItem.block;
+        const isPlaced = this.placeBlock(block);
 
         if (isPlaced) {
+          const blockData = Block.getBlockMetadata(block);
+
+          // sound effect
+          this.digSoundEffect.playBlockPlacementSound(blockData);
+
+          // decrement item amount
           this.inventory.decrementSelectedItemAmount();
         }
       }
