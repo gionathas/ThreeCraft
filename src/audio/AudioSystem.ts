@@ -38,13 +38,13 @@ export default class AudioSystem {
   }
 
   private loadSounds() {
-    Logger.debug("Loading sounds...");
+    Logger.info("Loading sounds...", Logger.AUDIO_KEY);
 
     const sounds = new Map();
 
     for (const src of Object.values(soundSrcSet)) {
-      Logger.debug(`Loading sound: ${src}`);
       const filename = src.split("/").pop() as string;
+      Logger.debug(`Loading sound: ${filename}`, Logger.AUDIO_KEY);
 
       this.audioLoader.load(
         src,
@@ -59,7 +59,7 @@ export default class AudioSystem {
       );
     }
 
-    Logger.debug("Sounds loaded");
+    Logger.info("Sound loaded", Logger.AUDIO_KEY);
     return sounds;
   }
 
@@ -80,7 +80,11 @@ export default class AudioSystem {
   }
 
   dispose() {
-    Logger.debug("Disposing AudioSystem...");
+    Logger.info(
+      "Disposing AudioSystem...",
+      Logger.DISPOSE_KEY,
+      Logger.AUDIO_KEY
+    );
     this.sounds.clear();
     AudioSystem.instance = null;
   }
