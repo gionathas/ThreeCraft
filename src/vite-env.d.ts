@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   // Logging
+  readonly VITE_LOG_LEVELS: string;
   readonly VITE_LOG_KEYS: string;
 
   // Game settings
