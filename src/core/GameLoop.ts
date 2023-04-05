@@ -10,6 +10,7 @@ import Logger from "./Logger";
 import Renderer from "./Renderer";
 import { Settings } from "./SettingsManager";
 
+// TODO move this to a separate file
 export type GameData = {
   world: {
     seed: string;
@@ -37,9 +38,9 @@ export default class GameLoop {
   private ui: UI | null;
 
   constructor() {
-    this.renderer = Renderer.init();
+    this.renderer = Renderer.create();
     this.gameState = GameState.getInstance();
-    this.scene = GameScene.getInstance();
+    this.scene = GameScene.create();
     this.camera = GameCamera.getInstance();
     this.inputController = InputController.getInstance();
 

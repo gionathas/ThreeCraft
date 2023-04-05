@@ -22,8 +22,21 @@ export default class GameScene extends Scene {
 
   public static getInstance(): GameScene {
     if (!this.instance) {
-      this.instance = new GameScene();
+      throw new Error("GameScene not initialized");
     }
+
+    return this.instance;
+  }
+
+  static create(): GameScene {
+    if (this.instance) {
+      return this.instance;
+    }
+
+    Logger.info("Creating scene...", Logger.SCENE_KEY);
+    const scene = new GameScene();
+    this.instance = scene;
+
     return this.instance;
   }
 

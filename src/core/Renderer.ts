@@ -15,7 +15,7 @@ export default class Renderer extends WebGLRenderer {
     return this.instance;
   }
 
-  static init() {
+  static create() {
     if (this.instance) {
       return this.instance;
     }
