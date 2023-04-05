@@ -64,7 +64,13 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
+      broken: [
         "Stone_dig1.ogg",
         "Stone_dig2.ogg",
         "Stone_dig3.ogg",
@@ -104,7 +110,13 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
+      broken: [
         "Stone_dig1.ogg",
         "Stone_dig2.ogg",
         "Stone_dig3.ogg",
@@ -144,7 +156,13 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Grass_dig1.ogg",
+        "Grass_dig2.ogg",
+        "Grass_dig3.ogg",
+        "Grass_dig4.ogg",
+      ],
+      broken: [
         "Grass_dig1.ogg",
         "Grass_dig2.ogg",
         "Grass_dig3.ogg",
@@ -208,7 +226,13 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Gravel_dig1.ogg",
+        "Gravel_dig2.ogg",
+        "Gravel_dig3.ogg",
+        "Gravel_dig4.ogg",
+      ],
+      broken: [
         "Gravel_dig1.ogg",
         "Gravel_dig2.ogg",
         "Gravel_dig3.ogg",
@@ -246,7 +270,18 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: ["Wood_dig1.ogg", "Wood_dig2.ogg", "Wood_dig3.ogg", "Wood_dig4.ogg"],
+      place: [
+        "Wood_dig1.ogg",
+        "Wood_dig2.ogg",
+        "Wood_dig3.ogg",
+        "Wood_dig4.ogg",
+      ],
+      broken: [
+        "Wood_dig1.ogg",
+        "Wood_dig2.ogg",
+        "Wood_dig3.ogg",
+        "Wood_dig4.ogg",
+      ],
       hit: [
         "Wood_hit1.ogg",
         "Wood_hit2.ogg",
@@ -280,7 +315,13 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Grass_dig1.ogg",
+        "Grass_dig2.ogg",
+        "Grass_dig3.ogg",
+        "Grass_dig4.ogg",
+      ],
+      broken: [
         "Grass_dig1.ogg",
         "Grass_dig2.ogg",
         "Grass_dig3.ogg",
@@ -320,7 +361,18 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: ["Wood_dig1.ogg", "Wood_dig2.ogg", "Wood_dig3.ogg", "Wood_dig4.ogg"],
+      place: [
+        "Wood_dig1.ogg",
+        "Wood_dig2.ogg",
+        "Wood_dig3.ogg",
+        "Wood_dig4.ogg",
+      ],
+      broken: [
+        "Wood_dig1.ogg",
+        "Wood_dig2.ogg",
+        "Wood_dig3.ogg",
+        "Wood_dig4.ogg",
+      ],
       hit: [
         "Wood_hit1.ogg",
         "Wood_hit2.ogg",
@@ -355,7 +407,18 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: ["Sand_dig1.ogg", "Sand_dig2.ogg", "Sand_dig3.ogg", "Sand_dig4.ogg"],
+      place: [
+        "Sand_dig1.ogg",
+        "Sand_dig2.ogg",
+        "Sand_dig3.ogg",
+        "Sand_dig4.ogg",
+      ],
+      broken: [
+        "Sand_dig1.ogg",
+        "Sand_dig2.ogg",
+        "Sand_dig3.ogg",
+        "Sand_dig4.ogg",
+      ],
       hit: [
         "Sand_hit1.ogg",
         "Sand_hit2.ogg",
@@ -411,7 +474,14 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
+      broken: ["Glass_dig1.ogg", "Glass_dig2.ogg", "Glass_dig3.ogg"],
+      hit: [
         "Stone_dig1.ogg",
         "Stone_dig2.ogg",
         "Stone_dig3.ogg",
@@ -443,7 +513,13 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
     sounds: {
-      dig: [
+      place: [
+        "Stone_dig1.ogg",
+        "Stone_dig2.ogg",
+        "Stone_dig3.ogg",
+        "Stone_dig4.ogg",
+      ],
+      broken: [
         "Stone_dig1.ogg",
         "Stone_dig2.ogg",
         "Stone_dig3.ogg",

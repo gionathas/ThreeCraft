@@ -7,7 +7,7 @@ export default class DigSoundEffect extends SoundEffect {
   }
 
   playBlockPlacementSound(block: BlockMetadata) {
-    const blockPlacementSoundSet = block.sounds?.dig;
+    const blockPlacementSoundSet = block.sounds?.place;
 
     if (blockPlacementSoundSet) {
       const placeSound = this.selectSoundFromSet(blockPlacementSoundSet);
@@ -16,7 +16,7 @@ export default class DigSoundEffect extends SoundEffect {
   }
 
   playBlockDestroySound(block: BlockMetadata) {
-    const blockPlacementSoundSet = block.sounds?.dig;
+    const blockPlacementSoundSet = block.sounds?.broken;
 
     if (blockPlacementSoundSet) {
       const destroySound = this.selectSoundFromSet(blockPlacementSoundSet);

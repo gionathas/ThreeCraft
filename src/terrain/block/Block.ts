@@ -30,7 +30,8 @@ export type BlockMetadata = {
     };
   };
   sounds?: {
-    dig?: string[];
+    place?: string[];
+    broken?: string[];
     hit?: string[];
   };
 };
