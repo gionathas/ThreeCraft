@@ -15,7 +15,7 @@ export default class Launcher {
   private dataManager: GameDataManager;
   private settingsManager: SettingsManager;
 
-  // ui's
+  // ui
   private mainMenu: MainMenu;
 
   constructor() {
