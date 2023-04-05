@@ -51,15 +51,15 @@ export default class Player {
     this.editingControls.dispose();
   }
 
-  controlsEnabled() {
+  controlsLocked() {
     return this.controls.isLocked;
   }
 
-  enableControls() {
+  lockControls() {
     this.controls.lock();
   }
 
-  disableControls() {
+  unlockControls() {
     this.controls.unlock();
   }
 

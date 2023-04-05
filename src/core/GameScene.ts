@@ -89,7 +89,6 @@ export default class GameScene extends Scene {
     this.clear();
 
     this.initialized = false;
-    Logger.info("Scene disposed", Logger.DISPOSE_KEY, Logger.SCENE_KEY);
   }
 
   getMeshCount(): number {

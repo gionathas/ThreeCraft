@@ -3,9 +3,11 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { InventoryState } from "../player/InventoryManager";
 import UI from "../ui/UI";
-import Engine from "./Engine";
+import GameCamera from "./GameCamera";
+import GameScene from "./GameScene";
 import GameState from "./GameState";
 import Logger from "./Logger";
+import Renderer from "./Renderer";
 import { Settings } from "./SettingsManager";
 
 export type GameData = {
@@ -20,7 +22,12 @@ export type GameData = {
 };
 
 export default class GameLoop {
-  private engine: Engine;
+  // NOTE FPS are capped at 75, maybe make this configurable in the future
+  private static readonly MAX_FPS = 75;
+
+  private renderer: Renderer;
+  private scene: GameScene;
+  private camera: GameCamera;
 
   private gameState: GameState;
   private inputController: InputController;
@@ -30,8 +37,10 @@ export default class GameLoop {
   private ui: UI | null;
 
   constructor() {
-    this.engine = Engine.getInstance();
+    this.renderer = Renderer.init();
     this.gameState = GameState.getInstance();
+    this.scene = GameScene.getInstance();
+    this.camera = GameCamera.getInstance();
     this.inputController = InputController.getInstance();
 
     this.player = null;
@@ -42,6 +51,10 @@ export default class GameLoop {
   async start(gameData: GameData, settings: Settings, asyncStart: boolean) {
     this.gameState.setState("loading");
 
+    // init scene
+    this.scene.init(settings.renderDistance);
+    this.camera.setFov(settings.fov);
+
     // init game entities
     Logger.info("Initializing game entities...", Logger.GAME_LOOP_KEY);
     this.terrain = asyncStart
@@ -49,15 +62,49 @@ export default class GameLoop {
       : this.initTerrain(gameData, settings);
     this.player = this.initPlayer(this.terrain, gameData);
     this.ui = this.initUI(this.player, this.terrain);
-    Logger.info("Game Entities initialized", Logger.GAME_LOOP_KEY);
 
-    this.gameState.setState("running");
-
-    // enable player controls
-    this.player.enableControls();
+    // lock controls
+    this.player.lockControls();
 
     // start game loop
-    this.engine.start(settings, this.update.bind(this));
+    this.startGameLoop();
+  }
+
+  private startGameLoop() {
+    Logger.info("Starting Game Loop...", Logger.GAME_LOOP_KEY);
+    this.renderer.showCanvas();
+
+    let previousTime = performance.now();
+
+    // fixed timestep
+    const timestep = 1 / GameLoop.MAX_FPS;
+    let accumulator = 0;
+
+    this.gameState.setState("running");
+    this.renderer.setAnimationLoop((time) => {
+      let dt = (time - previousTime) / 1000;
+      previousTime = time;
+
+      // Track the accumulated time that hasn't been simulated yet
+      accumulator += dt;
+
+      // Simulate the total elapsed time in fixed-size chunks
+      let numUpdateSteps = 0;
+      while (accumulator >= timestep) {
+        this.update(timestep);
+        accumulator -= timestep;
+
+        // Prevent spiral of death
+        if (++numUpdateSteps >= 240) {
+          console.warn("Too many update steps");
+          // discard the unsimulated time
+          accumulator = 0;
+          break;
+        }
+      }
+
+      this.renderer.render(this.scene, this.camera);
+    });
   }
 
   private update(dt: number) {
@@ -122,22 +169,48 @@ export default class GameLoop {
   }
 
   dispose() {
+    this.disposeEntities();
+    this.disposeSceneAndCamera();
+    this.disposeRenderer();
+  }
+
+  private disposeEntities() {
+    // entities disposing
     Logger.info(
-      "Disposing game loop...",
+      "Disposing game entities...",
       Logger.GAME_LOOP_KEY,
       Logger.DISPOSE_KEY
     );
-    // entities disposing
     this.inputController.disable();
     this.terrain?.dispose();
     this.player?.dispose();
     this.ui?.dispose();
-    this.engine.dispose();
 
     this.player = null;
     this.terrain = null;
     this.ui = null;
+  }
 
-    Logger.info("Game Loop disposed", Logger.GAME_LOOP_KEY, Logger.DISPOSE_KEY);
+  private disposeSceneAndCamera() {
+    // scene and camera disposing
+    Logger.info(
+      "Disposing scene and camera...",
+      Logger.GAME_LOOP_KEY,
+      Logger.DISPOSE_KEY
+    );
+    this.scene.dispose();
+    this.camera.clear();
+  }
+
+  private disposeRenderer() {
+    // disposing renderer
+    Logger.info(
+      "Disposing renderer...",
+      Logger.GAME_LOOP_KEY,
+      Logger.DISPOSE_KEY
+    );
+    this.renderer.hideCanvas();
+    this.renderer.setAnimationLoop(null);
+    this.renderer.dispose();
   }
 }

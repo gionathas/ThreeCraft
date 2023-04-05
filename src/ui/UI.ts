@@ -77,7 +77,7 @@ export default class UI {
       this.gameState.setState("running");
 
       // re-enable game controls
-      this.player.enableControls();
+      this.player.lockControls();
     });
 
     this.player.onDisableControls(() => {
@@ -113,10 +113,10 @@ export default class UI {
   private customControlsEnablerHandler(evt: PointerEvent) {
     const state = this.gameState.getState();
     const inventoryOpen = this.inventoryPanel.isOpen;
-    const controlsEnabled = this.player.controlsEnabled();
+    const controlsEnabled = this.player.controlsLocked();
 
     if (state === "running" && !inventoryOpen && !controlsEnabled) {
-      this.player.enableControls();
+      this.player.lockControls();
     }
   }
 
@@ -147,11 +147,11 @@ export default class UI {
 
   private openInventory() {
     this.inventoryPanel.show();
-    this.player.disableControls();
+    this.player.unlockControls();
   }
 
   private closeInventory() {
-    this.player.enableControls();
+    this.player.lockControls();
     this.inventoryPanel.hide();
   }
 }

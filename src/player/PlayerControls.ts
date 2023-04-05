@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
-import Engine from "../core/Engine";
 import GameCamera from "../core/GameCamera";
+import Renderer from "../core/Renderer";
 import PlayerConstants from "./PlayerConstants";
 import PlayerController from "./PlayerController";
 
@@ -16,7 +16,7 @@ export default class PlayerControls extends PointerLockControls {
   private onControlUnlockHandlerRef: () => void;
 
   constructor(playerController: PlayerController) {
-    super(GameCamera.getInstance(), Engine.getInstance().getCanvas());
+    super(GameCamera.getInstance(), Renderer.getInstance().getCanvas());
 
     this.playerController = playerController;
 
