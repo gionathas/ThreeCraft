@@ -1,6 +1,7 @@
 import { WebGLRenderer } from "three";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
+import Logger from "./Logger";
 import { Settings } from "./SettingsManager";
 
 export default class Engine {
@@ -42,6 +43,8 @@ export default class Engine {
   }
 
   start(settings: Settings, update: (dt: number) => void) {
+    Logger.info("Starting engine...", Logger.ENGINE_KEY);
+
     this.scene.init(settings);
     this.showCanvas();
 
@@ -78,17 +81,25 @@ export default class Engine {
     });
   }
 
-  private showCanvas() {
-    this.renderer.domElement.style.display = "block";
-  }
-
   dispose() {
-    this.renderer.domElement.style.display = "none";
+    Logger.info("Disposing engine...", Logger.DISPOSE_KEY, Logger.ENGINE_KEY);
+
+    this.hideCanvas();
 
     this.renderer.setAnimationLoop(null);
     this.scene.dispose();
     this.camera.clear();
     this.renderer.dispose();
+
+    Logger.info("Engine disposed", Logger.DISPOSE_KEY, Logger.ENGINE_KEY);
+  }
+
+  private showCanvas() {
+    this.renderer.domElement.style.display = "block";
+  }
+
+  private hideCanvas() {
+    this.renderer.domElement.style.display = "none";
   }
 
   getCanvas(): HTMLCanvasElement {

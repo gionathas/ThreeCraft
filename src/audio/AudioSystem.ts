@@ -87,5 +87,6 @@ export default class AudioSystem {
     );
     this.sounds.clear();
     AudioSystem.instance = null;
+    Logger.info("AudioSystem disposed", Logger.DISPOSE_KEY, Logger.AUDIO_KEY);
   }
 }
