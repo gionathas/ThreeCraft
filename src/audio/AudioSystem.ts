@@ -4,8 +4,8 @@ import GameCamera from "../core/GameCamera";
 import Logger from "../core/Logger";
 
 export enum VolumeLevel {
-  VERY_LOW = 0.05,
-  NORMAL = 0.15,
+  VERY_LOW = 0.02,
+  NORMAL = 0.1,
 }
 
 export enum PlaybackRate {
