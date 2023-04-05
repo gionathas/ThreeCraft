@@ -33,15 +33,15 @@ export default class GameCamera extends PerspectiveCamera {
     return this.instance;
   }
 
-  private static getAspectRatio() {
-    return window.innerWidth / window.innerHeight;
-  }
-
   private initAudioListener() {
     const audioListener = new AudioListener();
     this.add(audioListener);
 
     return audioListener;
+  }
+
+  private static getAspectRatio() {
+    return window.innerWidth / window.innerHeight;
   }
 
   setFov(fov: number) {
