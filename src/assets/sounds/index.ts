@@ -55,6 +55,10 @@ import Sand_hit3 from "./Sand_hit3.ogg";
 import Sand_hit4 from "./Sand_hit4.ogg";
 import Sand_hit5 from "./Sand_hit5.ogg";
 
+import Glass_dig1 from "./Glass_dig1.ogg";
+import Glass_dig2 from "./Glass_dig2.ogg";
+import Glass_dig3 from "./Glass_dig3.ogg";
+
 export { Grass_dig1, Grass_dig2, Grass_dig3, Grass_dig4 };
 export {
   Grass_hit1,
@@ -79,3 +83,4 @@ export { Wood_dig1, Wood_dig2, Wood_dig3, Wood_dig4 };
 export { Wood_hit1, Wood_hit2, Wood_hit3, Wood_hit4, Wood_hit5, Wood_hit6 };
 export { Sand_dig1, Sand_dig2, Sand_dig3, Sand_dig4 };
 export { Sand_hit1, Sand_hit2, Sand_hit3, Sand_hit4, Sand_hit5 };
+export { Glass_dig1, Glass_dig2, Glass_dig3 };
