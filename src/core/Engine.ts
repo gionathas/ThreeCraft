@@ -44,8 +44,9 @@ export default class Engine {
 
   start(settings: Settings, update: (dt: number) => void) {
     Logger.info("Starting engine...", Logger.ENGINE_KEY);
+    this.scene.init(settings.renderDistance);
+    this.camera.setFov(settings.fov);
 
-    this.scene.init(settings);
     this.showCanvas();
 
     let previousTime = performance.now();
@@ -54,7 +55,8 @@ export default class Engine {
     const timestep = 1 / Engine.MAX_FPS;
     let accumulator = 0;
 
-    // start game loop
+    // start animation loop
+    Logger.info("Starting animation loop...", Logger.ENGINE_KEY);
     this.renderer.setAnimationLoop((time) => {
       let dt = (time - previousTime) / 1000;
       previousTime = time;

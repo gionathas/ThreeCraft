@@ -4,8 +4,8 @@ import InputController from "../io/InputController";
 import { InventoryState } from "../player/InventoryManager";
 import UI from "../ui/UI";
 import Engine from "./Engine";
-import GameCamera from "./GameCamera";
 import GameState from "./GameState";
+import Logger from "./Logger";
 import { Settings } from "./SettingsManager";
 
 export type GameData = {
@@ -21,7 +21,6 @@ export type GameData = {
 
 export default class GameLoop {
   private engine: Engine;
-  private camera: GameCamera;
 
   private gameState: GameState;
   private inputController: InputController;
@@ -34,7 +33,6 @@ export default class GameLoop {
     this.engine = Engine.getInstance();
     this.gameState = GameState.getInstance();
     this.inputController = InputController.getInstance();
-    this.camera = GameCamera.getInstance();
 
     this.player = null;
     this.terrain = null;
@@ -44,15 +42,14 @@ export default class GameLoop {
   async start(gameData: GameData, settings: Settings, asyncStart: boolean) {
     this.gameState.setState("loading");
 
-    // init scene
-    this.applySettings(settings);
-
     // init game entities
+    Logger.info("Initializing game entities...", Logger.GAME_LOOP_KEY);
     this.terrain = asyncStart
       ? await this.asyncInitTerrain(gameData, settings)
       : this.initTerrain(gameData, settings);
     this.player = this.initPlayer(this.terrain, gameData);
     this.ui = this.initUI(this.player, this.terrain);
+    Logger.info("Game Entities initialized", Logger.GAME_LOOP_KEY);
 
     this.gameState.setState("running");
 
@@ -72,10 +69,6 @@ export default class GameLoop {
       ui!.update();
       inputController.update(); // this must come lastly
     }
-  }
-
-  private applySettings(settings: Settings) {
-    this.camera.setFov(settings.fov);
   }
 
   private async asyncInitTerrain(gameData: GameData, settings: Settings) {
@@ -129,6 +122,12 @@ export default class GameLoop {
   }
 
   dispose() {
+    Logger.info(
+      "Disposing game loop...",
+      Logger.GAME_LOOP_KEY,
+      Logger.DISPOSE_KEY
+    );
+    // entities disposing
     this.inputController.disable();
     this.terrain?.dispose();
     this.player?.dispose();
@@ -138,5 +137,7 @@ export default class GameLoop {
     this.player = null;
     this.terrain = null;
     this.ui = null;
+
+    Logger.info("Game Loop disposed", Logger.GAME_LOOP_KEY, Logger.DISPOSE_KEY);
   }
 }

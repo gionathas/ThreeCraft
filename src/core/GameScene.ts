@@ -2,10 +2,9 @@ import { AmbientLight, Color, DirectionalLight, Fog, Scene } from "three";
 import EnvVars from "../config/EnvVars";
 import { Chunk } from "../terrain/chunk";
 import DebugControls from "../tools/DebugControls";
-import { Settings } from "./SettingsManager";
+import Logger from "./Logger";
 
 export default class GameScene extends Scene {
-  private static readonly DEFAULT_FOG_FACTOR = 3;
   private static readonly SkyColor: string = "#87CEEB";
 
   private static instance: GameScene | null;
@@ -28,17 +27,19 @@ export default class GameScene extends Scene {
     return this.instance;
   }
 
-  init(settings: Settings) {
+  init(renderDistanceInChunks: number) {
     if (this.initialized) {
       return;
     }
 
+    Logger.info("Initializing scene...", Logger.SCENE_KEY);
     this.gui = DebugControls.getInstance();
     this.lights = this.initLights();
     this.initBackground();
-    this.initFog(settings.renderDistance);
+    this.initFog(renderDistanceInChunks);
 
     this.initialized = true;
+    Logger.info("Scene initialized", Logger.SCENE_KEY);
   }
 
   /**
@@ -82,11 +83,13 @@ export default class GameScene extends Scene {
   }
 
   dispose() {
+    Logger.info("Disposing scene...", Logger.DISPOSE_KEY, Logger.SCENE_KEY);
     this.lights.forEach((light) => light.dispose());
     this.lights = [];
     this.clear();
 
     this.initialized = false;
+    Logger.info("Scene disposed", Logger.DISPOSE_KEY, Logger.SCENE_KEY);
   }
 
   getMeshCount(): number {

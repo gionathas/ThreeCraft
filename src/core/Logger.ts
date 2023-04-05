@@ -9,6 +9,10 @@ export default class Logger {
 
   // logging keys
   public static readonly ENGINE_KEY = "engine";
+  public static readonly GAME_LOOP_KEY = "gameloop";
+
+  public static readonly SCENE_KEY = "scene";
+  public static readonly CAMERA_KEY = "camera";
   public static readonly AUDIO_KEY = "audio";
   public static readonly DISPOSE_KEY = "dispose";
 
