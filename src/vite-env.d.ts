@@ -1,6 +1,9 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  // Logging
+  readonly VITE_LOG_KEYS: string;
+
   // Game settings
   readonly VITE_JUMP_START: string;
 

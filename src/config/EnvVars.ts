@@ -1,9 +1,10 @@
 import { PhysicsMode } from "../player/PlayerPhysics";
 
 export default class EnvVars {
-  /**
-   * Game Settings
-   */
+  /** Logging */
+  static readonly LOG_KEYS = this.getList(import.meta.env.VITE_LOG_KEYS);
+
+  /** Game Settings */
   static readonly JUMP_START = this.getBoolean(import.meta.env.VITE_JUMP_START);
 
   /** Gameplay Settings */
@@ -14,9 +15,7 @@ export default class EnvVars {
     import.meta.env.VITE_EDITING_ENABLED
   );
 
-  /**
-   * UI
-   */
+  /** UI */
   static readonly SHOW_INITIAL_TERRAIN_GENERATION = this.getBoolean(
     import.meta.env.VITE_SHOW_INITIAL_TERRAIN_GENERATION
   );
