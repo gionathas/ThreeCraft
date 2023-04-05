@@ -39,9 +39,10 @@ export default class GameLoop {
 
   constructor() {
     this.renderer = Renderer.create();
-    this.gameState = GameState.getInstance();
     this.scene = GameScene.create();
-    this.camera = GameCamera.getInstance();
+    this.camera = GameCamera.create();
+
+    this.gameState = GameState.getInstance();
     this.inputController = InputController.getInstance();
 
     this.player = null;

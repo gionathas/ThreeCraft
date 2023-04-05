@@ -19,7 +19,7 @@ export default class Launcher {
   private mainMenu: MainMenu;
 
   constructor() {
-    this.gameState = GameState.getInstance();
+    this.gameState = GameState.create();
     this.gameLoop = new GameLoop();
 
     this.dataManager = GameDataManager.getInstance();

@@ -1,4 +1,5 @@
 import { WebGLRenderer } from "three";
+import Logger from "./Logger";
 
 export default class Renderer extends WebGLRenderer {
   private static instance: Renderer;
@@ -20,6 +21,7 @@ export default class Renderer extends WebGLRenderer {
       return this.instance;
     }
 
+    Logger.info("Instatiating renderer...", Logger.INIT_KEY);
     const renderer = new Renderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);

@@ -33,9 +33,8 @@ export default class GameScene extends Scene {
       return this.instance;
     }
 
-    Logger.info("Creating scene...", Logger.SCENE_KEY);
-    const scene = new GameScene();
-    this.instance = scene;
+    Logger.info("Instantiating scene...", Logger.SCENE_KEY);
+    this.instance = new GameScene();
 
     return this.instance;
   }

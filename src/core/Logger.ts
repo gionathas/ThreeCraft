@@ -8,12 +8,12 @@ export default class Logger {
   private static readonly LOG_KEYS = EnvVars.LOG_KEYS;
 
   // logging keys
-  public static readonly ENGINE_KEY = "engine";
   public static readonly GAME_LOOP_KEY = "gameloop";
-
   public static readonly SCENE_KEY = "scene";
-  public static readonly CAMERA_KEY = "camera";
   public static readonly AUDIO_KEY = "audio";
+
+  // phase keys
+  public static readonly INIT_KEY = "init";
   public static readonly DISPOSE_KEY = "dispose";
 
   static debug(msg: string, ...keys: string[]) {

@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import Logger from "./Logger";
 
 type State = "menu" | "loading" | "running" | "paused";
 
@@ -15,9 +16,19 @@ export default class GameState {
 
   static getInstance() {
     if (!this.instance) {
-      this.instance = new GameState();
+      throw new Error("GameState not initialized");
     }
 
+    return this.instance;
+  }
+
+  static create() {
+    if (this.instance) {
+      return this.instance;
+    }
+
+    Logger.info("Istantiating Game State...", Logger.INIT_KEY);
+    this.instance = new GameState();
     return this.instance;
   }
 

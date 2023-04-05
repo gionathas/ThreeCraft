@@ -11,6 +11,22 @@ export default class GameCamera extends PerspectiveCamera {
 
   private audioListener: AudioListener;
 
+  static getInstance() {
+    if (!this.instance) {
+      throw new Error("GameCamera not initialized");
+    }
+    return this.instance;
+  }
+
+  static create() {
+    if (this.instance) {
+      return this.instance;
+    }
+
+    this.instance = new GameCamera();
+    return this.instance;
+  }
+
   private constructor() {
     super(
       GameCamera.DEFAULT_FOV,
@@ -24,13 +40,6 @@ export default class GameCamera extends PerspectiveCamera {
     // listeners
     this.onResizeRef = this.onResize.bind(this);
     window.addEventListener("resize", this.onResizeRef);
-  }
-
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new GameCamera();
-    }
-    return this.instance;
   }
 
   private initAudioListener() {
