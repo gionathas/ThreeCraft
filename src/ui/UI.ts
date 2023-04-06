@@ -109,7 +109,7 @@ export default class UI {
 
   /**
    * This is for locking the controls when the player clicks on the screen
-   * when the game is running and the controls were not enabled.
+   * when the game is running and the controls are not locked.
    */
   private customControlsEnablerHandler(evt: PointerEvent) {
     const state = this.gameState.getState();
