@@ -1,8 +1,9 @@
 import { Quaternion, Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
-import GameDataManager from "../io/GameDataManager";
+import DataManager from "../io/DataManager";
 import PlayerConstants from "../player/PlayerConstants";
 import World from "../terrain/World";
+import Logger from "../tools/Logger";
 import MainMenu from "../ui/MainMenu";
 import Game from "./Game";
 import GameLoop, { GameData } from "./GameLoop";
@@ -13,7 +14,7 @@ export default class Launcher {
   private gameState: GameState;
   private gameLoop: GameLoop;
 
-  private dataManager: GameDataManager;
+  private dataManager: DataManager;
   private settingsManager: SettingsManager;
 
   // ui
@@ -23,8 +24,8 @@ export default class Launcher {
     this.gameState = Game.instance().getState();
     this.gameLoop = new GameLoop();
 
-    this.dataManager = GameDataManager.getInstance();
-    this.settingsManager = SettingsManager.getInstance();
+    this.dataManager = Game.instance().getDataManager();
+    this.settingsManager = Game.instance().getSettingsManager();
 
     this.mainMenu = new MainMenu();
     this.initEventListeners();
@@ -117,15 +118,20 @@ export default class Launcher {
   }
 
   private async loadSettings(): Promise<Settings> {
-    await this.settingsManager.loadSavedSettings();
-    return this.settingsManager.getSettings();
+    Logger.info("Loading settings...", Logger.LOADING_KEY);
+    await this.settingsManager.loadSettings();
+    const settings = this.settingsManager.getSettings();
+    Logger.debug(JSON.stringify(settings), Logger.LOADING_KEY);
+
+    return settings;
   }
 
   // TODO: this method should be moved into another class
   private async loadGameData(): Promise<GameData> {
-    const worldData = await this.dataManager.getSavedWorldData();
-    const playerData = await this.dataManager.getSavedPlayerData();
-    const inventoryData = await this.dataManager.getSavedInventory();
+    Logger.info("Loading game data...", Logger.LOADING_KEY);
+    const worldData = await this.dataManager.getWorldData();
+    const playerData = await this.dataManager.getPlayerData();
+    const inventoryData = await this.dataManager.getInventory();
 
     const seed = worldData?.seed
       ? worldData.seed

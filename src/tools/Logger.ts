@@ -11,9 +11,11 @@ export default class Logger {
   public static readonly GAME_LOOP_KEY = "gameloop";
   public static readonly SCENE_KEY = "scene";
   public static readonly AUDIO_KEY = "audio";
+  public static readonly DATA_KEY = "data";
 
   // phase keys
   public static readonly INIT_KEY = "init";
+  public static readonly LOADING_KEY = "load";
   public static readonly DISPOSE_KEY = "dispose";
 
   static debug(msg: string, ...keys: string[]) {

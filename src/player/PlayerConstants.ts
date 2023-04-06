@@ -7,10 +7,10 @@ export default class PlayerConstants {
   public static readonly DEFAULT_LOOK_ROTATION = new Quaternion(0, 0, 0);
   public static readonly DEFAULT_INVENTORY_STATE: InventoryState = {
     hotbar: EnvVars.STARTING_HOTBAR_ITEMS.map((item) => {
-      return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
+      return { block: item, amount: InventoryManager.MAX_STACKABLE_SIZE };
     }),
     inventory: EnvVars.STARTING_INVENTORY_ITEMS.map((item) => {
-      return { block: item, amount: InventoryManager.MAX_STACK_SIZE };
+      return { block: item, amount: InventoryManager.MAX_STACKABLE_SIZE };
     }),
   };
 

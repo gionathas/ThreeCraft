@@ -1,3 +1,4 @@
+import Game from "../core/Game";
 import SettingsManager, { Settings } from "../core/SettingsManager";
 
 export default class SettingsPanel {
@@ -14,7 +15,7 @@ export default class SettingsPanel {
   private renderDistanceSlider: HTMLInputElement;
 
   constructor() {
-    this.settingsManager = SettingsManager.getInstance();
+    this.settingsManager = Game.instance().getSettingsManager();
 
     this.settingsPanel = document.getElementById("settings-panel")!;
 

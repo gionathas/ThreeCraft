@@ -3,7 +3,7 @@ import Game from "../core/Game";
 import GameState from "../core/GameState";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
-import GameDataManager from "../io/GameDataManager";
+import DataManager from "../io/DataManager";
 import CrossHair from "./CrossHair";
 import DebugInfo from "./DebugInfo";
 import Hotbar from "./Hotbar";
@@ -12,7 +12,7 @@ import PausedMenu from "./PausedMenu";
 
 export default class UI {
   private gameState: GameState;
-  private dataManager: GameDataManager;
+  private dataManager: DataManager;
 
   private player: Player;
   private terrain: Terrain;
@@ -33,7 +33,7 @@ export default class UI {
     this.player = player;
     this.terrain = terrain;
 
-    this.dataManager = GameDataManager.getInstance();
+    this.dataManager = Game.instance().getDataManager();
 
     this.crosshair = this.initCrosshair();
     this.hotbar = this.initHotbar(player);

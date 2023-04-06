@@ -1,5 +1,6 @@
 import { Pool, spawn, Transfer } from "threads";
-import GameDataManager from "../../io/GameDataManager";
+import Game from "../../core/Game";
+import DataManager from "../../io/DataManager";
 import GlobalMapManager from "../../maps/GlobalMapManager";
 import { TerrainMap } from "../../maps/terrain";
 import GlobalTreeMap from "../../maps/tree/GlobalTreeMap";
@@ -27,7 +28,7 @@ export default class ChunkManager implements ChunkModel {
   private generatorsPool;
 
   private chunkGeometryBuilder: ChunkGeometryBuilder;
-  private dataManager: GameDataManager;
+  private dataManager: DataManager;
 
   constructor(globalMapManager: GlobalMapManager) {
     this.globalMapManager = globalMapManager;
@@ -43,7 +44,7 @@ export default class ChunkManager implements ChunkModel {
     );
 
     this.chunkGeometryBuilder = new ChunkGeometryBuilder(this.terrainMap);
-    this.dataManager = GameDataManager.getInstance();
+    this.dataManager = Game.instance().getDataManager();
   }
 
   generateChunkAt(
@@ -69,7 +70,7 @@ export default class ChunkManager implements ChunkModel {
       let transparentGeometry: BufferGeometryData | undefined;
       const chunkMeshes = [];
 
-      const savedChunk = await this.dataManager.getSavedChunk(chunkId);
+      const savedChunk = await this.dataManager.getChunk(chunkId);
 
       // if the chunk was previously saved, load it from the data storage
       if (savedChunk) {
@@ -77,8 +78,9 @@ export default class ChunkManager implements ChunkModel {
         this.loadedChunks.set(chunkId, savedChunk);
 
         // retrieve the saved chunk geometries
-        const persistedChunkGeometry =
-          await this.dataManager.getSavedChunkGeometry(chunkId);
+        const persistedChunkGeometry = await this.dataManager.getChunkGeometry(
+          chunkId
+        );
 
         solidGeometry = persistedChunkGeometry!.solidGeometry;
         transparentGeometry = persistedChunkGeometry!.transparentGeometry;
