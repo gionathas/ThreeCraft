@@ -1,3 +1,4 @@
+import AudioSystem from "../audio/AudioSystem";
 import DataManager from "../io/DataManager";
 import InputController from "../io/InputController";
 import Logger from "../tools/Logger";
@@ -19,11 +20,10 @@ export default class Game {
   private camera: GameCamera;
 
   // services
-  private dataManager: DataManager;
-  private settingsManager: SettingsManager;
-
-  // input listeners
   private inputController: InputController;
+  private dataManager: DataManager;
+  private audioSystem: AudioSystem;
+  private settingsManager: SettingsManager;
 
   static instance(): Game {
     if (!Game._instance) {
@@ -40,7 +40,6 @@ export default class Game {
 
   private constructor() {
     this.state = new GameState();
-    this.inputController = new InputController();
 
     // engine
     this.renderer = new Renderer();
@@ -48,8 +47,10 @@ export default class Game {
     this.camera = new GameCamera();
 
     // services
+    this.inputController = new InputController();
     this.dataManager = new DataManager();
     this.settingsManager = new SettingsManager(this.dataManager);
+    this.audioSystem = new AudioSystem(this.camera);
   }
 
   getState() {
@@ -78,5 +79,9 @@ export default class Game {
 
   getInputController() {
     return this.inputController;
+  }
+
+  getAudioSystem() {
+    return this.audioSystem;
   }
 }

@@ -1,3 +1,4 @@
+import Game from "../core/Game";
 import AudioSystem from "./AudioSystem";
 
 export abstract class SoundEffect {
@@ -5,7 +6,7 @@ export abstract class SoundEffect {
   protected soundIndex: number;
 
   constructor() {
-    this.audioSystem = AudioSystem.getInstance();
+    this.audioSystem = Game.instance().getAudioSystem();
     this.soundIndex = 0;
   }
 

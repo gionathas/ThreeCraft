@@ -1,6 +1,6 @@
 import { Audio, AudioListener, AudioLoader } from "three";
 import * as soundSrcSet from "../assets/sounds";
-import Game from "../core/Game";
+import GameCamera from "../core/GameCamera";
 import Logger from "../tools/Logger";
 
 export enum VolumeLevel {
@@ -16,25 +16,16 @@ export default class AudioSystem {
   private static readonly DEFAULT_VOLUME = VolumeLevel.NORMAL;
   private static readonly DEFAULT_PLAYBACK_RATE = PlaybackRate.NORMAL;
 
-  private static instance: AudioSystem | null;
-
   private audioListener: AudioListener;
   private audioLoader: AudioLoader;
 
   private sounds: Map<string, Audio>;
 
-  private constructor() {
-    this.audioListener = Game.instance().getCamera().getAudioListener();
+  constructor(camera: GameCamera) {
+    this.audioListener = camera.getAudioListener();
     this.audioLoader = new AudioLoader();
 
     this.sounds = this.loadSounds();
-  }
-
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new AudioSystem();
-    }
-    return this.instance;
   }
 
   private loadSounds() {
@@ -86,7 +77,6 @@ export default class AudioSystem {
       Logger.AUDIO_KEY
     );
     this.sounds.clear();
-    AudioSystem.instance = null;
     Logger.info("AudioSystem disposed", Logger.DISPOSE_KEY, Logger.AUDIO_KEY);
   }
 }
