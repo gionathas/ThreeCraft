@@ -1,11 +1,12 @@
 import KeyBindings from "../config/KeyBindings";
+import Game from "../core/Game";
 import InputController from "../io/InputController";
 
 export default class PlayerController {
   private inputController: InputController;
 
   constructor() {
-    this.inputController = InputController.getInstance();
+    this.inputController = Game.instance().getInputController();
   }
 
   hasJumped() {

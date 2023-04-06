@@ -1,4 +1,5 @@
 import DataManager from "../io/DataManager";
+import InputController from "../io/InputController";
 import Logger from "../tools/Logger";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
@@ -21,6 +22,9 @@ export default class Game {
   private dataManager: DataManager;
   private settingsManager: SettingsManager;
 
+  // input listeners
+  private inputController: InputController;
+
   static instance(): Game {
     if (!Game._instance) {
       throw new Error("Game not initialized");
@@ -36,6 +40,7 @@ export default class Game {
 
   private constructor() {
     this.state = new GameState();
+    this.inputController = new InputController();
 
     // engine
     this.renderer = new Renderer();
@@ -69,5 +74,9 @@ export default class Game {
 
   getSettingsManager() {
     return this.settingsManager;
+  }
+
+  getInputController() {
+    return this.inputController;
   }
 }

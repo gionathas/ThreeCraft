@@ -39,11 +39,12 @@ export default class GameLoop {
   private ui: UI | null;
 
   constructor() {
-    this.renderer = Game.instance().getRenderer();
-    this.scene = Game.instance().getScene();
-    this.camera = Game.instance().getCamera();
-    this.gameState = Game.instance().getState();
-    this.inputController = InputController.getInstance();
+    const game = Game.instance();
+    this.renderer = game.getRenderer();
+    this.scene = game.getScene();
+    this.camera = game.getCamera();
+    this.gameState = game.getState();
+    this.inputController = game.getInputController();
 
     this.player = null;
     this.terrain = null;

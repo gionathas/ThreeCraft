@@ -34,7 +34,7 @@ export default class DebugInfo {
 
   constructor(player: Player, terrain: Terrain) {
     this.scene = Game.instance().getScene();
-    this.inputController = InputController.getInstance();
+    this.inputController = Game.instance().getInputController();
 
     this.player = player;
     this.terrain = terrain;

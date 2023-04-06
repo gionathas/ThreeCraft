@@ -12,6 +12,7 @@ export default class Logger {
   public static readonly SCENE_KEY = "scene";
   public static readonly AUDIO_KEY = "audio";
   public static readonly DATA_KEY = "data";
+  public static readonly INPUT_KEY = "input";
 
   // phase keys
   public static readonly INIT_KEY = "init";
