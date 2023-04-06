@@ -1,7 +1,7 @@
+import Logger from "../tools/Logger";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
 import GameState from "./GameState";
-import Logger from "./Logger";
 import Renderer from "./Renderer";
 
 export default class Game {

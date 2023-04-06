@@ -2,12 +2,12 @@ import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { InventoryState } from "../player/InventoryManager";
+import Logger from "../tools/Logger";
 import UI from "../ui/UI";
 import Game from "./Game";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
 import GameState from "./GameState";
-import Logger from "./Logger";
 import Renderer from "./Renderer";
 import { Settings } from "./SettingsManager";
 
@@ -69,10 +69,10 @@ export default class GameLoop {
     this.player.lockControls();
 
     // start game loop
-    this.startGameLoop();
+    this.runLoop();
   }
 
-  private startGameLoop() {
+  private runLoop() {
     Logger.info("Starting Game Loop...", Logger.GAME_LOOP_KEY);
     this.renderer.showCanvas();
 

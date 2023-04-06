@@ -2,7 +2,7 @@ import { AmbientLight, Color, DirectionalLight, Fog, Scene } from "three";
 import EnvVars from "../config/EnvVars";
 import { Chunk } from "../terrain/chunk";
 import DebugControls from "../tools/DebugControls";
-import Logger from "./Logger";
+import Logger from "../tools/Logger";
 
 export default class GameScene extends Scene {
   private static readonly SkyColor: string = "#87CEEB";

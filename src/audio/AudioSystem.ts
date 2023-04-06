@@ -1,7 +1,7 @@
 import { Audio, AudioListener, AudioLoader } from "three";
 import * as soundSrcSet from "../assets/sounds";
 import Game from "../core/Game";
-import Logger from "../core/Logger";
+import Logger from "../tools/Logger";
 
 export enum VolumeLevel {
   VERY_LOW = 0.02,
