@@ -3,6 +3,7 @@ import Terrain from "../entities/Terrain";
 import InputController from "../io/InputController";
 import { InventoryState } from "../player/InventoryManager";
 import UI from "../ui/UI";
+import Game from "./Game";
 import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
 import GameState from "./GameState";
@@ -38,11 +39,10 @@ export default class GameLoop {
   private ui: UI | null;
 
   constructor() {
-    this.renderer = Renderer.create();
-    this.scene = GameScene.create();
-    this.camera = GameCamera.create();
-
-    this.gameState = GameState.getInstance();
+    this.renderer = Game.instance().getRenderer();
+    this.scene = Game.instance().getScene();
+    this.camera = Game.instance().getCamera();
+    this.gameState = Game.instance().getState();
     this.inputController = InputController.getInstance();
 
     this.player = null;
@@ -50,7 +50,7 @@ export default class GameLoop {
     this.ui = null;
   }
 
-  async start(gameData: GameData, settings: Settings, asyncStart: boolean) {
+  async run(gameData: GameData, settings: Settings, asyncStart: boolean) {
     this.gameState.setState("loading");
 
     // init scene

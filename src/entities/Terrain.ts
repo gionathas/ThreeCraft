@@ -1,3 +1,4 @@
+import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
@@ -21,7 +22,7 @@ export default class Terrain {
   private treeMap: GlobalTreeMap;
 
   constructor(seed: string, renderDistanceInChunks: number) {
-    this.scene = GameScene.getInstance();
+    this.scene = Game.instance().getScene();
     this.seed = seed;
 
     this.globalMapManager = GlobalMapManager.getInstance(seed);

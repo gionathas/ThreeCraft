@@ -7,36 +7,15 @@ import Logger from "./Logger";
 export default class GameScene extends Scene {
   private static readonly SkyColor: string = "#87CEEB";
 
-  private static instance: GameScene | null;
-
   private initialized: boolean;
   private gui!: DebugControls;
 
   private lights: THREE.Light[];
 
-  private constructor() {
+  constructor() {
     super();
     this.initialized = false;
     this.lights = [];
-  }
-
-  public static getInstance(): GameScene {
-    if (!this.instance) {
-      throw new Error("GameScene not initialized");
-    }
-
-    return this.instance;
-  }
-
-  static create(): GameScene {
-    if (this.instance) {
-      return this.instance;
-    }
-
-    Logger.info("Instantiating scene...", Logger.SCENE_KEY);
-    this.instance = new GameScene();
-
-    return this.instance;
   }
 
   init(renderDistanceInChunks: number) {

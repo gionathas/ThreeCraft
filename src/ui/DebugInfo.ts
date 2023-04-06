@@ -1,6 +1,7 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
+import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -32,7 +33,7 @@ export default class DebugInfo {
   private mem: Stats;
 
   constructor(player: Player, terrain: Terrain) {
-    this.scene = GameScene.getInstance();
+    this.scene = Game.instance().getScene();
     this.inputController = InputController.getInstance();
 
     this.player = player;

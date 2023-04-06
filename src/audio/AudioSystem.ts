@@ -1,6 +1,6 @@
 import { Audio, AudioListener, AudioLoader } from "three";
 import * as soundSrcSet from "../assets/sounds";
-import GameCamera from "../core/GameCamera";
+import Game from "../core/Game";
 import Logger from "../core/Logger";
 
 export enum VolumeLevel {
@@ -24,7 +24,7 @@ export default class AudioSystem {
   private sounds: Map<string, Audio>;
 
   private constructor() {
-    this.audioListener = GameCamera.getInstance().getAudioListener();
+    this.audioListener = Game.instance().getCamera().getAudioListener();
     this.audioLoader = new AudioLoader();
 
     this.sounds = this.loadSounds();

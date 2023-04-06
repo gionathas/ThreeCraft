@@ -1,4 +1,9 @@
+import Game from "./core/Game";
 import Launcher from "./core/Launcher";
 
-const gameLauncher = new Launcher();
-gameLauncher.start();
+// init game
+Game.init();
+
+// create and start launcher
+const launcher = new Launcher();
+launcher.start();

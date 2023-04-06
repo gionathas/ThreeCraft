@@ -5,29 +5,12 @@ export default class GameCamera extends PerspectiveCamera {
   private static readonly Z_NEAR = 0.01;
   private static readonly Z_FAR = 1000;
 
-  private static instance: GameCamera | null;
-
-  private onResizeRef: () => void;
-
   private audioListener: AudioListener;
 
-  static getInstance() {
-    if (!this.instance) {
-      throw new Error("GameCamera not initialized");
-    }
-    return this.instance;
-  }
+  // callbacks
+  private onResizeRef: () => void;
 
-  static create() {
-    if (this.instance) {
-      return this.instance;
-    }
-
-    this.instance = new GameCamera();
-    return this.instance;
-  }
-
-  private constructor() {
+  constructor() {
     super(
       GameCamera.DEFAULT_FOV,
       GameCamera.getAspectRatio(),

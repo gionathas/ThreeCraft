@@ -4,6 +4,7 @@ import GameDataManager from "../io/GameDataManager";
 import PlayerConstants from "../player/PlayerConstants";
 import World from "../terrain/World";
 import MainMenu from "../ui/MainMenu";
+import Game from "./Game";
 import GameLoop, { GameData } from "./GameLoop";
 import GameState from "./GameState";
 import SettingsManager, { Settings } from "./SettingsManager";
@@ -19,7 +20,7 @@ export default class Launcher {
   private mainMenu: MainMenu;
 
   constructor() {
-    this.gameState = GameState.create();
+    this.gameState = Game.instance().getState();
     this.gameLoop = new GameLoop();
 
     this.dataManager = GameDataManager.getInstance();
@@ -109,9 +110,9 @@ export default class Launcher {
     const settings = await this.loadSettings();
 
     if (showTerrainGeneration) {
-      this.gameLoop.start(loadedData, settings, false);
+      this.gameLoop.run(loadedData, settings, false);
     } else {
-      await this.gameLoop.start(loadedData, settings, true);
+      await this.gameLoop.run(loadedData, settings, true);
     }
   }
 

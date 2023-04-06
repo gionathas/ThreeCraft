@@ -1,40 +1,21 @@
 import { WebGLRenderer } from "three";
-import Logger from "./Logger";
 
 export default class Renderer extends WebGLRenderer {
-  private static instance: Renderer;
-
-  private constructor() {
+  constructor() {
     super();
+    this.init();
   }
 
-  static getInstance() {
-    if (!this.instance) {
-      throw new Error("Renderer not initialized");
-    }
-
-    return this.instance;
-  }
-
-  static create() {
-    if (this.instance) {
-      return this.instance;
-    }
-
-    Logger.info("Instatiating renderer...", Logger.INIT_KEY);
-    const renderer = new Renderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  private init() {
+    this.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(this.domElement);
 
     // do not show the canvas until the game starts
-    renderer.hideCanvas();
+    this.hideCanvas();
 
     window.addEventListener("resize", () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      this.setSize(window.innerWidth, window.innerHeight);
     });
-
-    this.instance = renderer;
-    return this.instance;
   }
 
   showCanvas() {

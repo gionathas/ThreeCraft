@@ -1,4 +1,5 @@
 import KeyBindings from "../config/KeyBindings";
+import Game from "../core/Game";
 import GameState from "../core/GameState";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -28,7 +29,7 @@ export default class UI {
   private customLockControlsHandlerRef: (evt: PointerEvent) => void;
 
   constructor(player: Player, terrain: Terrain) {
-    this.gameState = GameState.getInstance();
+    this.gameState = Game.instance().getState();
     this.player = player;
     this.terrain = terrain;
 

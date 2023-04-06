@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
 import DigSoundEffect from "../audio/DigSoundEffect";
 import EnvVars from "../config/EnvVars";
+import Game from "../core/Game";
 import GameCamera from "../core/GameCamera";
 import GameScene from "../core/GameScene";
 import Terrain from "../entities/Terrain";
@@ -32,8 +33,8 @@ export default class EditingControls {
     playerInventory: InventoryManager,
     terrain: Terrain
   ) {
-    this.scene = GameScene.getInstance();
-    this.camera = GameCamera.getInstance();
+    this.scene = Game.instance().getScene();
+    this.camera = Game.instance().getCamera();
     this.playerController = playerController;
     this.digSoundEffect = new DigSoundEffect();
 
