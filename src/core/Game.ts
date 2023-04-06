@@ -43,8 +43,8 @@ export default class Game {
 
     // engine
     this.renderer = new Renderer();
-    this.scene = new GameScene();
     this.camera = new GameCamera();
+    this.scene = new GameScene(this.state, this.camera);
 
     // services
     this.inputController = new InputController();

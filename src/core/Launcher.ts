@@ -1,14 +1,10 @@
-import { Quaternion, Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
 import DataManager from "../io/DataManager";
-import PlayerConstants from "../player/PlayerConstants";
-import World from "../terrain/World";
-import Logger from "../tools/Logger";
 import MainMenu from "../ui/MainMenu";
 import Game from "./Game";
-import GameLoop, { GameData } from "./GameLoop";
+import GameLoop from "./GameLoop";
 import GameState from "./GameState";
-import SettingsManager, { Settings } from "./SettingsManager";
+import SettingsManager from "./SettingsManager";
 
 export default class Launcher {
   private gameState: GameState;
@@ -59,7 +55,7 @@ export default class Launcher {
     });
 
     this.mainMenu.onSettings(async () => {
-      await this.loadSettings();
+      await this.settingsManager.loadSettings();
       this.mainMenu.setMenuLayout("settings");
     });
 
@@ -105,61 +101,15 @@ export default class Launcher {
     const showTerrainGeneration = EnvVars.SHOW_INITIAL_TERRAIN_GENERATION;
 
     // load saved data
-    const loadedData = await this.loadGameData();
+    const loadedData = await this.dataManager.loadGameData();
 
     // load saved settings
-    const settings = await this.loadSettings();
+    const settings = await this.settingsManager.loadSettings();
 
     if (showTerrainGeneration) {
       this.gameLoop.run(loadedData, settings, false);
     } else {
       await this.gameLoop.run(loadedData, settings, true);
     }
-  }
-
-  private async loadSettings(): Promise<Settings> {
-    Logger.info("Loading settings...", Logger.LOADING_KEY);
-    await this.settingsManager.loadSettings();
-    const settings = this.settingsManager.getSettings();
-    Logger.debug(JSON.stringify(settings), Logger.LOADING_KEY);
-
-    return settings;
-  }
-
-  // TODO: this method should be moved into another class
-  private async loadGameData(): Promise<GameData> {
-    Logger.info("Loading game data...", Logger.LOADING_KEY);
-    const worldData = await this.dataManager.getWorldData();
-    const playerData = await this.dataManager.getPlayerData();
-    const inventoryData = await this.dataManager.getInventory();
-
-    const seed = worldData?.seed
-      ? worldData.seed
-      : EnvVars.CUSTOM_SEED || World.generateSeed();
-
-    const spawnPosition = playerData?.position
-      ? new Vector3().fromArray(playerData.position)
-      : PlayerConstants.DEFAULT_SPAWN_POSITION;
-
-    const quaternion = playerData?.quaternion
-      ? new Quaternion().fromArray(playerData.quaternion)
-      : PlayerConstants.DEFAULT_LOOK_ROTATION;
-
-    const inventory: GameData["player"]["inventory"] = inventoryData
-      ? { hotbar: inventoryData.hotbar, inventory: inventoryData.inventory }
-      : PlayerConstants.DEFAULT_INVENTORY_STATE;
-
-    const gameData: GameData = {
-      world: {
-        seed,
-      },
-      player: {
-        spawnPosition,
-        quaternion,
-        inventory,
-      },
-    };
-
-    return gameData;
   }
 }

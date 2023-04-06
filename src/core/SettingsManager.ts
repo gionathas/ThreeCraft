@@ -1,5 +1,6 @@
 import EnvVars from "../config/EnvVars";
 import DataManager from "../io/DataManager";
+import Logger from "../tools/Logger";
 import GameCamera from "./GameCamera";
 
 export type Settings = {
@@ -48,10 +49,13 @@ export default class SettingsManager {
   }
 
   async loadSettings() {
+    Logger.info("Loading settings...", Logger.LOADING_KEY);
     const settings = await this.dataManager.getSettingsData();
 
     if (settings) {
       this.settings = settings;
     }
+
+    return this.settings;
   }
 }

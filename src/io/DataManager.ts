@@ -1,9 +1,12 @@
 import Dexie from "dexie";
-import { Vector3Tuple, Vector4Tuple } from "three";
+import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from "three";
+import EnvVars from "../config/EnvVars";
 import { Settings } from "../core/SettingsManager";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
-import { Slot } from "../player/InventoryManager";
+import { InventoryState, Slot } from "../player/InventoryManager";
+import PlayerConstants from "../player/PlayerConstants";
+import World from "../terrain/World";
 import { Chunk, ChunkID } from "../terrain/chunk";
 import Logger from "../tools/Logger";
 import { BufferGeometryData } from "../utils/helpers";
@@ -36,6 +39,17 @@ interface SettingsDataTable {
   fov: number;
   renderDistance: number;
 }
+
+export type GameData = {
+  world: {
+    seed: string;
+  };
+  player: {
+    spawnPosition: THREE.Vector3;
+    quaternion: THREE.Quaternion;
+    inventory: InventoryState;
+  };
+};
 
 export default class DataManager extends Dexie {
   // Chunks
@@ -94,6 +108,51 @@ export default class DataManager extends Dexie {
 
     Logger.info("Game saved!", Logger.DATA_KEY);
   }
+
+  async loadGameData(): Promise<GameData> {
+    Logger.info("Loading game data...", Logger.LOADING_KEY);
+    const worldData = await this.getWorldData();
+    const playerData = await this.getPlayerData();
+    const inventoryData = await this.getInventory();
+
+    const seed = worldData?.seed
+      ? worldData.seed
+      : EnvVars.CUSTOM_SEED || World.generateSeed();
+
+    const spawnPosition = playerData?.position
+      ? new Vector3().fromArray(playerData.position)
+      : PlayerConstants.DEFAULT_SPAWN_POSITION;
+
+    const quaternion = playerData?.quaternion
+      ? new Quaternion().fromArray(playerData.quaternion)
+      : PlayerConstants.DEFAULT_LOOK_ROTATION;
+
+    const inventory: GameData["player"]["inventory"] = inventoryData
+      ? { hotbar: inventoryData.hotbar, inventory: inventoryData.inventory }
+      : PlayerConstants.DEFAULT_INVENTORY_STATE;
+
+    const gameData: GameData = {
+      world: {
+        seed,
+      },
+      player: {
+        spawnPosition,
+        quaternion,
+        inventory,
+      },
+    };
+
+    return gameData;
+  }
+
+  // private async loadSettings(): Promise<Settings> {
+  //   Logger.info("Loading settings...", Logger.LOADING_KEY);
+  //   await this.getSettingsData();
+  //   const settings = this.settingsManager.();
+  //   Logger.debug(JSON.stringify(settings), Logger.LOADING_KEY);
+
+  //   return settings;
+  // }
 
   getWorldData() {
     return this.world.get("default");
