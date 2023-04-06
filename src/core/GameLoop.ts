@@ -194,12 +194,6 @@ export default class GameLoop {
   }
 
   private disposeSceneAndCamera() {
-    // scene and camera disposing
-    Logger.info(
-      "Disposing scene and camera...",
-      Logger.GAME_LOOP_KEY,
-      Logger.DISPOSE_KEY
-    );
     this.scene.dispose();
     this.camera.clear();
   }
