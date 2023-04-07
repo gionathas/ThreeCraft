@@ -6,7 +6,7 @@ import Terrain from "../entities/Terrain";
 import DataManager from "../io/DataManager";
 import Logger from "../tools/Logger";
 import CrossHair from "./CrossHair";
-import DebugInfo from "./DebugInfo";
+import DebugStats from "./DebugStats";
 import Hotbar from "./Hotbar";
 import Inventory from "./Inventory";
 import PausedMenu from "./PausedMenu";
@@ -20,7 +20,7 @@ export default class UI {
 
   // UI's
   private pausedMenu: PausedMenu;
-  private debugInfo: DebugInfo;
+  private debugStats: DebugStats;
   private inventoryPanel!: Inventory;
   private hotbar!: Hotbar;
   private crosshair: CrossHair;
@@ -41,7 +41,7 @@ export default class UI {
     this.inventoryPanel = this.initInventoryPanel(player);
 
     this.pausedMenu = new PausedMenu();
-    this.debugInfo = new DebugInfo(player, terrain);
+    this.debugStats = new DebugStats(player, terrain);
 
     // callbacks refs
     this.interactionHandlerRef = this.interactionHandler.bind(this);
@@ -123,7 +123,7 @@ export default class UI {
   }
 
   update() {
-    this.debugInfo.update();
+    this.debugStats.update();
   }
 
   dispose() {
@@ -132,7 +132,7 @@ export default class UI {
     this.inventoryPanel.dispose();
     this.crosshair.dispose();
     this.hotbar.dispose();
-    this.debugInfo.dispose();
+    this.debugStats.dispose();
 
     // remove custom event listeners
     document.removeEventListener("keydown", this.interactionHandlerRef);

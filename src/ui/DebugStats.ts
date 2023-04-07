@@ -18,7 +18,7 @@ import DebugControls from "../tools/DebugControls";
  * //TODO: (refactor) instead of knowing about the player and terrain,
  * the debug info should take in input only the data it needs to display
  */
-export default class DebugInfo {
+export default class DebugStats {
   private scene: GameScene;
   private inputController: InputController;
 
