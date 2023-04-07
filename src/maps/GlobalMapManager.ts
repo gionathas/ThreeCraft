@@ -1,4 +1,5 @@
 import { Chunk } from "../terrain/chunk";
+import Logger from "../tools/Logger";
 import Global2DMap from "./Global2DMap";
 import Global3DMap from "./Global3DMap";
 import MapManager from "./MapManager";
@@ -127,6 +128,7 @@ export default class GlobalMapManager extends MapManager {
   }
 
   dispose() {
+    Logger.info("Disposing maps...", Logger.DISPOSE_KEY);
     this.continentalMap?.dispose();
     this.erosionMap?.dispose();
     this.pvMap?.dispose();
@@ -135,6 +137,7 @@ export default class GlobalMapManager extends MapManager {
     this.globalTreeMap?.dispose();
 
     GlobalMapManager.instance = null;
+    Logger.info("Maps disposed!", Logger.DISPOSE_KEY);
   }
 
   _logTotalRegionCount() {

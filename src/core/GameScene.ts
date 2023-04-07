@@ -48,7 +48,7 @@ export default class GameScene extends Scene {
       throw new Error("Game scene already initialized!");
     }
 
-    Logger.info("Initializing scene...", Logger.SCENE_KEY);
+    Logger.info("Initializing scene...", Logger.INIT_KEY, Logger.SCENE_KEY);
     this.gui = DebugControls.getInstance();
     this.lights = this.initLights();
     this.initBackground();
@@ -58,7 +58,7 @@ export default class GameScene extends Scene {
     await this.initEntities(gameData, settings, asyncInit);
 
     this.initialized = true;
-    Logger.info("Scene initialized", Logger.SCENE_KEY);
+    Logger.info("Scene initialized", Logger.INIT_KEY, Logger.SCENE_KEY);
   }
 
   start() {
@@ -125,7 +125,11 @@ export default class GameScene extends Scene {
     asyncInit: boolean
   ) {
     // init game entities
-    Logger.info("Initializing game entities...", Logger.INIT_KEY);
+    Logger.info(
+      "Initializing game entities...",
+      Logger.SCENE_KEY,
+      Logger.INIT_KEY
+    );
     this.terrain = asyncInit
       ? await this.asyncInitTerrain(gameData, settings)
       : this.initTerrain(gameData, settings);
@@ -172,7 +176,7 @@ export default class GameScene extends Scene {
     const { spawnPosition: spawn, quaternion, inventory } = gameData.player;
 
     const player = new Player(terrain, inventory);
-    player.setSpawnPosition(spawn.x, spawn.y, spawn.z);
+    player.setFirstSpawnPosition(spawn.x, spawn.y, spawn.z);
     player.setQuaternion(quaternion);
 
     return player;
@@ -185,7 +189,7 @@ export default class GameScene extends Scene {
   }
 
   dispose() {
-    Logger.info("Disposing scene...", Logger.DISPOSE_KEY, Logger.SCENE_KEY);
+    Logger.info("Disposing scene...", Logger.DISPOSE_KEY);
 
     // disposing lights
     this.lights.forEach((light) => light.dispose());
@@ -197,15 +201,12 @@ export default class GameScene extends Scene {
     // clear scene
     this.clear();
     this.initialized = false;
+    Logger.info("Scene disposed!", Logger.DISPOSE_KEY);
   }
 
   private disposeEntities() {
     // entities disposing
-    Logger.info(
-      "Disposing game entities...",
-      Logger.GAME_LOOP_KEY,
-      Logger.DISPOSE_KEY
-    );
+    Logger.info("Disposing game entities...", Logger.DISPOSE_KEY);
     this.terrain?.dispose();
     this.player?.dispose();
     this.ui?.dispose();
@@ -213,6 +214,7 @@ export default class GameScene extends Scene {
     this.player = null;
     this.terrain = null;
     this.ui = null;
+    Logger.info("Game entities disposed!", Logger.DISPOSE_KEY);
   }
 
   getMeshCount(): number {

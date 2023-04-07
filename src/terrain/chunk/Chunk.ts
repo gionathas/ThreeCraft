@@ -1,5 +1,6 @@
 import { MathUtils } from "three";
 import EnvVars from "../../config/EnvVars";
+import Logger from "../../tools/Logger";
 import { Coordinate } from "../../utils/helpers";
 import { BlockData, BlockRegistry, BlockType } from "../block";
 import BlockGenerator from "../block/generators/BlockGenerator";
@@ -165,6 +166,6 @@ export default class Chunk implements ChunkModel {
   }
 
   _debug() {
-    console.log(this.blocks);
+    Logger.debug(JSON.stringify(this.blocks), Logger.TERRAIN_KEY);
   }
 }

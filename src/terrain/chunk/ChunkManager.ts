@@ -4,6 +4,7 @@ import DataManager from "../../io/DataManager";
 import GlobalMapManager from "../../maps/GlobalMapManager";
 import { TerrainMap } from "../../maps/terrain";
 import GlobalTreeMap from "../../maps/tree/GlobalTreeMap";
+import Logger from "../../tools/Logger";
 import {
   BufferGeometryData,
   Coordinate,
@@ -247,6 +248,7 @@ export default class ChunkManager implements ChunkModel {
   }
 
   unloadChunk(chunkId: ChunkID) {
+    Logger.debug(`Unloading chunk ${chunkId}...`, Logger.TERRAIN_KEY);
     const chunk = this.loadedChunks.get(chunkId);
 
     if (chunk) {
@@ -295,6 +297,7 @@ export default class ChunkManager implements ChunkModel {
   }
 
   dispose() {
+    Logger.info("Disposing chunks...", Logger.DISPOSE_KEY);
     // unload all the currently loaded chunks
     for (const chunk of this.loadedChunks.values()) {
       this.unloadChunk(chunk.getId());
@@ -304,6 +307,7 @@ export default class ChunkManager implements ChunkModel {
     this.processingChunks.clear();
     this.chunkMeshManager.dispose();
 
+    Logger.info("Terminating chunk workers...", Logger.DISPOSE_KEY);
     this.generatorsPool.terminate(true);
   }
 

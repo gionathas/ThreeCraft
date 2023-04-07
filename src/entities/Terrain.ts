@@ -7,6 +7,7 @@ import { BlockType } from "../terrain/block";
 import { Chunk } from "../terrain/chunk";
 import ChunkManager from "../terrain/chunk/ChunkManager";
 import TerrainLoader from "../terrain/TerrainLoader";
+import Logger from "../tools/Logger";
 import { Coordinate } from "../utils/helpers";
 
 export default class Terrain {
@@ -83,11 +84,13 @@ export default class Terrain {
   }
 
   dispose() {
+    Logger.info("Disposing terrain...", Logger.DISPOSE_KEY);
     // dispose all the chunks
     this.chunksManager.dispose();
 
     // dispose all the global maps
     this.globalMapManager.dispose();
+    Logger.info("Terrain disposed!", Logger.DISPOSE_KEY);
   }
 
   setRenderDistance(renderDistanceInChunks: number) {

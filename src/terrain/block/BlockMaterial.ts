@@ -5,6 +5,7 @@ import {
   TextureLoader,
 } from "three";
 import blockAtlasUrl from "../../assets/textures/block_atlas.png?url";
+import Logger from "../../tools/Logger";
 
 const TEXTURE_ATLAS_PATH = blockAtlasUrl;
 export const TEXTURE_TILE_SIZE = 16;
@@ -62,6 +63,7 @@ export default class BlockMaterial {
   }
 
   dispose() {
+    Logger.info("Disposing block materials...", Logger.DISPOSE_KEY);
     this.blockTexture.dispose();
     this.blockSolidMaterial.dispose();
     this.blockTransparentMaterial.dispose();

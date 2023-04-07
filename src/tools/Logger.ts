@@ -7,12 +7,17 @@ export default class Logger {
     (EnvVars.LOG_LEVELS as LogLevel[]) ?? ["silent"];
   private static readonly LOG_KEYS = EnvVars.LOG_KEYS;
 
-  // logging keys
+  // engine keys
   public static readonly GAME_LOOP_KEY = "gameloop";
   public static readonly SCENE_KEY = "scene";
   public static readonly AUDIO_KEY = "audio";
   public static readonly DATA_KEY = "data";
   public static readonly INPUT_KEY = "input";
+  public static readonly MAP_KEY = "map";
+
+  // entities
+  public static readonly PLAYER_KEY = "player";
+  public static readonly TERRAIN_KEY = "terrain";
 
   // phase keys
   public static readonly INIT_KEY = "init";
@@ -33,6 +38,14 @@ export default class Logger {
     if (shouldLog) {
       console.info(msg);
     }
+  }
+
+  static warn(msg: string) {
+    console.warn(msg);
+  }
+
+  static error(error: ErrorEvent) {
+    console.error(error);
   }
 
   private static shouldLog(level: LogLevel, ...keys: string[]) {

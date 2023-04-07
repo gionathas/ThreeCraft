@@ -1,4 +1,5 @@
 import { BufferAttribute, BufferGeometry, Mesh } from "three";
+import Logger from "../../tools/Logger";
 import { BufferGeometryData } from "../../utils/helpers";
 import BlockMaterial from "../block/BlockMaterial";
 import { ChunkID } from "./Chunk";
@@ -112,6 +113,7 @@ export default class ChunkMeshManager {
   }
 
   dispose() {
+    Logger.info("Disposing chunk meshes...", Logger.DISPOSE_KEY);
     this.solidMesh.forEach((mesh) => {
       mesh.geometry.dispose();
       // @ts-ignore

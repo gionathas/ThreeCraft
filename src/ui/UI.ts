@@ -4,6 +4,7 @@ import GameState from "../core/GameState";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
 import DataManager from "../io/DataManager";
+import Logger from "../tools/Logger";
 import CrossHair from "./CrossHair";
 import DebugInfo from "./DebugInfo";
 import Hotbar from "./Hotbar";
@@ -126,6 +127,7 @@ export default class UI {
   }
 
   dispose() {
+    Logger.info("Disposing UI...", Logger.DISPOSE_KEY);
     this.pausedMenu.dispose();
     this.inventoryPanel.dispose();
     this.crosshair.dispose();
@@ -138,6 +140,7 @@ export default class UI {
       "pointerdown",
       this.customLockControlsHandlerRef
     );
+    Logger.info("UI disposed!", Logger.DISPOSE_KEY);
   }
 
   private toggleInventory() {

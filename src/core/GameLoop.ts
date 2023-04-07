@@ -67,7 +67,7 @@ export default class GameLoop {
 
         // Prevent spiral of death
         if (++numUpdateSteps >= 240) {
-          console.warn("Too many update steps");
+          Logger.warn("Too many update steps");
           // discard the unsimulated time
           accumulator = 0;
           break;
