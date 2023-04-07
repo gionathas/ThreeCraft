@@ -1,3 +1,4 @@
+import AudioSystem from "../audio/AudioSystem";
 import EnvVars from "../config/EnvVars";
 import DataManager from "../io/DataManager";
 import MainMenu from "../ui/MainMenu";
@@ -10,6 +11,7 @@ export default class Launcher {
   private gameState: GameState;
   private gameLoop: GameLoop;
 
+  private audioSystem: AudioSystem;
   private dataManager: DataManager;
   private settingsManager: SettingsManager;
 
@@ -18,6 +20,7 @@ export default class Launcher {
 
   constructor() {
     this.gameState = Game.instance().getState();
+    this.audioSystem = Game.instance().getAudioSystem();
     this.gameLoop = new GameLoop();
 
     this.dataManager = Game.instance().getDataManager();
@@ -42,6 +45,13 @@ export default class Launcher {
     // to prevent the context menu from appearingt
     document.addEventListener("contextmenu", (evt) => {
       evt.preventDefault();
+    });
+
+    // add click sound to all buttons
+    document.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.audioSystem.playSound("click.ogg");
+      });
     });
 
     this.mainMenu.onPlayWorld(async () => {
