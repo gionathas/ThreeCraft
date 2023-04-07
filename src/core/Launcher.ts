@@ -116,6 +116,6 @@ export default class Launcher {
 
     // load saved settings
     const settings = await this.settingsManager.loadSettings();
-    this.gameLoop.run(loadedData, settings, asyncInit);
+    await this.gameLoop.run(loadedData, settings, asyncInit);
   }
 }
