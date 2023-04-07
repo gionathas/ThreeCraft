@@ -143,12 +143,12 @@ export default class GameScene extends Scene {
       return this.terrain;
     }
 
-    const { spawnPosition } = gameData.player;
     const { seed } = gameData.world;
     const { renderDistance } = settings;
+    const origin = gameData.player.spawnPosition;
 
     const terrain = new Terrain(seed, renderDistance);
-    await terrain.asyncInit(spawnPosition);
+    await terrain.asyncInit(origin);
 
     return terrain;
   }
@@ -158,12 +158,12 @@ export default class GameScene extends Scene {
       return this.terrain;
     }
 
-    const { spawnPosition } = gameData.player;
     const { seed } = gameData.world;
     const { renderDistance } = settings;
+    const origin = gameData.player.spawnPosition;
 
     const terrain = new Terrain(seed, renderDistance);
-    terrain.init(spawnPosition);
+    terrain.init(origin);
 
     return terrain;
   }
@@ -173,11 +173,10 @@ export default class GameScene extends Scene {
       return this.player;
     }
 
-    const { spawnPosition: spawn, quaternion, inventory } = gameData.player;
+    const { spawnPosition, quaternion, inventory } = gameData.player;
 
     const player = new Player(terrain, inventory);
-    player.setFirstSpawnPosition(spawn.x, spawn.y, spawn.z);
-    player.setQuaternion(quaternion);
+    player.init(quaternion, spawnPosition);
 
     return player;
   }

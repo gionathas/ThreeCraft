@@ -99,17 +99,13 @@ export default class Launcher {
 
   private async startGame() {
     const showTerrainGeneration = EnvVars.SHOW_INITIAL_TERRAIN_GENERATION;
+    const asyncInit = !showTerrainGeneration;
 
     // load saved data
     const loadedData = await this.dataManager.loadGameData();
 
     // load saved settings
     const settings = await this.settingsManager.loadSettings();
-
-    if (showTerrainGeneration) {
-      this.gameLoop.run(loadedData, settings, false);
-    } else {
-      await this.gameLoop.run(loadedData, settings, true);
-    }
+    this.gameLoop.run(loadedData, settings, asyncInit);
   }
 }

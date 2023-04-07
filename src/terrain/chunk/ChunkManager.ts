@@ -248,7 +248,7 @@ export default class ChunkManager implements ChunkModel {
   }
 
   unloadChunk(chunkId: ChunkID) {
-    Logger.debug(`Unloading chunk ${chunkId}...`, Logger.TERRAIN_KEY);
+    Logger.debug(`Unloading chunk ${chunkId}...`, Logger.CHUNK_KEY);
     const chunk = this.loadedChunks.get(chunkId);
 
     if (chunk) {

@@ -7,6 +7,7 @@ import { BlockType } from "../terrain/block";
 import { Chunk } from "../terrain/chunk";
 import ChunkManager from "../terrain/chunk/ChunkManager";
 import TerrainLoader from "../terrain/TerrainLoader";
+import World from "../terrain/World";
 import Logger from "../tools/Logger";
 import { Coordinate } from "../utils/helpers";
 
@@ -37,16 +38,32 @@ export default class Terrain {
     );
   }
 
-  async asyncInit(centerPosition: THREE.Vector3) {
-    await this.terrainLoader.asyncInit(centerPosition);
+  async asyncInit(initialOrigin?: THREE.Vector3) {
+    Logger.info("Initializing terrain (ASYNC)...", Logger.INIT_KEY);
+
+    const origin = initialOrigin ?? World.ORIGIN;
+    Logger.debug(
+      `Terrain origin: ${initialOrigin?.toArray()}`,
+      Logger.TERRAIN_KEY
+    );
+
+    await this.terrainLoader.asyncInit(origin);
   }
 
-  init(centerPosition: THREE.Vector3) {
-    this.terrainLoader.init(centerPosition);
+  init(initialOrigin?: THREE.Vector3) {
+    Logger.info("Initializing terrain (SYNC)...", Logger.INIT_KEY);
+
+    const origin = initialOrigin ?? World.ORIGIN;
+    Logger.info(
+      `Terrain origin: ${initialOrigin?.toArray()}`,
+      Logger.TERRAIN_KEY
+    );
+
+    this.terrainLoader.init(origin);
   }
 
-  update(newCenterPosition: THREE.Vector3) {
-    this.terrainLoader.update(newCenterPosition);
+  update(newOrigin: THREE.Vector3) {
+    this.terrainLoader.update(newOrigin);
 
     // this.globalMapManager._logTotalRegionCount();
   }

@@ -45,7 +45,7 @@ export type GameData = {
     seed: string;
   };
   player: {
-    spawnPosition: THREE.Vector3;
+    spawnPosition?: THREE.Vector3;
     quaternion: THREE.Quaternion;
     inventory: InventoryState;
   };
@@ -119,9 +119,8 @@ export default class DataManager extends Dexie {
       ? worldData.seed
       : EnvVars.CUSTOM_SEED || World.generateSeed();
 
-    const spawnPosition = playerData?.position
-      ? new Vector3().fromArray(playerData.position)
-      : PlayerConstants.DEFAULT_SPAWN_POSITION;
+    const spawnPosition =
+      playerData?.position && new Vector3().fromArray(playerData.position);
 
     const quaternion = playerData?.quaternion
       ? new Quaternion().fromArray(playerData.quaternion)
@@ -144,15 +143,6 @@ export default class DataManager extends Dexie {
 
     return gameData;
   }
-
-  // private async loadSettings(): Promise<Settings> {
-  //   Logger.info("Loading settings...", Logger.LOADING_KEY);
-  //   await this.getSettingsData();
-  //   const settings = this.settingsManager.();
-  //   Logger.debug(JSON.stringify(settings), Logger.LOADING_KEY);
-
-  //   return settings;
-  // }
 
   getWorldData() {
     return this.world.get("default");

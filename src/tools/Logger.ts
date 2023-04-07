@@ -18,6 +18,7 @@ export default class Logger {
   // entities
   public static readonly PLAYER_KEY = "player";
   public static readonly TERRAIN_KEY = "terrain";
+  public static readonly CHUNK_KEY = "chunk";
 
   // phase keys
   public static readonly INIT_KEY = "init";
