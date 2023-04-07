@@ -6,6 +6,7 @@ export default class DebugControls extends GUI {
   private constructor() {
     super();
 
+    this.hide();
     const isDev = import.meta.env.DEV;
 
     // allowed in dev mode only
