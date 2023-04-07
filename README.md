@@ -30,6 +30,7 @@ npm install
 ## Known Issues
 
 - Opening and closing the inventory without doing any action cause the camera to behave weirdly.
+- Locking the mouse cursor fails if the unlock operation occurred in less than 1 second.
 - Collision detection is not always accurate. Sometimes weird collision responses can occur when the player is moving around.
 - Since the framerate is capped at 75, the game feels a bit choppy on higher framerate devices. (This is due the fact the draw calls are not interpolated between frames)
 
