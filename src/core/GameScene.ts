@@ -130,15 +130,17 @@ export default class GameScene extends Scene {
       Logger.SCENE_KEY,
       Logger.INIT_KEY
     );
-    this.terrain = asyncInit
-      ? await this.asyncInitTerrain(gameData, settings)
-      : this.initTerrain(gameData, settings);
 
+    this.terrain = await this.initTerrain(gameData, settings, asyncInit);
     this.player = this.initPlayer(this.terrain, gameData);
     this.ui = this.initUI(this.player, this.terrain);
   }
 
-  private async asyncInitTerrain(gameData: GameData, settings: Settings) {
+  private async initTerrain(
+    gameData: GameData,
+    settings: Settings,
+    asyncInit: boolean
+  ) {
     if (this.terrain) {
       return this.terrain;
     }
@@ -148,22 +150,7 @@ export default class GameScene extends Scene {
     const origin = gameData.player.spawnPosition;
 
     const terrain = new Terrain(seed, renderDistance);
-    await terrain.asyncInit(origin);
-
-    return terrain;
-  }
-
-  private initTerrain(gameData: GameData, settings: Settings) {
-    if (this.terrain) {
-      return this.terrain;
-    }
-
-    const { seed } = gameData.world;
-    const { renderDistance } = settings;
-    const origin = gameData.player.spawnPosition;
-
-    const terrain = new Terrain(seed, renderDistance);
-    terrain.init(origin);
+    await terrain.init(asyncInit, origin);
 
     return terrain;
   }

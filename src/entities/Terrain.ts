@@ -1,13 +1,14 @@
+import { Vector3 } from "three";
 import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
 import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
+import TerrainLoader from "../terrain/TerrainLoader";
+import World from "../terrain/World";
 import { BlockType } from "../terrain/block";
 import { Chunk } from "../terrain/chunk";
 import ChunkManager from "../terrain/chunk/ChunkManager";
-import TerrainLoader from "../terrain/TerrainLoader";
-import World from "../terrain/World";
 import Logger from "../tools/Logger";
 import { Coordinate } from "../utils/helpers";
 
@@ -38,8 +39,9 @@ export default class Terrain {
     );
   }
 
-  async asyncInit(initialOrigin?: THREE.Vector3) {
-    Logger.info("Initializing terrain (ASYNC)...", Logger.INIT_KEY);
+  async init(isAsync: boolean, initialOrigin?: Vector3) {
+    const logPrefix = isAsync ? "ASYNC" : "SYNC";
+    Logger.info(`Initializing terrain (${logPrefix})...`, Logger.INIT_KEY);
 
     const origin = initialOrigin ?? World.ORIGIN;
     Logger.debug(
@@ -47,18 +49,18 @@ export default class Terrain {
       Logger.TERRAIN_KEY
     );
 
+    if (isAsync) {
+      await this.asyncInit(origin);
+    } else {
+      this.syncInit(origin);
+    }
+  }
+
+  private async asyncInit(origin: Vector3) {
     await this.terrainLoader.asyncInit(origin);
   }
 
-  init(initialOrigin?: THREE.Vector3) {
-    Logger.info("Initializing terrain (SYNC)...", Logger.INIT_KEY);
-
-    const origin = initialOrigin ?? World.ORIGIN;
-    Logger.info(
-      `Terrain origin: ${initialOrigin?.toArray()}`,
-      Logger.TERRAIN_KEY
-    );
-
+  private syncInit(origin: Vector3) {
     this.terrainLoader.init(origin);
   }
 
