@@ -5,13 +5,12 @@ export default class GameCamera extends PerspectiveCamera {
   private static readonly Z_NEAR = 0.01;
   private static readonly Z_FAR = 1000;
 
-  private static instance: GameCamera | null;
-
-  private onResizeRef: () => void;
-
   private audioListener: AudioListener;
 
-  private constructor() {
+  // callbacks
+  private onResizeRef: () => void;
+
+  constructor() {
     super(
       GameCamera.DEFAULT_FOV,
       GameCamera.getAspectRatio(),
@@ -26,22 +25,15 @@ export default class GameCamera extends PerspectiveCamera {
     window.addEventListener("resize", this.onResizeRef);
   }
 
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new GameCamera();
-    }
-    return this.instance;
-  }
-
-  private static getAspectRatio() {
-    return window.innerWidth / window.innerHeight;
-  }
-
   private initAudioListener() {
     const audioListener = new AudioListener();
     this.add(audioListener);
 
     return audioListener;
+  }
+
+  private static getAspectRatio() {
+    return window.innerWidth / window.innerHeight;
   }
 
   setFov(fov: number) {

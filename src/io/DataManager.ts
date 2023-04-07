@@ -1,10 +1,14 @@
 import Dexie from "dexie";
-import { Vector3Tuple, Vector4Tuple } from "three";
+import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from "three";
+import EnvVars from "../config/EnvVars";
 import { Settings } from "../core/SettingsManager";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
-import { Slot } from "../player/InventoryManager";
+import { InventoryState, Slot } from "../player/InventoryManager";
+import PlayerConstants from "../player/PlayerConstants";
+import World from "../terrain/World";
 import { Chunk, ChunkID } from "../terrain/chunk";
+import Logger from "../tools/Logger";
 import { BufferGeometryData } from "../utils/helpers";
 
 interface ChunkGeometryTable {
@@ -36,9 +40,18 @@ interface SettingsDataTable {
   renderDistance: number;
 }
 
-export default class GameDataManager extends Dexie {
-  private static instance: GameDataManager | null;
+export type GameData = {
+  world: {
+    seed: string;
+  };
+  player: {
+    spawnPosition?: THREE.Vector3;
+    quaternion: THREE.Quaternion;
+    inventory: InventoryState;
+  };
+};
 
+export default class DataManager extends Dexie {
   // Chunks
   private chunks!: Dexie.Table<Chunk, ChunkID>;
   private chunksGeometries!: Dexie.Table<ChunkGeometryTable, ChunkID>;
@@ -55,12 +68,10 @@ export default class GameDataManager extends Dexie {
   // Settings
   private settings!: Dexie.Table<SettingsDataTable, string>;
 
-  private constructor() {
-    super("GameDataManager");
+  constructor() {
+    super("DataManager");
     this.init();
   }
-
-  //TODO add initialization logic (to execute only on New Game)
 
   private init() {
     this.version(1).stores({
@@ -75,15 +86,8 @@ export default class GameDataManager extends Dexie {
     this.chunks.mapToClass(Chunk);
   }
 
-  public static getInstance(): GameDataManager {
-    if (!this.instance) {
-      this.instance = new GameDataManager();
-    }
-    return this.instance;
-  }
-
   async saveGame(player: Player, terrain: Terrain) {
-    console.debug("Saving game...");
+    Logger.info("Saving game...", Logger.DATA_KEY);
 
     const seed = terrain.getSeed();
     const inventory = player.getInventory();
@@ -102,10 +106,45 @@ export default class GameDataManager extends Dexie {
     // save world info's
     this.saveWorldData(seed);
 
-    console.debug("Game saved!");
+    Logger.info("Game saved!", Logger.DATA_KEY);
   }
 
-  getSavedWorldData() {
+  async loadGameData(): Promise<GameData> {
+    Logger.info("Loading game data...", Logger.LOADING_KEY);
+    const worldData = await this.getWorldData();
+    const playerData = await this.getPlayerData();
+    const inventoryData = await this.getInventory();
+
+    const seed = worldData?.seed
+      ? worldData.seed
+      : EnvVars.CUSTOM_SEED || World.generateSeed();
+
+    const spawnPosition =
+      playerData?.position && new Vector3().fromArray(playerData.position);
+
+    const quaternion = playerData?.quaternion
+      ? new Quaternion().fromArray(playerData.quaternion)
+      : PlayerConstants.DEFAULT_LOOK_ROTATION;
+
+    const inventory: GameData["player"]["inventory"] = inventoryData
+      ? { hotbar: inventoryData.hotbar, inventory: inventoryData.inventory }
+      : PlayerConstants.DEFAULT_INVENTORY_STATE;
+
+    const gameData: GameData = {
+      world: {
+        seed,
+      },
+      player: {
+        spawnPosition,
+        quaternion,
+        inventory,
+      },
+    };
+
+    return gameData;
+  }
+
+  getWorldData() {
     return this.world.get("default");
   }
 
@@ -116,7 +155,7 @@ export default class GameDataManager extends Dexie {
     });
   }
 
-  getSavedPlayerData() {
+  getPlayerData() {
     return this.player.get("default");
   }
 
@@ -128,7 +167,7 @@ export default class GameDataManager extends Dexie {
     });
   }
 
-  getSavedInventory() {
+  getInventory() {
     return this.inventory.get("default");
   }
 
@@ -140,11 +179,11 @@ export default class GameDataManager extends Dexie {
     });
   }
 
-  getSavedChunk(chunkId: ChunkID) {
+  getChunk(chunkId: ChunkID) {
     return this.chunks.get({ chunkId });
   }
 
-  getSavedChunkGeometry(chunkId: ChunkID) {
+  getChunkGeometry(chunkId: ChunkID) {
     return this.chunksGeometries.get({ chunkId });
   }
 

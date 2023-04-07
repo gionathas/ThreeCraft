@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { MathUtils } from "three";
-import GameDataManager from "../io/GameDataManager";
+import Game from "../core/Game";
+import DataManager from "../io/DataManager";
 import { BlockType } from "../terrain/block";
 
 export type Item = {
@@ -16,13 +17,12 @@ export type InventoryState = {
 export type Slot = Item | null;
 
 export default class InventoryManager {
-  static readonly MAX_STACK_SIZE = 64;
+  public static readonly MAX_STACKABLE_SIZE = 64;
+  public static readonly INVENTORY_SLOTS = 27;
+  public static readonly HOTBAR_SLOTS = 9;
+  public static readonly CRAFTING_SLOTS = 9;
 
-  static readonly INVENTORY_SLOTS = 27;
-  static readonly HOTBAR_SLOTS = 9;
-  static readonly CRAFTING_SLOTS = 9;
-
-  private dataManager: GameDataManager;
+  private dataManager: DataManager;
   public isDirty: boolean;
 
   private crafting: Slot[];
@@ -35,7 +35,7 @@ export default class InventoryManager {
   private eventEmitter: EventEmitter;
 
   constructor(inventory: InventoryState) {
-    this.dataManager = GameDataManager.getInstance();
+    this.dataManager = Game.instance().getDataManager();
     this.eventEmitter = new EventEmitter();
 
     this.selectedHotbarIndex = 0;
@@ -112,7 +112,7 @@ export default class InventoryManager {
     // slot is not empty and items are the same, try to stack them
     if (targetSlot.block === dragItem.block) {
       // item is already maxed out, perform a swap
-      if (targetSlot.amount === InventoryManager.MAX_STACK_SIZE) {
+      if (targetSlot.amount === InventoryManager.MAX_STACKABLE_SIZE) {
         this.setSlot(items, index, dragItem);
         return this.setDraggingItem(targetSlot);
       }
@@ -120,7 +120,7 @@ export default class InventoryManager {
       const newAmount = targetSlot.amount + unitsToPlace;
 
       // item stack is not full, add the item to the stack
-      if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
+      if (newAmount <= InventoryManager.MAX_STACKABLE_SIZE) {
         targetSlot.amount = newAmount;
 
         this.setSlot(items, index, targetSlot);
@@ -129,11 +129,11 @@ export default class InventoryManager {
 
       // item stack will overcome its limit, so place the item in the slot
       // and keep dragging the remaining amount
-      if (newAmount > InventoryManager.MAX_STACK_SIZE) {
-        const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
+      if (newAmount > InventoryManager.MAX_STACKABLE_SIZE) {
+        const remainingAmount = newAmount - InventoryManager.MAX_STACKABLE_SIZE;
 
         // fill the current slot and update it
-        targetSlot.amount = InventoryManager.MAX_STACK_SIZE;
+        targetSlot.amount = InventoryManager.MAX_STACKABLE_SIZE;
         this.setSlot(items, index, targetSlot);
 
         // set the dragging item to the remaining amount
@@ -252,14 +252,14 @@ export default class InventoryManager {
     // slot is not empty and items are the same, try to stack them
     if (slotItem.block === item.block) {
       // item is already maxed out, we can't add the item
-      if (slotItem.amount === InventoryManager.MAX_STACK_SIZE) {
+      if (slotItem.amount === InventoryManager.MAX_STACKABLE_SIZE) {
         return item.amount;
       }
 
       const newAmount = slotItem.amount + item.amount;
 
       // the slot can be filled up without overflowing
-      if (newAmount <= InventoryManager.MAX_STACK_SIZE) {
+      if (newAmount <= InventoryManager.MAX_STACKABLE_SIZE) {
         // update the amount and update it
         slotItem.amount = newAmount;
         this.setSlot(items, index, slotItem);
@@ -268,11 +268,11 @@ export default class InventoryManager {
       }
 
       // item stack is full, place the item in the slot and keep dragging the rest
-      if (newAmount > InventoryManager.MAX_STACK_SIZE) {
-        const remainingAmount = newAmount - InventoryManager.MAX_STACK_SIZE;
+      if (newAmount > InventoryManager.MAX_STACKABLE_SIZE) {
+        const remainingAmount = newAmount - InventoryManager.MAX_STACKABLE_SIZE;
 
         // fill the current slot and update it
-        slotItem.amount = InventoryManager.MAX_STACK_SIZE;
+        slotItem.amount = InventoryManager.MAX_STACKABLE_SIZE;
         this.setSlot(items, index, slotItem);
 
         // return the amount of items that couldn't be added

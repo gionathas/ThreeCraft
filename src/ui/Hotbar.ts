@@ -1,3 +1,4 @@
+import Game from "../core/Game";
 import GameState from "../core/GameState";
 import InventoryManager, { Slot } from "../player/InventoryManager";
 import SlotGrid from "./SlotGrid";
@@ -18,7 +19,7 @@ export default class Hotbar implements UIComponent {
   private onWheelSelectionHandlerRef: (event: WheelEvent) => void;
 
   constructor(inventoryManager: InventoryManager) {
-    this.gameState = GameState.getInstance();
+    this.gameState = Game.instance().getState();
     this.inventoryManager = inventoryManager;
     this.hotbarSlots = this.inventoryManager.getHotbarSlots();
 

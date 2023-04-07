@@ -1,24 +1,26 @@
 import KeyBindings from "../config/KeyBindings";
+import Game from "../core/Game";
 import GameState from "../core/GameState";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
-import GameDataManager from "../io/GameDataManager";
+import DataManager from "../io/DataManager";
+import Logger from "../tools/Logger";
 import CrossHair from "./CrossHair";
-import DebugInfo from "./DebugInfo";
+import DebugStats from "./DebugStats";
 import Hotbar from "./Hotbar";
 import Inventory from "./Inventory";
 import PausedMenu from "./PausedMenu";
 
 export default class UI {
   private gameState: GameState;
-  private dataManager: GameDataManager;
+  private dataManager: DataManager;
 
   private player: Player;
   private terrain: Terrain;
 
   // UI's
   private pausedMenu: PausedMenu;
-  private debugInfo: DebugInfo;
+  private debugStats: DebugStats;
   private inventoryPanel!: Inventory;
   private hotbar!: Hotbar;
   private crosshair: CrossHair;
@@ -28,18 +30,18 @@ export default class UI {
   private customLockControlsHandlerRef: (evt: PointerEvent) => void;
 
   constructor(player: Player, terrain: Terrain) {
-    this.gameState = GameState.getInstance();
+    this.gameState = Game.instance().getState();
     this.player = player;
     this.terrain = terrain;
 
-    this.dataManager = GameDataManager.getInstance();
+    this.dataManager = Game.instance().getDataManager();
 
     this.crosshair = this.initCrosshair();
     this.hotbar = this.initHotbar(player);
     this.inventoryPanel = this.initInventoryPanel(player);
 
     this.pausedMenu = new PausedMenu();
-    this.debugInfo = new DebugInfo(player, terrain);
+    this.debugStats = new DebugStats(player, terrain);
 
     // callbacks refs
     this.interactionHandlerRef = this.interactionHandler.bind(this);
@@ -77,7 +79,7 @@ export default class UI {
       this.gameState.setState("running");
 
       // re-enable game controls
-      this.player.enableControls();
+      this.player.lockControls();
     });
 
     this.player.onDisableControls(() => {
@@ -108,28 +110,29 @@ export default class UI {
 
   /**
    * This is for locking the controls when the player clicks on the screen
-   * when the game is running and the controls were not enabled.
+   * when the game is running and the controls are not locked.
    */
   private customControlsEnablerHandler(evt: PointerEvent) {
     const state = this.gameState.getState();
     const inventoryOpen = this.inventoryPanel.isOpen;
-    const controlsEnabled = this.player.controlsEnabled();
+    const controlsEnabled = this.player.controlsLocked();
 
     if (state === "running" && !inventoryOpen && !controlsEnabled) {
-      this.player.enableControls();
+      this.player.lockControls();
     }
   }
 
   update() {
-    this.debugInfo.update();
+    this.debugStats.update();
   }
 
   dispose() {
+    Logger.info("Disposing UI...", Logger.DISPOSE_KEY);
     this.pausedMenu.dispose();
     this.inventoryPanel.dispose();
     this.crosshair.dispose();
     this.hotbar.dispose();
-    this.debugInfo.dispose();
+    this.debugStats.dispose();
 
     // remove custom event listeners
     document.removeEventListener("keydown", this.interactionHandlerRef);
@@ -137,6 +140,7 @@ export default class UI {
       "pointerdown",
       this.customLockControlsHandlerRef
     );
+    Logger.info("UI disposed!", Logger.DISPOSE_KEY);
   }
 
   private toggleInventory() {
@@ -147,11 +151,11 @@ export default class UI {
 
   private openInventory() {
     this.inventoryPanel.show();
-    this.player.disableControls();
+    this.player.unlockControls();
   }
 
   private closeInventory() {
-    this.player.enableControls();
+    this.player.lockControls();
     this.inventoryPanel.hide();
   }
 }

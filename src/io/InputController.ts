@@ -1,3 +1,5 @@
+import Logger from "../tools/Logger";
+
 type PointerState = {
   leftButton: boolean;
   rightButton: boolean;
@@ -9,7 +11,6 @@ type PointerState = {
 
 type KeyCode = string;
 export default class InputController {
-  private static instance: InputController;
   private previousPointer: PointerState | null;
   private currentPointer: PointerState;
 
@@ -24,7 +25,7 @@ export default class InputController {
   private onPointerUpRef: (e: PointerEvent) => void;
   private onPointerMoveRef: (e: PointerEvent) => void;
 
-  private constructor() {
+  constructor() {
     this.previousPointer = null;
     this.currentPointer = {
       leftButton: false,
@@ -46,15 +47,9 @@ export default class InputController {
     this.onPointerMoveRef = this.onPointerMove.bind(this);
   }
 
-  public static getInstance(): InputController {
-    if (!InputController.instance) {
-      InputController.instance = new InputController();
-    }
-    return InputController.instance;
-  }
-
   enable() {
     if (!this.enabled) {
+      Logger.info("Enabling input listeners", Logger.INPUT_KEY);
       this.enabled = true;
       document.addEventListener("pointerdown", this.onPointerDownRef);
       document.addEventListener("pointerup", this.onPointerUpRef);
@@ -66,6 +61,7 @@ export default class InputController {
 
   disable() {
     if (this.enabled) {
+      Logger.info("Disabling input listeners", Logger.INPUT_KEY);
       this.enabled = false;
       document.removeEventListener("pointerdown", this.onPointerDownRef);
       document.removeEventListener("pointerup", this.onPointerUpRef);

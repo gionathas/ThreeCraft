@@ -1,6 +1,9 @@
+import { Vector3 } from "three";
 import EnvVars from "../config/EnvVars";
 
 export default class World {
+  static readonly ORIGIN = new Vector3(0, 0, 0);
+
   static readonly CONTINENTALNESS_NOISE_SCALE = 2500;
   static readonly EROSION_NOISE_SCALE = 1024;
   static readonly PV_BASE_SCALE = 180;

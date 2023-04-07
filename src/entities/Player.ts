@@ -4,7 +4,10 @@ import PlayerCollider from "../player/PlayerCollider";
 import PlayerController from "../player/PlayerController";
 import PlayerControls from "../player/PlayerControls";
 import PlayerPhysics from "../player/PlayerPhysics";
+import World from "../terrain/World";
+import { Block } from "../terrain/block";
 import { Chunk } from "../terrain/chunk";
+import Logger from "../tools/Logger";
 import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
@@ -38,6 +41,23 @@ export default class Player {
     );
   }
 
+  init(lookRotation: THREE.Quaternion, spawn?: THREE.Vector3) {
+    Logger.info("Initializing player...", Logger.INIT_KEY);
+    this.setRotation(lookRotation);
+
+    if (spawn) {
+      Logger.debug("Loading spawn position...", Logger.PLAYER_KEY);
+      this.setSpawnPosition(spawn.x, spawn.y, spawn.z);
+    } else {
+      Logger.debug(
+        "No spawn position found, using world origin...",
+        Logger.PLAYER_KEY
+      );
+      const worldOrigin = World.ORIGIN;
+      this.setFirstSpawnPosition(worldOrigin.x, worldOrigin.y, worldOrigin.z);
+    }
+  }
+
   update(dt: number) {
     this.physics.update(dt);
     this.collider.update();
@@ -46,20 +66,22 @@ export default class Player {
   }
 
   dispose() {
+    Logger.info("Disposing player...", Logger.DISPOSE_KEY);
     this.collider.dispose();
     this.controls.dispose();
     this.editingControls.dispose();
+    Logger.info("Player disposed!", Logger.DISPOSE_KEY);
   }
 
-  controlsEnabled() {
+  controlsLocked() {
     return this.controls.isLocked;
   }
 
-  enableControls() {
+  lockControls() {
     this.controls.lock();
   }
 
-  disableControls() {
+  unlockControls() {
     this.controls.unlock();
   }
 
@@ -71,7 +93,7 @@ export default class Player {
     this.controls.onUnlock(cb);
   }
 
-  setSpawnPosition(x: number, y: number, z: number) {
+  setFirstSpawnPosition(x: number, y: number, z: number) {
     const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
 
     // move rightward until we find a free spot
@@ -79,13 +101,18 @@ export default class Player {
       x += 1;
     }
 
-    // adjust the player's y position to be above the surface
-    if (y <= surfaceHeight) {
-      // this will simulate the camera placed on the player's eyes
-      // and the player's feet being 1 block above the surface
-      y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 2;
-    }
+    // simulating falling from some blocks offset and the camera placed
+    // at the player's eye level
+    y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 3;
 
+    // spawn the player at the center of the block
+    const cenX = Block.toBlockCenterCoord(x);
+    const cenZ = Block.toBlockCenterCoord(z);
+
+    this.setSpawnPosition(cenX, y, cenZ);
+  }
+
+  setSpawnPosition(x: number, y: number, z: number) {
     this.controls.position.set(x, y, z);
   }
 
@@ -120,7 +147,7 @@ export default class Player {
     return this.controls.quaternion.clone();
   }
 
-  setQuaternion(quaternion: THREE.Quaternion) {
+  setRotation(quaternion: THREE.Quaternion) {
     this.controls.quaternion.copy(quaternion);
   }
 

@@ -1,7 +1,7 @@
 import { Audio, AudioListener, AudioLoader } from "three";
 import * as soundSrcSet from "../assets/sounds";
 import GameCamera from "../core/GameCamera";
-import Logger from "../core/Logger";
+import Logger from "../tools/Logger";
 
 export enum VolumeLevel {
   VERY_LOW = 0.02,
@@ -16,35 +16,26 @@ export default class AudioSystem {
   private static readonly DEFAULT_VOLUME = VolumeLevel.NORMAL;
   private static readonly DEFAULT_PLAYBACK_RATE = PlaybackRate.NORMAL;
 
-  private static instance: AudioSystem | null;
-
   private audioListener: AudioListener;
   private audioLoader: AudioLoader;
 
   private sounds: Map<string, Audio>;
 
-  private constructor() {
-    this.audioListener = GameCamera.getInstance().getAudioListener();
+  constructor(camera: GameCamera) {
+    this.audioListener = camera.getAudioListener();
     this.audioLoader = new AudioLoader();
 
     this.sounds = this.loadSounds();
   }
 
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new AudioSystem();
-    }
-    return this.instance;
-  }
-
   private loadSounds() {
-    Logger.debug("Loading sounds...");
+    Logger.info("Loading sounds...", Logger.LOADING_KEY);
 
     const sounds = new Map();
 
     for (const src of Object.values(soundSrcSet)) {
-      Logger.debug(`Loading sound: ${src}`);
       const filename = src.split("/").pop() as string;
+      Logger.debug(`Loading sound: ${filename}`, Logger.LOADING_KEY);
 
       this.audioLoader.load(
         src,
@@ -55,11 +46,11 @@ export default class AudioSystem {
           this.sounds.set(filename, sound);
         },
         undefined,
-        (err) => console.error(err)
+        (err) => Logger.error(err)
       );
     }
 
-    Logger.debug("Sounds loaded");
+    Logger.info("Sound loaded!", Logger.LOADING_KEY);
     return sounds;
   }
 
@@ -80,8 +71,7 @@ export default class AudioSystem {
   }
 
   dispose() {
-    Logger.debug("Disposing AudioSystem...");
+    Logger.info("Disposing AudioSystem...", Logger.DISPOSE_KEY);
     this.sounds.clear();
-    AudioSystem.instance = null;
   }
 }

@@ -1,3 +1,5 @@
+import click from "./click.ogg";
+
 import Grass_dig1 from "./Grass_dig1.ogg";
 import Grass_dig2 from "./Grass_dig2.ogg";
 import Grass_dig3 from "./Grass_dig3.ogg";
@@ -59,6 +61,7 @@ import Glass_dig1 from "./Glass_dig1.ogg";
 import Glass_dig2 from "./Glass_dig2.ogg";
 import Glass_dig3 from "./Glass_dig3.ogg";
 
+export { click };
 export { Grass_dig1, Grass_dig2, Grass_dig3, Grass_dig4 };
 export {
   Grass_hit1,

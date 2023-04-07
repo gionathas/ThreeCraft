@@ -1,4 +1,5 @@
 import EnvVars from "../config/EnvVars";
+import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import { Coordinate } from "../utils/helpers";
 import Chunk, { ChunkID } from "./chunk/Chunk";
@@ -22,7 +23,7 @@ export default class TerrainLoader {
   private hozRenderDistance: number;
 
   constructor(chunksManager: ChunkManager, renderDistanceInChunks: number) {
-    this.scene = GameScene.getInstance();
+    this.scene = Game.instance().getScene();
     this.chunksManager = chunksManager;
     this.hozRenderDistance = renderDistanceInChunks * Chunk.WIDTH;
   }

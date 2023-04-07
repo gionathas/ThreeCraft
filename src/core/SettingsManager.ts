@@ -1,5 +1,6 @@
 import EnvVars from "../config/EnvVars";
-import GameDataManager from "../io/GameDataManager";
+import DataManager from "../io/DataManager";
+import Logger from "../tools/Logger";
 import GameCamera from "./GameCamera";
 
 export type Settings = {
@@ -8,30 +9,19 @@ export type Settings = {
 };
 
 export default class SettingsManager {
-  private static instance: SettingsManager;
-
   static readonly DEFAULT_FOV = GameCamera.DEFAULT_FOV;
   static readonly DEFAULT_RENDER_DISTANCE_IN_CHUNKS =
     EnvVars.DEFAULT_HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS;
 
-  private dataManager: GameDataManager;
-
+  private dataManager: DataManager;
   private settings: Settings;
 
-  private constructor(settings: Settings) {
-    this.dataManager = GameDataManager.getInstance();
-
-    this.settings = settings;
-  }
-
-  static getInstance(): SettingsManager {
-    if (!this.instance) {
-      this.instance = new SettingsManager({
-        fov: SettingsManager.DEFAULT_FOV,
-        renderDistance: SettingsManager.DEFAULT_RENDER_DISTANCE_IN_CHUNKS,
-      });
-    }
-    return this.instance;
+  constructor(dataManager: DataManager) {
+    this.dataManager = dataManager;
+    this.settings = {
+      fov: SettingsManager.DEFAULT_FOV,
+      renderDistance: SettingsManager.DEFAULT_RENDER_DISTANCE_IN_CHUNKS,
+    };
   }
 
   getSettings() {
@@ -58,11 +48,14 @@ export default class SettingsManager {
     await this.dataManager.saveSettingsData(this.settings);
   }
 
-  async loadSavedSettings() {
+  async loadSettings() {
+    Logger.info("Loading settings...", Logger.LOADING_KEY);
     const settings = await this.dataManager.getSettingsData();
 
     if (settings) {
       this.settings = settings;
     }
+
+    return this.settings;
   }
 }

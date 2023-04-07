@@ -6,6 +6,7 @@ import {
   LineSegments,
 } from "three";
 import EnvVars from "../config/EnvVars";
+import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import PlayerConstants from "./PlayerConstants";
 import PlayerControls from "./PlayerControls";
@@ -17,7 +18,7 @@ export default class PlayerCollider {
   private playerControls: PlayerControls;
 
   constructor(playerControls: PlayerControls) {
-    this.scene = GameScene.getInstance();
+    this.scene = Game.instance().getScene();
     this.playerControls = playerControls;
 
     this.collider = this.initCollider();

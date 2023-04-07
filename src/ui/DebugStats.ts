@@ -1,6 +1,7 @@
 import Stats from "three/examples/jsm/libs/stats.module";
 import EnvVars from "../config/EnvVars";
 import KeyBindings from "../config/KeyBindings";
+import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import Player from "../entities/Player";
 import Terrain from "../entities/Terrain";
@@ -17,7 +18,7 @@ import DebugControls from "../tools/DebugControls";
  * //TODO: (refactor) instead of knowing about the player and terrain,
  * the debug info should take in input only the data it needs to display
  */
-export default class DebugInfo {
+export default class DebugStats {
   private scene: GameScene;
   private inputController: InputController;
 
@@ -32,8 +33,8 @@ export default class DebugInfo {
   private mem: Stats;
 
   constructor(player: Player, terrain: Terrain) {
-    this.scene = GameScene.getInstance();
-    this.inputController = InputController.getInstance();
+    this.scene = Game.instance().getScene();
+    this.inputController = Game.instance().getInputController();
 
     this.player = player;
     this.terrain = terrain;

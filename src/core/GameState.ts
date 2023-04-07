@@ -3,22 +3,12 @@ import { EventEmitter } from "events";
 type State = "menu" | "loading" | "running" | "paused";
 
 export default class GameState {
-  private static instance: GameState;
-
   private state!: State;
   private eventsEmitter: EventEmitter;
 
-  private constructor() {
+  constructor() {
     this.eventsEmitter = new EventEmitter();
     this.setState("menu");
-  }
-
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new GameState();
-    }
-
-    return this.instance;
   }
 
   onMenu(callback: () => void) {

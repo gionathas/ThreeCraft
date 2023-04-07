@@ -1,11 +1,15 @@
+import { Vector3 } from "three";
+import Game from "../core/Game";
 import GameScene from "../core/GameScene";
 import GlobalMapManager from "../maps/GlobalMapManager";
 import { TerrainMap } from "../maps/terrain";
 import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
+import TerrainLoader from "../terrain/TerrainLoader";
+import World from "../terrain/World";
 import { BlockType } from "../terrain/block";
 import { Chunk } from "../terrain/chunk";
 import ChunkManager from "../terrain/chunk/ChunkManager";
-import TerrainLoader from "../terrain/TerrainLoader";
+import Logger from "../tools/Logger";
 import { Coordinate } from "../utils/helpers";
 
 export default class Terrain {
@@ -21,7 +25,7 @@ export default class Terrain {
   private treeMap: GlobalTreeMap;
 
   constructor(seed: string, renderDistanceInChunks: number) {
-    this.scene = GameScene.getInstance();
+    this.scene = Game.instance().getScene();
     this.seed = seed;
 
     this.globalMapManager = GlobalMapManager.getInstance(seed);
@@ -35,16 +39,33 @@ export default class Terrain {
     );
   }
 
-  async asyncInit(centerPosition: THREE.Vector3) {
-    await this.terrainLoader.asyncInit(centerPosition);
+  async init(isAsync: boolean, initialOrigin?: Vector3) {
+    const logPrefix = isAsync ? "ASYNC" : "SYNC";
+    Logger.info(`Initializing terrain (${logPrefix})...`, Logger.INIT_KEY);
+
+    const origin = initialOrigin ?? World.ORIGIN;
+    Logger.debug(
+      `Terrain origin: ${initialOrigin?.toArray()}`,
+      Logger.TERRAIN_KEY
+    );
+
+    if (isAsync) {
+      await this.asyncInit(origin);
+    } else {
+      this.syncInit(origin);
+    }
   }
 
-  init(centerPosition: THREE.Vector3) {
-    this.terrainLoader.init(centerPosition);
+  private async asyncInit(origin: Vector3) {
+    await this.terrainLoader.asyncInit(origin);
   }
 
-  update(newCenterPosition: THREE.Vector3) {
-    this.terrainLoader.update(newCenterPosition);
+  private syncInit(origin: Vector3) {
+    this.terrainLoader.init(origin);
+  }
+
+  update(newOrigin: THREE.Vector3) {
+    this.terrainLoader.update(newOrigin);
 
     // this.globalMapManager._logTotalRegionCount();
   }
@@ -82,11 +103,13 @@ export default class Terrain {
   }
 
   dispose() {
+    Logger.info("Disposing terrain...", Logger.DISPOSE_KEY);
     // dispose all the chunks
     this.chunksManager.dispose();
 
     // dispose all the global maps
     this.globalMapManager.dispose();
+    Logger.info("Terrain disposed!", Logger.DISPOSE_KEY);
   }
 
   setRenderDistance(renderDistanceInChunks: number) {

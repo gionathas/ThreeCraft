@@ -1,142 +1,99 @@
-import Player from "../entities/Player";
-import Terrain from "../entities/Terrain";
+import { GameData } from "../io/DataManager";
 import InputController from "../io/InputController";
-import { InventoryState } from "../player/InventoryManager";
-import UI from "../ui/UI";
-import Engine from "./Engine";
+import Logger from "../tools/Logger";
+import Game from "./Game";
 import GameCamera from "./GameCamera";
+import GameScene from "./GameScene";
 import GameState from "./GameState";
+import Renderer from "./Renderer";
 import { Settings } from "./SettingsManager";
 
-export type GameData = {
-  world: {
-    seed: string;
-  };
-  player: {
-    spawnPosition: THREE.Vector3;
-    quaternion: THREE.Quaternion;
-    inventory: InventoryState;
-  };
-};
-
 export default class GameLoop {
-  private engine: Engine;
+  // NOTE FPS are capped at 75, maybe make this configurable in the future
+  private static readonly MAX_FPS = 75;
+
+  private renderer: Renderer;
+  private scene: GameScene;
   private camera: GameCamera;
 
   private gameState: GameState;
   private inputController: InputController;
 
-  private player: Player | null;
-  private terrain: Terrain | null;
-  private ui: UI | null;
-
   constructor() {
-    this.engine = Engine.getInstance();
-    this.gameState = GameState.getInstance();
-    this.inputController = InputController.getInstance();
-    this.camera = GameCamera.getInstance();
-
-    this.player = null;
-    this.terrain = null;
-    this.ui = null;
+    const game = Game.instance();
+    this.renderer = game.getRenderer();
+    this.scene = game.getScene();
+    this.camera = game.getCamera();
+    this.gameState = game.getState();
+    this.inputController = game.getInputController();
   }
 
-  async start(gameData: GameData, settings: Settings, asyncStart: boolean) {
+  async run(gameData: GameData, settings: Settings, asyncInit: boolean) {
     this.gameState.setState("loading");
 
     // init scene
-    this.applySettings(settings);
-
-    // init game entities
-    this.terrain = asyncStart
-      ? await this.asyncInitTerrain(gameData, settings)
-      : this.initTerrain(gameData, settings);
-    this.player = this.initPlayer(this.terrain, gameData);
-    this.ui = this.initUI(this.player, this.terrain);
-
-    this.gameState.setState("running");
-
-    // enable player controls
-    this.player.enableControls();
+    await this.scene.init(gameData, settings, asyncInit);
+    this.scene.start();
 
     // start game loop
-    this.engine.start(settings, this.update.bind(this));
+    this.renderer.showCanvas();
+    this.gameState.setState("running");
+    this.runLoop();
   }
 
-  private update(dt: number) {
-    const { inputController, player, terrain, ui } = this;
+  private runLoop() {
+    Logger.info("Starting Game Loop...", Logger.INIT_KEY);
 
-    if (this.gameState.isRunning()) {
-      terrain!.update(player!.getPosition());
-      player!.update(dt);
-      ui!.update();
-      inputController.update(); // this must come lastly
-    }
-  }
+    let previousTime = performance.now();
 
-  private applySettings(settings: Settings) {
-    this.camera.setFov(settings.fov);
-  }
+    // fixed timestep
+    const timestep = 1 / GameLoop.MAX_FPS;
+    let accumulator = 0;
 
-  private async asyncInitTerrain(gameData: GameData, settings: Settings) {
-    if (this.terrain) {
-      return this.terrain;
-    }
+    this.renderer.setAnimationLoop((time) => {
+      let dt = (time - previousTime) / 1000;
+      previousTime = time;
 
-    const { spawnPosition } = gameData.player;
-    const { seed } = gameData.world;
-    const { renderDistance } = settings;
+      // Track the accumulated time that hasn't been simulated yet
+      accumulator += dt;
 
-    const terrain = new Terrain(seed, renderDistance);
-    await terrain.asyncInit(spawnPosition);
+      // Simulate the total elapsed time in fixed-size chunks
+      let numUpdateSteps = 0;
+      while (accumulator >= timestep) {
+        this.scene.update(timestep);
+        this.inputController.update(); // update input controller
 
-    return terrain;
-  }
+        accumulator -= timestep;
 
-  private initTerrain(gameData: GameData, settings: Settings) {
-    if (this.terrain) {
-      return this.terrain;
-    }
+        // Prevent spiral of death
+        if (++numUpdateSteps >= 240) {
+          Logger.warn("Too many update steps");
+          // discard the unsimulated time
+          accumulator = 0;
+          break;
+        }
+      }
 
-    const { spawnPosition } = gameData.player;
-    const { seed } = gameData.world;
-    const { renderDistance } = settings;
-
-    const terrain = new Terrain(seed, renderDistance);
-    terrain.init(spawnPosition);
-
-    return terrain;
-  }
-
-  private initPlayer(terrain: Terrain, gameData: GameData) {
-    if (this.player) {
-      return this.player;
-    }
-
-    const { spawnPosition: spawn, quaternion, inventory } = gameData.player;
-
-    const player = new Player(terrain, inventory);
-    player.setSpawnPosition(spawn.x, spawn.y, spawn.z);
-    player.setQuaternion(quaternion);
-
-    return player;
-  }
-
-  private initUI(player: Player, terrain: Terrain) {
-    const ui = new UI(player, terrain);
-
-    return ui;
+      this.renderer.render(this.scene, this.camera);
+    });
   }
 
   dispose() {
     this.inputController.disable();
-    this.terrain?.dispose();
-    this.player?.dispose();
-    this.ui?.dispose();
-    this.engine.dispose();
+    this.disposeSceneAndCamera();
+    this.disposeRenderer();
+  }
 
-    this.player = null;
-    this.terrain = null;
-    this.ui = null;
+  private disposeSceneAndCamera() {
+    this.scene.dispose();
+    this.camera.clear();
+  }
+
+  private disposeRenderer() {
+    // disposing renderer
+    Logger.info("Disposing renderer...", Logger.DISPOSE_KEY);
+    this.renderer.hideCanvas();
+    this.renderer.setAnimationLoop(null);
+    this.renderer.dispose();
   }
 }
