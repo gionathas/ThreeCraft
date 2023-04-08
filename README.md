@@ -50,8 +50,11 @@ Here are some important tasks and features that i'd like to implement in the fut
 - [ ] Block lighting system
 - [ ] Better sky
 - [ ] Day/Night cycle
-- [ ] Improve biomes
 - [ ] Block color tint ( very useful for grass block )
+
+### Codebase
+
+- [ ] Implement ECS pattern
 
 ---
 
