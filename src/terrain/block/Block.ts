@@ -120,7 +120,7 @@ export default class Block {
     };
   }
 
-  static getBlockFaceFromNormal(normal: THREE.Vector3): BlockFace | null {
+  static getBlockFaceFromNormal(normal: Vector3): BlockFace | null {
     for (const [face, faceNormal] of Object.entries(BlockFaceNormal)) {
       if (new Vector3().fromArray(faceNormal).equals(normal)) {
         return face as BlockFace;
@@ -129,17 +129,17 @@ export default class Block {
     return null;
   }
 
-  static getBlockBoundingBoxFromPosition(position: THREE.Vector3) {
+  static getBlockBoundingBoxFromPosition(position: Vector3) {
     return Block.getBlockBoundingBox(
       Block.getBlockOriginFromPosition(position)
     );
   }
 
-  static getBlockBoundingBox(blockOrigin: THREE.Vector3) {
+  static getBlockBoundingBox(blockOrigin: Vector3) {
     return new Box3(blockOrigin, blockOrigin.clone().addScalar(Block.SIZE));
   }
 
-  static getBlockOriginFromPosition(position: THREE.Vector3) {
+  static getBlockOriginFromPosition(position: Vector3) {
     return new Vector3(
       Math.floor(position.x),
       Math.floor(position.y),
@@ -147,13 +147,11 @@ export default class Block {
     );
   }
 
-  static toBlockCenterCoord = (val: number) =>
-    Math.floor(val / Block.SIZE) * Block.SIZE + Block.SIZE / 2;
+  static toBlockCenterCoord(val: number) {
+    return Math.floor(val / Block.SIZE) * Block.SIZE + Block.SIZE / 2;
+  }
 
-  static getBlockNormalFromPosition(
-    blockOrigin: THREE.Vector3,
-    position: THREE.Vector3
-  ) {
+  static getBlockNormalFromPosition(blockOrigin: Vector3, position: Vector3) {
     const blockCenter = new Vector3(
       blockOrigin.x + 0.5,
       blockOrigin.y + 0.5,
@@ -177,11 +175,7 @@ export default class Block {
   /**
    * This is a raycast implementation optmized for voxels
    */
-  static raycast(
-    rayStart: THREE.Vector3,
-    rayEnd: THREE.Vector3,
-    blocks: ChunkModel
-  ) {
+  static raycast(rayStart: Vector3, rayEnd: Vector3, blocks: ChunkModel) {
     let dx = rayEnd.x - rayStart.x;
     let dy = rayEnd.y - rayStart.y;
     let dz = rayEnd.z - rayStart.z;

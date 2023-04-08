@@ -13,7 +13,6 @@ export const TEXTURE_TILE_WIDTH = 128;
 export const TEXTURE_TILE_HEIGHT = 128;
 export default class BlockMaterial {
   private static instance: BlockMaterial | null;
-
   private textureAtlas: THREE.Texture;
 
   // materials
