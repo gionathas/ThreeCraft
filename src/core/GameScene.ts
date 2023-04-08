@@ -30,12 +30,12 @@ export default class GameScene extends Scene {
   private terrain: Terrain | null;
   private ui: UI | null;
 
-  constructor(state: GameState, camera: GameCamera) {
+  constructor(state: GameState) {
     super();
     this.initialized = false;
 
     this.gameState = state;
-    this.camera = camera;
+    this.camera = new GameCamera();
 
     this.lights = [];
     this.player = null;
@@ -184,9 +184,13 @@ export default class GameScene extends Scene {
     // disposing entities
     this.disposeEntities();
 
-    // clear scene
+    // clear scene and camera
+    this.camera.clear();
     this.clear();
+
+    // reset flags
     this.initialized = false;
+
     Logger.info("Scene disposed!", Logger.DISPOSE_KEY);
   }
 
@@ -205,5 +209,9 @@ export default class GameScene extends Scene {
 
   getMeshCount(): number {
     return this.children.length;
+  }
+
+  getCamera() {
+    return this.camera;
   }
 }

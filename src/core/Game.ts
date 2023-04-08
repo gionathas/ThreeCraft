@@ -2,7 +2,6 @@ import AudioSystem from "../audio/AudioSystem";
 import DataManager from "../io/DataManager";
 import InputController from "../io/InputController";
 import Logger from "../tools/Logger";
-import GameCamera from "./GameCamera";
 import GameScene from "./GameScene";
 import GameState from "./GameState";
 import Renderer from "./Renderer";
@@ -17,7 +16,6 @@ export default class Game {
   // engine
   private renderer: Renderer;
   private scene: GameScene;
-  private camera: GameCamera;
 
   // services
   private inputController: InputController;
@@ -43,14 +41,13 @@ export default class Game {
 
     // engine
     this.renderer = new Renderer();
-    this.camera = new GameCamera();
-    this.scene = new GameScene(this.state, this.camera);
+    this.scene = new GameScene(this.state);
 
     // services
     this.inputController = new InputController();
     this.dataManager = new DataManager();
     this.settingsManager = new SettingsManager(this.dataManager);
-    this.audioSystem = new AudioSystem(this.camera);
+    this.audioSystem = new AudioSystem(this.scene.getCamera());
   }
 
   getState() {
@@ -63,10 +60,6 @@ export default class Game {
 
   getScene() {
     return this.scene;
-  }
-
-  getCamera() {
-    return this.camera;
   }
 
   getDataManager() {
