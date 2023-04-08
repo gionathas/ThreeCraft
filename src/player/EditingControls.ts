@@ -34,7 +34,7 @@ export default class EditingControls {
     terrain: Terrain
   ) {
     this.scene = Game.instance().getScene();
-    this.camera = Game.instance().getCamera();
+    this.camera = this.scene.getCamera();
     this.playerController = playerController;
     this.digSoundEffect = new DigSoundEffect();
 

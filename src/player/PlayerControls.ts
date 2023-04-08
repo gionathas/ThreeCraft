@@ -16,7 +16,7 @@ export default class PlayerControls extends PointerLockControls {
 
   constructor(playerController: PlayerController) {
     super(
-      Game.instance().getCamera(),
+      Game.instance().getScene().getCamera(),
       Game.instance().getRenderer().getCanvas()
     );
 

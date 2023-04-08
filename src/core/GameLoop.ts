@@ -21,10 +21,10 @@ export default class GameLoop {
 
   constructor() {
     const game = Game.instance();
+    this.gameState = game.getState();
     this.renderer = game.getRenderer();
     this.scene = game.getScene();
-    this.camera = game.getCamera();
-    this.gameState = game.getState();
+    this.camera = this.scene.getCamera();
     this.inputController = game.getInputController();
   }
 
@@ -80,13 +80,12 @@ export default class GameLoop {
 
   dispose() {
     this.inputController.disable();
-    this.disposeSceneAndCamera();
+    this.disposeScene();
     this.disposeRenderer();
   }
 
-  private disposeSceneAndCamera() {
+  private disposeScene() {
     this.scene.dispose();
-    this.camera.clear();
   }
 
   private disposeRenderer() {
