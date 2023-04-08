@@ -3,8 +3,9 @@ import StepSoundEffect from "../audio/StepSoundEffect";
 import EnvVars from "../config/EnvVars";
 import Terrain from "../entities/Terrain";
 import { Block } from "../terrain/block";
-import { determineAngleQuadrant } from "../utils/helpers";
+import Logger from "../tools/Logger";
 import Physics from "../utils/Physics";
+import { determineAngleQuadrant } from "../utils/helpers";
 import PlayerConstants from "./PlayerConstants";
 import PlayerController from "./PlayerController";
 import PlayerControls from "./PlayerControls";
@@ -83,8 +84,8 @@ export default class PlayerPhysics {
     this.updateHorizontalVelocity(dt);
     this.updateVerticalVelocity(dt);
 
-    this.applyHorizontalCollisionResponse(dt);
     this.applyVerticalCollisionResponse();
+    this.applyHorizontalCollisionResponse(dt);
 
     // update player position
     playerControls.moveForward(this.velocity.z);
@@ -298,7 +299,7 @@ export default class PlayerPhysics {
 
     const newVelocity = this.velocity.clone();
 
-    const collisions = this.detectCollisions();
+    const collisions = this.detectHorizontalCollisions();
     if (collisions.front) {
       this.applyFrontCollisionResponse(lookDirAngle, dt, newVelocity);
     }
@@ -1299,7 +1300,7 @@ export default class PlayerPhysics {
     }
   }
 
-  private detectCollisions() {
+  private detectHorizontalCollisions() {
     return {
       front: this.isZSideColliding("front"),
       back: this.isZSideColliding("back"),
@@ -1312,7 +1313,7 @@ export default class PlayerPhysics {
     const { width, playerControls } = this;
     const position = this.position.clone();
 
-    // slightly offset to distinguish from left or right collisions
+    // slightly offset to distinguish from x side collisions
     const left = position.x + width / 2 - 0.1;
     const right = position.x - width / 2 + 0.1;
     const xInc = left - right;
@@ -1331,6 +1332,7 @@ export default class PlayerPhysics {
         });
 
         if (isColliding) {
+          Logger.debug(`collision: ${side}`, Logger.COLLISION_KEY);
           return true;
         }
       }
@@ -1343,7 +1345,7 @@ export default class PlayerPhysics {
     const { width, playerControls } = this;
     const position = this.position.clone();
 
-    // slightly offset to distinguish from front or back collisions
+    // slightly offset to distinguish from z side collisions
     const front = position.z + width / 2 - 0.1;
     const back = position.z - width / 2 + 0.1;
     const zInc = front - back;
@@ -1362,6 +1364,7 @@ export default class PlayerPhysics {
         });
 
         if (isColliding) {
+          Logger.debug(`collision: ${side}`, Logger.COLLISION_KEY);
           return true;
         }
       }

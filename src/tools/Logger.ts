@@ -14,6 +14,7 @@ export default class Logger {
   public static readonly DATA_KEY = "data";
   public static readonly INPUT_KEY = "input";
   public static readonly MAP_KEY = "map";
+  public static readonly COLLISION_KEY = "collision";
 
   // entities
   public static readonly PLAYER_KEY = "player";
