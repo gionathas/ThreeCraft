@@ -19,10 +19,10 @@ export default class ChunkMeshManager {
   private readonly UV_NUM_COMPONENTS = 2;
   private readonly COLOR_NUM_COMPONENTS = 3;
 
-  private solidMesh: Map<ChunkID, THREE.Mesh>;
-  private transparentMesh: Map<ChunkID, THREE.Mesh>;
-  private solidMeshPool: Array<THREE.Mesh>;
-  private transparentMeshPool: Array<THREE.Mesh>;
+  private solidMesh: Map<ChunkID, Mesh>;
+  private transparentMesh: Map<ChunkID, Mesh>;
+  private solidMeshPool: Array<Mesh>;
+  private transparentMeshPool: Array<Mesh>;
   private blockMaterials: BlockMaterial;
 
   constructor() {
@@ -139,7 +139,7 @@ export default class ChunkMeshManager {
    * If the mesh does not exist it will try either to extract one from the mesh pool,
    * or it will creates a new one
    */
-  private getNewSolidMesh(chunkID: ChunkID): THREE.Mesh {
+  private getNewSolidMesh(chunkID: ChunkID): Mesh {
     const prevSolidMesh = this.solidMesh.get(chunkID);
 
     // if the mesh for the chunkId already exist return it
@@ -165,7 +165,7 @@ export default class ChunkMeshManager {
    * If the mesh does not exist it will try either to extract one from the mesh pool,
    * or it will creates a new one
    */
-  private getNewTransparentMesh(chunkID: ChunkID): THREE.Mesh {
+  private getNewTransparentMesh(chunkID: ChunkID): Mesh {
     const prevTransparentMesh = this.transparentMesh.get(chunkID);
 
     // if the mesh for the chunkId already exist return it

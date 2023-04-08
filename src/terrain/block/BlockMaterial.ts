@@ -14,12 +14,14 @@ export const TEXTURE_TILE_HEIGHT = 128;
 export default class BlockMaterial {
   private static instance: BlockMaterial | null;
 
-  private blockTexture: THREE.Texture;
+  private textureAtlas: THREE.Texture;
+
+  // materials
   private blockSolidMaterial: THREE.MeshStandardMaterial;
   private blockTransparentMaterial: THREE.MeshStandardMaterial;
 
   private constructor() {
-    this.blockTexture = this.initTextureAtlas();
+    this.textureAtlas = this.loadTextureAtlas();
     this.blockSolidMaterial = this.createBlockSolidMaterial();
     this.blockTransparentMaterial = this.createBlockTransparentMaterial();
   }
@@ -31,7 +33,7 @@ export default class BlockMaterial {
     return this.instance;
   }
 
-  private initTextureAtlas() {
+  private loadTextureAtlas() {
     const texture = new TextureLoader().load(TEXTURE_ATLAS_PATH);
     texture.minFilter = NearestFilter;
     texture.magFilter = NearestFilter;
@@ -41,7 +43,7 @@ export default class BlockMaterial {
 
   private createBlockSolidMaterial() {
     return new MeshStandardMaterial({
-      map: this.blockTexture,
+      map: this.textureAtlas,
       side: FrontSide,
       vertexColors: true,
     });
@@ -55,7 +57,7 @@ export default class BlockMaterial {
    */
   private createBlockTransparentMaterial() {
     return new MeshStandardMaterial({
-      map: this.blockTexture,
+      map: this.textureAtlas,
       side: FrontSide,
       alphaTest: 0.1,
       transparent: true,
@@ -63,10 +65,11 @@ export default class BlockMaterial {
   }
 
   dispose() {
-    Logger.info("Disposing block materials...", Logger.DISPOSE_KEY);
-    this.blockTexture.dispose();
+    Logger.info("Disposing materials...", Logger.DISPOSE_KEY);
+    this.textureAtlas.dispose();
     this.blockSolidMaterial.dispose();
     this.blockTransparentMaterial.dispose();
+
     BlockMaterial.instance = null;
   }
 
