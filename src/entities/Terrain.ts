@@ -1,241 +1,164 @@
-import * as THREE from "three";
-import {
-  BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
-  CHUNK_HEIGHT,
-  CHUNK_WIDTH,
-  CLOUD_LEVEL,
-  HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS,
-  TERRAIN_GENERATION_ENABLED,
-  TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS,
-} from "../config/constants";
-import TerrainChunksFactory from "../terrain/TerrainChunksFactory";
-import { Voxel, VoxelModel } from "../terrain/Voxel";
-import ChunkUtils from "../utils/ChunkUtils";
+import { Vector3 } from "three";
+import Game from "../core/Game";
+import GameScene from "../core/GameScene";
+import GlobalMapManager from "../maps/GlobalMapManager";
+import { TerrainMap } from "../maps/terrain";
+import GlobalTreeMap from "../maps/tree/GlobalTreeMap";
+import TerrainLoader from "../terrain/TerrainLoader";
+import World from "../terrain/World";
+import { BlockType } from "../terrain/block";
+import { Chunk } from "../terrain/chunk";
+import ChunkManager from "../terrain/chunk/ChunkManager";
+import Logger from "../tools/Logger";
 import { Coordinate } from "../utils/helpers";
 
-const horizontalRenderDistance =
-  HORIZONTAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_WIDTH;
+export default class Terrain {
+  private scene: GameScene;
 
-const verticalTopRenderDistance =
-  TOP_VERTICAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_HEIGHT;
+  private seed: string;
 
-const verticalBottomRenderDistance =
-  BOTTOM_VERTICAL_RENDER_DISTANCE_IN_CHUNKS * CHUNK_HEIGHT;
+  private chunksManager: ChunkManager;
+  private terrainLoader: TerrainLoader;
 
-type TerrainBoundaries = {
-  lowerX: number;
-  upperX: number;
-  lowerY: number;
-  upperY: number;
-  lowerZ: number;
-  upperZ: number;
-};
+  private globalMapManager: GlobalMapManager;
+  private terrainMap: TerrainMap;
+  private treeMap: GlobalTreeMap;
 
-export default class Terrain implements VoxelModel {
-  private chunkFactory: TerrainChunksFactory;
-  private scene: THREE.Scene;
+  constructor(seed: string, renderDistanceInChunks: number) {
+    this.scene = Game.instance().getScene();
+    this.seed = seed;
 
-  private previousCenterPosition: THREE.Vector3;
+    this.globalMapManager = GlobalMapManager.getInstance(seed);
+    this.terrainMap = this.globalMapManager.getTerrainMap();
+    this.treeMap = this.globalMapManager.getTreeMap();
 
-  constructor(scene: THREE.Scene, centerPosition: THREE.Vector3) {
-    this.scene = scene;
-    this.previousCenterPosition = centerPosition;
-    this.chunkFactory = new TerrainChunksFactory(CHUNK_WIDTH, CHUNK_HEIGHT);
+    this.chunksManager = new ChunkManager(this.globalMapManager);
+    this.terrainLoader = new TerrainLoader(
+      this.chunksManager,
+      renderDistanceInChunks
+    );
   }
 
-  /**
-   * //TODO: optimization: you could do some check between the previous and
-   * current position to prevent the unload/load of the terrain
-   */
-  update(newCenterPosition: THREE.Vector3, isFirstUpdate: boolean = false) {
-    const isGenerationEnabled = TERRAIN_GENERATION_ENABLED;
+  async init(isAsync: boolean, initialOrigin?: Vector3) {
+    const logPrefix = isAsync ? "ASYNC" : "SYNC";
+    Logger.info(`Initializing terrain (${logPrefix})...`, Logger.INIT_KEY);
 
-    const isSamePosition =
-      this.previousCenterPosition.equals(newCenterPosition);
+    const origin = initialOrigin ?? World.ORIGIN;
+    Logger.debug(
+      `Terrain origin: ${initialOrigin?.toArray()}`,
+      Logger.TERRAIN_KEY
+    );
 
-    if ((!isSamePosition && isGenerationEnabled) || isFirstUpdate) {
-      const terrainBoundaries =
-        this.getTerrainBoundariesFromPosition(newCenterPosition);
-      this.unloadTerrain(terrainBoundaries);
-      this.loadTerrain(terrainBoundaries);
-      this.previousCenterPosition.copy(newCenterPosition);
-
-      // console.debug(`solidPool: ${this.chunkFactory._poolSolidMeshSize}`);
-      // console.log(`transPool: ${this.chunkFactory._poolTransparentMeshSize}`);
+    if (isAsync) {
+      await this.asyncInit(origin);
+    } else {
+      this.syncInit(origin);
     }
   }
 
-  private loadTerrain(boundaries: TerrainBoundaries) {
-    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    for (let x = lowerX; x < upperX; x += CHUNK_WIDTH) {
-      for (let z = lowerZ; z < upperZ; z += CHUNK_WIDTH) {
-        for (let y = lowerY; y < upperY; y += CHUNK_HEIGHT) {
-          this.chunkFactory.generateChunk(
-            { x, y, z },
-            (solidMesh, transparentMesh) => {
-              if (solidMesh) {
-                this.scene.add(solidMesh);
-              }
+  private async asyncInit(origin: Vector3) {
+    await this.terrainLoader.asyncInit(origin);
+  }
 
-              if (transparentMesh) {
-                this.scene.add(transparentMesh);
-              }
-            }
-          );
-        }
+  private syncInit(origin: Vector3) {
+    this.terrainLoader.init(origin);
+  }
+
+  update(newOrigin: THREE.Vector3) {
+    this.terrainLoader.update(newOrigin);
+
+    // this.globalMapManager._logTotalRegionCount();
+  }
+
+  setBlock(blockCoord: Coordinate, block: BlockType) {
+    const chunkId = Chunk.getChunkIdFromPosition(blockCoord);
+
+    let chunk = this.chunksManager.getChunk(chunkId);
+
+    // laod a new chunk if we are trying to set a block in a chunk that does't exist yet
+    if (!chunk) {
+      chunk = this.chunksManager.loadChunk(chunkId);
+    }
+
+    // add/remove the block inside the chunk
+    chunk.setBlock(blockCoord, block);
+
+    // update all the affected chunks
+    const { updatedMesh: updatedMeshList, removedMesh: removedMeshList } =
+      this.chunksManager.updateChunkAt(blockCoord);
+
+    for (const updatedMesh of updatedMeshList) {
+      // if the chunk mesh was not already in the scene, add it
+      if (!this.scene.getObjectByName(updatedMesh.name)) {
+        this.scene.add(updatedMesh);
+      }
+    }
+
+    // remove from the scene all the unnecesary chunk meshes
+    for (const removedMesh of removedMeshList) {
+      if (removedMesh) {
+        this.scene.remove(removedMesh);
       }
     }
   }
 
-  private unloadTerrain(boundaries: TerrainBoundaries) {
-    const { lowerX, upperX, lowerY, upperY, lowerZ, upperZ } = boundaries;
-    const loadedChunks = this.chunkFactory.loadedChunks;
+  dispose() {
+    Logger.info("Disposing terrain...", Logger.DISPOSE_KEY);
+    // dispose all the chunks
+    this.chunksManager.dispose();
 
-    for (const chunk of loadedChunks) {
-      const chunkOriginPosition = ChunkUtils.computeChunkOriginPosition(
-        chunk.id,
-        CHUNK_WIDTH,
-        CHUNK_HEIGHT
-      );
-
-      if (
-        chunkOriginPosition.x < lowerX ||
-        chunkOriginPosition.x > upperX ||
-        chunkOriginPosition.y < lowerY ||
-        chunkOriginPosition.y > upperY ||
-        chunkOriginPosition.z < lowerZ ||
-        chunkOriginPosition.z > upperZ
-      ) {
-        const { solidMesh, transparentMesh } = this.chunkFactory.removeChunk(
-          chunk.id
-        );
-
-        if (solidMesh) {
-          this.scene.remove(solidMesh);
-        }
-
-        if (transparentMesh) {
-          this.scene.remove(transparentMesh);
-        }
-      }
-    }
+    // dispose all the global maps
+    this.globalMapManager.dispose();
+    Logger.info("Terrain disposed!", Logger.DISPOSE_KEY);
   }
 
-  private getTerrainBoundariesFromPosition({ x, y, z }: Coordinate) {
-    const centerChunkOriginX = this.roundToNearestHorizontalChunk(x);
-    const centerChunkOriginZ = this.roundToNearestHorizontalChunk(z);
-    const centerChunkOriginY = this.roundToNearestVerticalChunk(y);
-
-    const lowerX = centerChunkOriginX - horizontalRenderDistance;
-    const upperX = centerChunkOriginX + horizontalRenderDistance;
-
-    const upperZ = centerChunkOriginZ + horizontalRenderDistance;
-    const lowerZ = centerChunkOriginZ - horizontalRenderDistance;
-
-    const upperY = centerChunkOriginY + verticalTopRenderDistance;
-    let lowerY = centerChunkOriginY - verticalBottomRenderDistance;
-
-    // keep rendering at least 1 chunk as far as we are below the cloud level
-    // and above the terrain surface
-    if (lowerY < CLOUD_LEVEL && lowerY > -CHUNK_HEIGHT) {
-      lowerY = -CHUNK_HEIGHT;
-    }
-
-    return { lowerX, upperX, lowerY, upperY, lowerZ, upperZ };
+  setRenderDistance(renderDistanceInChunks: number) {
+    this.terrainLoader.setRenderDistance(renderDistanceInChunks);
   }
 
   isSolidBlock(blockCoord: Coordinate): boolean {
     const block = this.getBlock(blockCoord);
 
-    return block != null && block != Voxel.AIR;
+    return block ? block.isSolid : false;
   }
 
-  /**
-   * Given a voxel position returns the value of the voxel there.
-   *
-   * @returns the voxel value or null if the chunk does not exist
-   *
-   */
-  getBlock(blockCoord: Coordinate): Voxel | null {
-    const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
-    const chunk = this.chunkFactory.getChunk(chunkId);
-
-    if (!chunk) {
-      return null;
-    }
-
-    return chunk.getVoxel(blockCoord);
+  getBlock(blockCoord: Coordinate) {
+    return this.chunksManager.getBlock(blockCoord);
   }
 
-  /**
-   * Set the specified voxel into his relative chunk.
-   *
-   * If the chunk doesn't exist it will create a new one.
-   */
-  setBlock(blockCoord: Coordinate, voxel: Voxel) {
-    const chunkId = this.chunkFactory.computeChunkIdFromPosition(blockCoord);
-
-    let chunk = this.chunkFactory.getChunk(chunkId);
-
-    // add new chunk if we try to set a voxel in a chunk that does not exist yet
-    if (!chunk) {
-      chunk = this.chunkFactory.createChunk(chunkId);
-    }
-
-    chunk.setVoxel(blockCoord, voxel);
-    const { updatedChunkMesh, removedChunksIds } =
-      this.chunkFactory.updateChunk(chunkId);
-
-    for (const updatedChunk of updatedChunkMesh) {
-      // if the chunk was not already in the scene, add it
-      if (!this.scene.getObjectByName(updatedChunk.name)) {
-        this.scene.add(updatedChunk);
-      }
-    }
-
-    for (const removedChunkId of removedChunksIds) {
-      const removedSolidMesh = this.scene.getObjectByName(
-        TerrainChunksFactory.getChunkSolidMeshId(removedChunkId)
-      );
-      const removedTransparentMesh = this.scene.getObjectByName(
-        TerrainChunksFactory.getChunkTransparentMeshId(removedChunkId)
-      );
-
-      if (removedSolidMesh) {
-        this.scene.remove(removedSolidMesh);
-      }
-
-      if (removedTransparentMesh) {
-        this.scene.remove(removedTransparentMesh);
-      }
-    }
+  getSurfaceHeight(x: number, z: number) {
+    return this.terrainMap.getSurfaceHeightAt(x, z);
   }
 
-  private roundToNearestHorizontalChunk(val: number) {
-    return Math.round(val / CHUNK_WIDTH) * CHUNK_WIDTH;
+  hasTreeAt(x: number, z: number) {
+    return this.treeMap.hasTreeAt(x, z);
   }
 
-  private roundToNearestVerticalChunk(val: number) {
-    return Math.round(val / CHUNK_HEIGHT) * CHUNK_HEIGHT;
+  getSeed() {
+    return this.seed;
   }
 
-  get loadedChunks() {
-    return this.chunkFactory.loadedChunks;
+  _getContinentalness(x: number, z: number) {
+    return this.terrainMap.getContinentalnessAt(x, z);
   }
 
-  get totalChunks() {
-    return this.chunkFactory.totalChunks;
+  _getErosion(x: number, z: number) {
+    return this.terrainMap.getErosionAt(x, z);
   }
 
-  get _totalSolidMesh() {
-    return this.chunkFactory.totalSolidChunksMesh;
+  _getPV(x: number, z: number) {
+    return this.terrainMap.getPVAt(x, z);
   }
 
-  get _totalTransparentMesh() {
-    return this.chunkFactory.totalTransparentChunksMesh;
+  get _totalChunks() {
+    return this.chunksManager.totalChunks;
   }
 
-  get _poolSolidMeshSize() {
-    return this.chunkFactory._poolSolidMeshSize;
+  get _solidMeshPoolSize() {
+    return this.chunksManager._solidMeshPoolSize;
+  }
+
+  get _transparentMeshPoolSize() {
+    return this.chunksManager._transparentMeshPoolSize;
   }
 }

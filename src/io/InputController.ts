@@ -1,3 +1,5 @@
+import Logger from "../tools/Logger";
+
 type PointerState = {
   leftButton: boolean;
   rightButton: boolean;
@@ -9,7 +11,6 @@ type PointerState = {
 
 type KeyCode = string;
 export default class InputController {
-  private static instance: InputController;
   private previousPointer: PointerState | null;
   private currentPointer: PointerState;
 
@@ -24,7 +25,7 @@ export default class InputController {
   private onPointerUpRef: (e: PointerEvent) => void;
   private onPointerMoveRef: (e: PointerEvent) => void;
 
-  private constructor() {
+  constructor() {
     this.previousPointer = null;
     this.currentPointer = {
       leftButton: false,
@@ -46,32 +47,27 @@ export default class InputController {
     this.onPointerMoveRef = this.onPointerMove.bind(this);
   }
 
-  public static getInstance(): InputController {
-    if (!InputController.instance) {
-      InputController.instance = new InputController();
-    }
-    return InputController.instance;
-  }
-
   enable() {
     if (!this.enabled) {
+      Logger.info("Enabling input listeners", Logger.INPUT_KEY);
       this.enabled = true;
-      window.addEventListener("pointerdown", this.onPointerDownRef);
-      window.addEventListener("pointerup", this.onPointerUpRef);
-      window.addEventListener("keydown", this.onKeyDownRef);
-      window.addEventListener("keyup", this.onKeyUpRef);
-      window.addEventListener("pointermove", this.onPointerMoveRef);
+      document.addEventListener("pointerdown", this.onPointerDownRef);
+      document.addEventListener("pointerup", this.onPointerUpRef);
+      document.addEventListener("keydown", this.onKeyDownRef);
+      document.addEventListener("keyup", this.onKeyUpRef);
+      document.addEventListener("pointermove", this.onPointerMoveRef);
     }
   }
 
   disable() {
     if (this.enabled) {
+      Logger.info("Disabling input listeners", Logger.INPUT_KEY);
       this.enabled = false;
-      window.removeEventListener("pointerdown", this.onPointerDownRef);
-      window.removeEventListener("pointerup", this.onPointerUpRef);
-      window.removeEventListener("keydown", this.onKeyDownRef);
-      window.removeEventListener("keyup", this.onKeyUpRef);
-      window.removeEventListener("pointermove", this.onPointerMoveRef);
+      document.removeEventListener("pointerdown", this.onPointerDownRef);
+      document.removeEventListener("pointerup", this.onPointerUpRef);
+      document.removeEventListener("keydown", this.onKeyDownRef);
+      document.removeEventListener("keyup", this.onKeyUpRef);
+      document.removeEventListener("pointermove", this.onPointerMoveRef);
     }
   }
 
@@ -79,12 +75,16 @@ export default class InputController {
     return this.enabled;
   }
 
-  getKey(key: KeyCode) {
+  isPressingKey(key: KeyCode) {
     return this.keys[key];
   }
 
-  getPrevKey(key: KeyCode) {
+  wasPressingKey(key: KeyCode) {
     return this.prevKeys[key];
+  }
+
+  hasJustPressedKey(key: KeyCode) {
+    return this.isPressingKey(key) && !this.wasPressingKey(key);
   }
 
   get pointer() {
@@ -109,14 +109,16 @@ export default class InputController {
     );
   }
 
-  get currentPointerCenterCoordinates() {
+  get crosshairCoordinates(): THREE.Vector2Tuple {
     return [
       this.pointer.current.centeredMouseX,
       this.pointer.current.centeredMouseY,
     ];
   }
 
-  get previousPointerCenterCoordinates() {
+  get previousCrosshairCoordinates(): THREE.Vector2Tuple | null {
+    if (!this.pointer.previous) return null;
+
     return [
       this.pointer.previous?.centeredMouseX,
       this.pointer.previous?.centeredMouseY,

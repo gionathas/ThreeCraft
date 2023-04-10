@@ -1,173 +1,177 @@
-import * as THREE from "three";
-import {
-  CHUNK_HEIGHT,
-  CHUNK_WIDTH,
-  EDITING_DISTANCE,
-  EDITING_ENABLED,
-} from "../config/constants";
-import InputController from "../io/InputController";
+import EditingControls from "../player/EditingControls";
+import InventoryManager, { InventoryState } from "../player/InventoryManager";
+import PlayerCollider from "../player/PlayerCollider";
+import PlayerController from "../player/PlayerController";
 import PlayerControls from "../player/PlayerControls";
-import VoxelMarker from "../player/VoxelMarker";
-import { Voxel } from "../terrain/Voxel";
-import ChunkUtils from "../utils/ChunkUtils";
-import { intersectVoxel } from "../utils/helpers";
+import PlayerPhysics from "../player/PlayerPhysics";
+import World from "../terrain/World";
+import { Block } from "../terrain/block";
+import { Chunk } from "../terrain/chunk";
+import Logger from "../tools/Logger";
+import { getOrientationFromAngle } from "../utils/helpers";
 import Terrain from "./Terrain";
 
-export type PlayerMode = "sim" | "dev";
-
+/**
+ * The player is represented by a moving camera in the world.
+ */
 export default class Player {
   private terrain: Terrain;
-  private blockMarker: VoxelMarker | null;
 
-  private scene: THREE.Scene;
-  private inputController: InputController;
+  private controller: PlayerController;
+  private controls: PlayerControls;
+  private collider: PlayerCollider;
+  private physics: PlayerPhysics;
 
-  private playerControls: PlayerControls;
+  private inventory: InventoryManager;
+  private editingControls: EditingControls;
 
-  constructor(
-    camera: THREE.Camera,
-    domElement: HTMLElement,
-    scene: THREE.Scene,
-    terrain: Terrain,
-    mode: PlayerMode
-  ) {
-    this.scene = scene;
+  constructor(terrain: Terrain, inventory: InventoryState) {
     this.terrain = terrain;
-    this.inputController = InputController.getInstance();
-    this.blockMarker = null;
-    this.playerControls = new PlayerControls(
-      camera,
-      domElement,
-      scene,
-      terrain,
-      mode
+
+    this.controller = new PlayerController();
+    this.controls = new PlayerControls(this.controller);
+    this.physics = new PlayerPhysics(this.controller, this.controls, terrain);
+    this.collider = new PlayerCollider(this.controls);
+    this.inventory = new InventoryManager(inventory);
+    this.editingControls = new EditingControls(
+      this.controller,
+      this.collider,
+      this.inventory,
+      terrain
     );
+  }
+
+  init(lookRotation: THREE.Quaternion, spawn?: THREE.Vector3) {
+    Logger.info("Initializing player...", Logger.INIT_KEY);
+    this.setRotation(lookRotation);
+
+    if (spawn) {
+      Logger.debug("Loading spawn position...", Logger.PLAYER_KEY);
+      this.setSpawnPosition(spawn.x, spawn.y, spawn.z);
+    } else {
+      Logger.debug(
+        "No spawn position found, using world origin...",
+        Logger.PLAYER_KEY
+      );
+      const worldOrigin = World.ORIGIN;
+      this.setFirstSpawnPosition(worldOrigin.x, worldOrigin.y, worldOrigin.z);
+    }
   }
 
   update(dt: number) {
-    this.playerControls.update(dt);
-    this.updateBlockMarker();
-    this.updateVoxelPlacement();
+    this.physics.update(dt);
+    this.collider.update();
+    this.editingControls.update();
+    //TODO DebugInfo.updatePlayerInfo(this);
   }
 
-  setSpawn(x: number, y: number, z: number) {
-    this.playerControls.position.set(x, y, z);
+  dispose() {
+    Logger.info("Disposing player...", Logger.DISPOSE_KEY);
+    this.collider.dispose();
+    this.controls.dispose();
+    this.editingControls.dispose();
+    Logger.info("Player disposed!", Logger.DISPOSE_KEY);
   }
 
-  //TODO optimization: to not permit to add a block in the current player position
-  private updateVoxelPlacement() {
-    const leftButton = this.inputController.isLeftButtonJustPressed;
-    const rightButton = this.inputController.isRightButtonJustPressed;
-
-    if (leftButton) {
-      this.placeBlock(Voxel.AIR); // erasing
-    } else if (rightButton) {
-      this.placeBlock(Voxel.GLASS); //FIXME
-    }
+  controlsLocked() {
+    return this.controls.isLocked;
   }
 
-  private placeBlock(block: Voxel) {
-    const { terrain } = this;
-
-    if (!EDITING_ENABLED) return;
-
-    const targetVoxel = this.getTargetBlock();
-
-    if (targetVoxel) {
-      // the intersection point is on the face. That means
-      // the math imprecision could put us on either side of the face.
-      // so go half a normal into the voxel if removing (currentVoxel = 0)
-      // our out of the voxel if adding (currentVoxel  > 0)
-      const [x, y, z] = targetVoxel.position.map((v, ndx) => {
-        return v + targetVoxel.normal[ndx] * (block != Voxel.AIR ? 0.5 : -0.5);
-      });
-
-      terrain.setBlock({ x, y, z }, block);
-    }
+  lockControls() {
+    this.controls.lock();
   }
 
-  private updateBlockMarker() {
-    const targetBlock = this.getTargetBlock();
+  unlockControls() {
+    this.controls.unlock();
+  }
 
-    // any voxel in sight, hide the marker
-    if (!targetBlock && this.blockMarker) {
-      this.blockMarker.visible = false;
+  onEnableControls(cb: () => void) {
+    this.controls.onLock(cb);
+  }
+
+  onDisableControls(cb: () => void) {
+    this.controls.onUnlock(cb);
+  }
+
+  setFirstSpawnPosition(x: number, y: number, z: number) {
+    const surfaceHeight = this.terrain.getSurfaceHeight(x, z);
+
+    // move rightward until we find a free spot
+    while (this.terrain.hasTreeAt(x, z)) {
+      x += 1;
     }
 
-    if (targetBlock) {
-      const blockNormal = new THREE.Vector3().fromArray(targetBlock.normal);
-      const blockPosition = new THREE.Vector3().fromArray(targetBlock.position);
+    // simulating falling from some blocks offset and the camera placed
+    // at the player's eye level
+    y = PlayerControls.getEyeHeightFromGround(surfaceHeight) + 3;
 
-      this.blockMarker = this.blockMarker ?? new VoxelMarker();
-      this.blockMarker.adaptToVoxel(blockPosition, blockNormal);
-      this.blockMarker.visible = true;
+    // spawn the player at the center of the block
+    const cenX = Block.toBlockCenterCoord(x);
+    const cenZ = Block.toBlockCenterCoord(z);
 
-      if (!this.scene.children.includes(this.blockMarker)) {
-        this.scene.add(this.blockMarker);
-      }
-    }
+    this.setSpawnPosition(cenX, y, cenZ);
+  }
+
+  setSpawnPosition(x: number, y: number, z: number) {
+    this.controls.position.set(x, y, z);
   }
 
   /**
-   * Get the first intersected voxel by the screen coordinates
+   * Corresponds to the player's head position
    */
-  getTargetBlock() {
-    const [cenX, cenY] = this.inputController.currentPointerCenterCoordinates;
-    const { terrain } = this;
-    const camera = this.playerControls.getCamera();
-
-    // normalize screen coordinate
-    const x = (cenX / window.innerWidth) * 2 - 1;
-    const y = -(cenY / window.innerHeight) * 2 + 1;
-
-    const rayStart = new THREE.Vector3();
-    const rayEnd = new THREE.Vector3();
-    rayStart.setFromMatrixPosition(camera.matrixWorld);
-    rayEnd.set(x, y, 1).unproject(camera);
-
-    const rayLength = new THREE.Vector3();
-    rayLength.subVectors(rayEnd, rayStart).normalize();
-    rayLength.multiplyScalar(EDITING_DISTANCE);
-    rayEnd.copy(rayStart).add(rayLength);
-
-    return intersectVoxel(rayStart, rayEnd, terrain);
-  }
-
-  enableControls() {
-    return this.playerControls.lock();
-  }
-
-  setOnControlsEnabled(func: () => void) {
-    return this.playerControls.addEventListener("lock", func);
-  }
-
-  setOnControlsDisabled(func: () => void) {
-    return this.playerControls.addEventListener("unlock", func);
-  }
-
-  getWidth() {
-    return this.playerControls.width;
-  }
-
-  getHeight() {
-    return this.playerControls.height;
-  }
-
   getPosition() {
-    return this.playerControls.position.clone();
+    return this.controls.position.clone();
+  }
+
+  getGroundState() {
+    return this.physics.getGroundState();
   }
 
   getVelocity() {
-    return this.playerControls.getVelocity().clone();
+    return this.physics.getVelocity().clone();
   }
 
-  get _currentChunkCoordinates() {
-    const currentPosition = this.playerControls.position;
-    const chunkId = ChunkUtils.computeChunkIdFromPosition(
-      currentPosition,
-      CHUNK_WIDTH,
-      CHUNK_HEIGHT
-    );
+  getCamera() {
+    return this.controls.camera;
+  }
+
+  getTargetBlock() {
+    return this.editingControls.getTargetBlock();
+  }
+
+  intersectWith(entityCollider: THREE.Box3) {
+    return this.collider.intersectsWith(entityCollider);
+  }
+
+  getQuaternion() {
+    return this.controls.quaternion.clone();
+  }
+
+  setRotation(quaternion: THREE.Quaternion) {
+    this.controls.quaternion.copy(quaternion);
+  }
+
+  getLookDirection() {
+    return this.controls.getLookDirection();
+  }
+
+  lookAt(direction: THREE.Vector3) {
+    this.controls.lookAt(direction);
+  }
+
+  getOrientation() {
+    const lookDirection = this.getLookDirection();
+    const angle = Math.atan2(lookDirection.x, lookDirection.z);
+    return getOrientationFromAngle(angle);
+  }
+
+  getInventory() {
+    return this.inventory;
+  }
+
+  get _currentChunkId() {
+    const currentPosition = this.getPosition();
+    const chunkId = Chunk.getChunkIdFromPosition(currentPosition);
 
     return chunkId;
   }
