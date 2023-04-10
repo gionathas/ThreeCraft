@@ -7,33 +7,40 @@ export default class EnvVars {
 
   /** Game Settings */
   static readonly JUMP_START = EnvVars.getBoolean(
-    import.meta.env.VITE_JUMP_START
+    import.meta.env.VITE_JUMP_START,
+    false
   );
 
   /** Gameplay Settings */
   static readonly FOG_ENABLED = EnvVars.getBoolean(
-    import.meta.env.VITE_FOG_ENABLED
+    import.meta.env.VITE_FOG_ENABLED,
+    true
   );
   static readonly EDITING_ENABLED = EnvVars.getBoolean(
-    import.meta.env.VITE_EDITING_ENABLED
+    import.meta.env.VITE_EDITING_ENABLED,
+    true
   );
 
   /** UI */
   static readonly SHOW_INITIAL_TERRAIN_GENERATION = EnvVars.getBoolean(
-    import.meta.env.VITE_SHOW_INITIAL_TERRAIN_GENERATION
+    import.meta.env.VITE_SHOW_INITIAL_TERRAIN_GENERATION,
+    false
   );
   static readonly SHOW_DEBUG_INFO = EnvVars.getBoolean(
-    import.meta.env.VITE_SHOW_DEBUG_UI
+    import.meta.env.VITE_SHOW_DEBUG_UI,
+    false
   );
   static readonly SHOW_WINDOW_CLOSE_ALERT = EnvVars.getBoolean(
-    import.meta.env.VITE_SHOW_WINDOW_CLOSE_ALERT
+    import.meta.env.VITE_SHOW_WINDOW_CLOSE_ALERT,
+    true
   );
 
   /** Player */
   static readonly PLAYER_DEFAULT_PHYSICS_MODE = import.meta.env
     .VITE_PLAYER_DEFAULT_PHYSICS_MODE as PhysicsMode;
   static readonly PLAYER_SHOW_BOUNDING_BOX: boolean = EnvVars.getBoolean(
-    import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX
+    import.meta.env.VITE_PLAYER_SHOW_BOUNDING_BOX,
+    false
   );
 
   /**
@@ -51,13 +58,16 @@ export default class EnvVars {
    */
   static readonly CUSTOM_SEED = import.meta.env.VITE_CUSTOM_SEED;
   static readonly TERRAIN_GENERATION_ENABLED = EnvVars.getBoolean(
-    import.meta.env.VITE_TERRAIN_GENERATION_ENABLED
+    import.meta.env.VITE_TERRAIN_GENERATION_ENABLED,
+    true
   );
   static readonly TERRAIN_OPTIMIZATION_ENABLED = EnvVars.getBoolean(
-    import.meta.env.VITE_TERRAIN_OPTIMIZATION_ENABLED
+    import.meta.env.VITE_TERRAIN_OPTIMIZATION_ENABLED,
+    true
   );
   static readonly TREE_GENERATION_ENABLED = EnvVars.getBoolean(
-    import.meta.env.VITE_TREE_GENERATION_ENABLED
+    import.meta.env.VITE_TREE_GENERATION_ENABLED,
+    true
   );
 
   /**
@@ -76,7 +86,8 @@ export default class EnvVars {
 
   /** Testing Map */
   static readonly TESTING_MAP_ENABLED = EnvVars.getBoolean(
-    import.meta.env.VITE_TESTING_MAP_ENABLED
+    import.meta.env.VITE_TESTING_MAP_ENABLED,
+    false
   );
   static readonly TESTING_MAP_EROSION = EnvVars.getOptionalNumber(
     import.meta.env.VITE_TESTING_MAP_EROSION
@@ -106,8 +117,15 @@ export default class EnvVars {
     return (key as string).split(",").map((item) => item.trim());
   }
 
-  private static getBoolean(key: keyof ImportMetaEnv): boolean {
-    return key === "true";
+  private static getBoolean(
+    key: keyof ImportMetaEnv,
+    defaultValue: boolean
+  ): boolean {
+    if (key) {
+      return key === "true";
+    }
+
+    return defaultValue;
   }
 
   private static getNumber(key: keyof ImportMetaEnv): number {
