@@ -1,13 +1,18 @@
+import { Vector3Tuple, Vector4Tuple } from "three";
 import EnvVars from "../../config/EnvVars";
 import { TerrainMap } from "../../maps/terrain";
 import { BufferGeometryData, Coordinate } from "../../utils/helpers";
-import { Block, BlockFaceAO, BlockType } from "../block";
-import { BlockFace } from "../block/BlockGeometry";
 import World from "../World";
+import { Block, BlockFaceAO, BlockType } from "../block";
+import { BlockData } from "../block/Block";
+import { BlockFace } from "../block/BlockGeometry";
 import Chunk, { ChunkModel } from "./Chunk";
 
 export default class ChunkGeometryBuilder {
-  private readonly AO_INTENSITY_LEVEL = [1.0, 0.8, 0.7, 0.6];
+  private readonly DEFAULT_BLOCK_COLOR_RGBA: Vector4Tuple = [
+    1.0, 1.0, 1.0, 1.0,
+  ];
+  private readonly AO_INTENSITY_LEVEL = [0.0, 0.2, 0.3, 0.4];
 
   private terrainMap: TerrainMap;
 
@@ -101,11 +106,14 @@ export default class ChunkGeometryBuilder {
                 continue;
               }
 
-              const isNeighbourTransparent = neighbourBlock?.isTransparent;
+              const shouldRenderBlockFace =
+                !neighbourBlock ||
+                (neighbourBlock.isTransparent &&
+                  neighbourBlock.type !== BlockType.CLOUD);
 
               // if the current block has no neighbor or has a transparent neighbour
               // we need to show this block face
-              if (!neighbourBlock || isNeighbourTransparent) {
+              if (shouldRenderBlockFace) {
                 const ndx = positions.length / 3;
 
                 // for each vertex of the current face
@@ -120,6 +128,7 @@ export default class ChunkGeometryBuilder {
                   // add vertex normal
                   normals.push(...dir);
 
+                  // add vertex uv coordinates
                   const textureCoords = Block.getBlockUVCoordinates(
                     block.type,
                     blockFace,
@@ -128,17 +137,15 @@ export default class ChunkGeometryBuilder {
 
                   uvs.push(textureCoords.u, textureCoords.v);
 
-                  const vertexAO = this.computeVertexAO(
-                    {
-                      x: vertexX,
-                      y: vertexY,
-                      z: vertexZ,
-                    },
+                  // calculate vertex color
+                  const vertexColor = this.calculateVertexColor(
+                    { x: vertexX, y: vertexY, z: vertexZ },
+                    block,
                     aoSides,
                     chunk
                   );
 
-                  colors.push(...vertexAO);
+                  colors.push(...vertexColor);
                 }
 
                 indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
@@ -204,6 +211,29 @@ export default class ChunkGeometryBuilder {
     return haveSameDensity;
   }
 
+  private calculateVertexColor(
+    vertexCoords: Coordinate,
+    block: BlockData,
+    aoSides: BlockFaceAO,
+    chunk: ChunkModel
+  ) {
+    const baseColor =
+      Block.getBlockColor(block.type) ?? this.DEFAULT_BLOCK_COLOR_RGBA;
+
+    // calculate vertex ambient occlusion
+    const vertexAO = this.computeVertexAO(vertexCoords, aoSides, chunk);
+
+    // apply ambient occlusion to the block color
+    const finalColor: Vector4Tuple = [
+      baseColor[0] - vertexAO,
+      baseColor[1] - vertexAO,
+      baseColor[2] - vertexAO,
+      baseColor[3],
+    ];
+
+    return finalColor;
+  }
+
   /**
    * This function compute the ambient occlusion for a particular vertex of a block face.
    *
@@ -213,25 +243,24 @@ export default class ChunkGeometryBuilder {
    * //TODO fix ambient occlusion asintropy issue
    */
   private computeVertexAO(
-    { x, y, z }: Coordinate,
-    { side0, side1, side2 }: BlockFaceAO,
+    vertexCoords: Coordinate,
+    { corner, side1, side2 }: BlockFaceAO,
     chunk: ChunkModel
   ) {
     let occlusionLevel = 0;
 
-    for (const occlusionSide of [side0, side1, side2]) {
-      if (this.isSideOccluded({ x, y, z }, occlusionSide, chunk)) {
+    for (const occlusionSide of [corner, side1, side2]) {
+      if (this.isSideOccluded(vertexCoords, occlusionSide, chunk)) {
         occlusionLevel += 1;
       }
     }
 
-    const rgb = this.AO_INTENSITY_LEVEL[occlusionLevel];
-    return [rgb, rgb, rgb];
+    return this.AO_INTENSITY_LEVEL[occlusionLevel];
   }
 
   private isSideOccluded(
     { x, y, z }: Coordinate,
-    aoSide: [number, number, number],
+    aoSide: Vector3Tuple,
     chunk: ChunkModel
   ) {
     const { terrainMap } = this;
@@ -243,11 +272,11 @@ export default class ChunkGeometryBuilder {
       z: z + dz,
     });
 
-    if (occludingBlock && occludingBlock.isSolid) {
+    if (occludingBlock && !occludingBlock.isTransparent) {
       return true;
     }
 
-    // out of the chunk edges, use the surface heigh  t as an heuristic check
+    // out of the chunk edges, use the surface height as an heuristic check
     if (!occludingBlock) {
       const nx = Math.floor(x + dx);
       const ny = Math.floor(y + dy);
