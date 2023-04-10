@@ -31,10 +31,25 @@ export default class FeaturesGenerator extends BlockGenerator {
       return BlockType.OAK_LEAVES;
     }
 
+    if (this.shouldSpawnCloud(x, y, z)) {
+      return BlockType.CLOUD;
+    }
+
     return BlockType.AIR;
   }
 
   private shouldSpawnWater(x: number, y: number, z: number): boolean {
     return y < World.SEA_LEVEL;
+  }
+
+  private shouldSpawnCloud(x: number, y: number, z: number): boolean {
+    const dist = Math.floor(Math.random() * 6) + 1;
+
+    const isIdealHeight = y > World.CLOUD_LEVEL && y <= World.CLOUD_LEVEL + 1;
+    const isSpawnableArea =
+      Math.ceil(x / World.CLOUD_WIDTH) % dist === 0 &&
+      Math.ceil(z / World.CLOUD_DEPTH) % dist === 0;
+
+    return isIdealHeight && isSpawnableArea;
   }
 }

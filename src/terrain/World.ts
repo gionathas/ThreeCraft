@@ -31,13 +31,16 @@ export default class World {
   static readonly MIN_SURFACE_HEIGHT =
     this.MIN_CONTINENTALNESS_HEIGHT - this.MAX_EROSION;
 
-  static readonly CLOUD_LEVEL = this.MAX_SURFACE_HEIGHT - 10;
+  static readonly CLOUD_LEVEL = this.MAX_SURFACE_HEIGHT - 25;
   static readonly SNOW_LEVEL = this.MAX_CONTINENTALNESS_HEIGHT;
 
   static readonly SEA_LEVEL = this.MIN_CONTINENTALNESS_HEIGHT + 15;
   static readonly SAND_LEVEL = World.SEA_LEVEL + 6;
 
   static readonly BEDROCK_LEVEL = World.MIN_WORLD_HEIGHT / 6;
+
+  static readonly CLOUD_WIDTH = 10;
+  static readonly CLOUD_DEPTH = 5;
 
   static generateSeed() {
     return Math.random().toString(36).substring(2, 15);

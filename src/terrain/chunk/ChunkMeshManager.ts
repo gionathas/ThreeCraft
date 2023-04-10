@@ -17,7 +17,7 @@ export default class ChunkMeshManager {
   private readonly POSITION_NUM_COMPONENTS = 3;
   private readonly NORMAL_NUM_COMPONENTS = 3;
   private readonly UV_NUM_COMPONENTS = 2;
-  private readonly COLOR_NUM_COMPONENTS = 3;
+  private readonly COLOR_NUM_COMPONENTS = 4;
 
   private solidMesh: Map<ChunkID, Mesh>;
   private transparentMesh: Map<ChunkID, Mesh>;
@@ -77,12 +77,13 @@ export default class ChunkMeshManager {
 
   generateChunkTransparentMesh(
     chunkId: ChunkID,
-    { positions, normals, uvs, indices }: BufferGeometryData
+    { positions, normals, uvs, indices, colors }: BufferGeometryData
   ) {
     const {
       POSITION_NUM_COMPONENTS: positionNumComponents,
       NORMAL_NUM_COMPONENTS: normalNumComponents,
       UV_NUM_COMPONENTS: uvNumComponents,
+      COLOR_NUM_COMPONENTS: colorNumComponents,
     } = this;
 
     const transparentMesh = this.getNewTransparentMesh(chunkId);
@@ -100,6 +101,10 @@ export default class ChunkMeshManager {
     chunkGeometry.setAttribute(
       "uv",
       new BufferAttribute(new Float32Array(uvs), uvNumComponents)
+    );
+    chunkGeometry.setAttribute(
+      "color",
+      new BufferAttribute(new Float32Array(colors), colorNumComponents)
     );
 
     chunkGeometry.setIndex(indices);

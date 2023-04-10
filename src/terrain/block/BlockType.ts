@@ -2,6 +2,7 @@ import { BlockMetadata } from "./Block";
 
 export enum BlockType {
   AIR = 0,
+  CLOUD,
   STONE,
   COBBLESTONE,
   DIRT,
@@ -40,13 +41,37 @@ export const BlockRegistry: Record<BlockType, BlockMetadata> = {
       },
     },
   },
+  [BlockType.CLOUD]: {
+    name: "cloud",
+    isTransparent: true,
+    isSolid: false,
+    icon: {
+      row: -1,
+      col: -1,
+    },
+    texture: {
+      top: {
+        row: 2,
+        col: 5,
+      },
+      bottom: {
+        row: 2,
+        col: 5,
+      },
+      side: {
+        row: 2,
+        col: 5,
+      },
+    },
+    color: [1, 1, 1, 0.4],
+  },
   [BlockType.STONE]: {
     name: "Stone",
     isTransparent: false,
     isSolid: true,
     drop: BlockType.COBBLESTONE,
     icon: {
-      row: 48,
+      row: 18,
       col: 12,
     },
     texture: {
