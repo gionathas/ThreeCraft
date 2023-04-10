@@ -1,3 +1,5 @@
+import { Vector2Tuple, Vector3Tuple } from "three";
+
 enum BlockFaceEnum {
   left,
   right,
@@ -10,21 +12,21 @@ enum BlockFaceEnum {
 export type BlockFace = keyof typeof BlockFaceEnum;
 
 export type BlockFaceAO = {
-  side0: [number, number, number];
-  side1: [number, number, number];
-  side2: [number, number, number];
+  corner: Vector3Tuple;
+  side1: Vector3Tuple;
+  side2: Vector3Tuple;
 };
 
 export type BlockFaceGeometry = {
-  normal: [number, number, number];
+  normal: Vector3Tuple;
   vertices: {
-    pos: [number, number, number];
-    uv: [number, number];
+    pos: Vector3Tuple;
+    uv: Vector2Tuple;
     ao: BlockFaceAO;
   }[];
 };
 
-export const BlockFaceNormal: Record<BlockFace, [number, number, number]> = {
+export const BlockFaceNormal: Record<BlockFace, Vector3Tuple> = {
   left: [-1, 0, 0],
   right: [1, 0, 0],
   top: [0, 1, 0],
@@ -42,7 +44,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 1, 0],
         uv: [0, 1],
         ao: {
-          side0: [-0.5, -0.5, 0.5],
+          corner: [-0.5, -0.5, 0.5],
           side1: [-0.5, 0.5, -0.5],
           side2: [-0.5, -0.5, -0.5],
         },
@@ -52,7 +54,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 0, 0],
         uv: [0, 0],
         ao: {
-          side0: [-0.5, -0.5, 0.5],
+          corner: [-0.5, -0.5, 0.5],
           side1: [-0.5, 0.5, -0.5],
           side2: [-0.5, -0.5, -0.5],
         },
@@ -62,7 +64,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 1, 1],
         uv: [1, 1],
         ao: {
-          side0: [-0.5, 0.5, -0.5],
+          corner: [-0.5, 0.5, -0.5],
           side1: [-0.5, 0.5, 0.5],
           side2: [-0.5, -0.5, 0.5],
         },
@@ -72,7 +74,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 0, 1],
         uv: [1, 0],
         ao: {
-          side0: [-0.5, -0.5, -0.5],
+          corner: [-0.5, -0.5, -0.5],
           side1: [-0.5, 0.5, 0.5],
           side2: [-0.5, -0.5, 0.5],
         },
@@ -87,7 +89,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 1, 1],
         uv: [0, 1],
         ao: {
-          side0: [0.5, 0.5, -0.5],
+          corner: [0.5, 0.5, -0.5],
           side1: [0.5, 0.5, 0.5],
           side2: [0.5, -0.5, 0.5],
         },
@@ -97,7 +99,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 0, 1],
         uv: [0, 0],
         ao: {
-          side0: [0.5, -0.5, -0.5],
+          corner: [0.5, -0.5, -0.5],
           side1: [0.5, 0.5, 0.5],
           side2: [0.5, -0.5, 0.5],
         },
@@ -107,7 +109,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 1, 0],
         uv: [1, 1],
         ao: {
-          side0: [0.5, 0.5, 0.5],
+          corner: [0.5, 0.5, 0.5],
           side1: [0.5, 0.5, -0.5],
           side2: [0.5, -0.5, -0.5],
         },
@@ -117,7 +119,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 0, 0],
         uv: [1, 0],
         ao: {
-          side0: [0.5, -0.5, 0.5],
+          corner: [0.5, -0.5, 0.5],
           side1: [0.5, 0.5, -0.5],
           side2: [0.5, -0.5, -0.5],
         },
@@ -132,7 +134,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 1, 1],
         uv: [1, 1],
         ao: {
-          side0: [-0.5, 0.5, 0.5],
+          corner: [-0.5, 0.5, 0.5],
           side1: [0.5, 0.5, 0.5],
           side2: [-0.5, 0.5, -0.5],
         },
@@ -142,7 +144,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 1, 1],
         uv: [0, 1],
         ao: {
-          side0: [0.5, 0.5, 0.5],
+          corner: [0.5, 0.5, 0.5],
           side1: [-0.5, 0.5, 0.5],
           side2: [0.5, 0.5, -0.5],
         },
@@ -152,7 +154,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 1, 0],
         uv: [1, 0],
         ao: {
-          side0: [-0.5, 0.5, -0.5],
+          corner: [-0.5, 0.5, -0.5],
           side1: [0.5, 0.5, -0.5],
           side2: [-0.5, 0.5, 0.5],
         },
@@ -162,7 +164,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 1, 0],
         uv: [0, 0],
         ao: {
-          side0: [0.5, 0.5, -0.5],
+          corner: [0.5, 0.5, -0.5],
           side1: [-0.5, 0.5, -0.5],
           side2: [0.5, 0.5, 0.5],
         },
@@ -177,7 +179,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 0, 1],
         uv: [1, 0],
         ao: {
-          side0: [0.5, -0.5, 0.5],
+          corner: [0.5, -0.5, 0.5],
           side1: [-0.5, -0.5, 0.5],
           side2: [0.5, -0.5, -0.5],
         },
@@ -187,7 +189,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 0, 1],
         uv: [0, 0],
         ao: {
-          side0: [-0.5, -0.5, 0.5],
+          corner: [-0.5, -0.5, 0.5],
           side1: [0.5, -0.5, 0.5],
           side2: [-0.5, -0.5, 0.5],
         },
@@ -197,7 +199,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 0, 0],
         uv: [1, 1],
         ao: {
-          side0: [0.5, -0.5, -0.5],
+          corner: [0.5, -0.5, -0.5],
           side1: [0.5, -0.5, 0.5],
           side2: [-0.5, -0.5, -0.5],
         },
@@ -207,7 +209,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 0, 0],
         uv: [0, 1],
         ao: {
-          side0: [-0.5, -0.5, -0.5],
+          corner: [-0.5, -0.5, -0.5],
           side1: [0.5, -0.5, -0.5],
           side2: [-0.5, -0.5, 0.5],
         },
@@ -222,7 +224,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 0, 1],
         uv: [0, 0],
         ao: {
-          side0: [0.5, -0.5, 0.5],
+          corner: [0.5, -0.5, 0.5],
           side1: [-0.5, 0.5, 0.5],
           side2: [-0.5, -0.5, 0.5],
         },
@@ -232,7 +234,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 0, 1],
         uv: [1, 0],
         ao: {
-          side0: [-0.5, -0.5, 0.5],
+          corner: [-0.5, -0.5, 0.5],
           side1: [0.5, 0.5, 0.5],
           side2: [0.5, -0.5, 0.5],
         },
@@ -242,7 +244,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 1, 1],
         uv: [0, 1],
         ao: {
-          side0: [0.5, 0.5, 0.5],
+          corner: [0.5, 0.5, 0.5],
           side1: [-0.5, -0.5, 0.5],
           side2: [-0.5, 0.5, 0.5],
         },
@@ -252,7 +254,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 1, 1],
         uv: [1, 1],
         ao: {
-          side0: [-0.5, 0.5, 0.5],
+          corner: [-0.5, 0.5, 0.5],
           side1: [0.5, -0.5, 0.5],
           side2: [0.5, 0.5, 0.5],
         },
@@ -267,7 +269,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 0, 0],
         uv: [0, 0],
         ao: {
-          side0: [-0.5, -0.5, -0.5],
+          corner: [-0.5, -0.5, -0.5],
           side1: [0.5, 0.5, -0.5],
           side2: [0.5, -0.5, -0.5],
         },
@@ -277,7 +279,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 0, 0],
         uv: [1, 0],
         ao: {
-          side0: [0.5, -0.5, -0.5],
+          corner: [0.5, -0.5, -0.5],
           side1: [-0.5, 0.5, -0.5],
           side2: [-0.5, -0.5, -0.5],
         },
@@ -287,7 +289,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [1, 1, 0],
         uv: [0, 1],
         ao: {
-          side0: [-0.5, 0.5, -0.5],
+          corner: [-0.5, 0.5, -0.5],
           side1: [0.5, 0.5, -0.5],
           side2: [0.5, -0.5, -0.5],
         },
@@ -297,7 +299,7 @@ export const BlockFacesGeometry: Record<BlockFace, BlockFaceGeometry> = {
         pos: [0, 1, 0],
         uv: [1, 1],
         ao: {
-          side0: [0.5, 0.5, -0.5],
+          corner: [0.5, 0.5, -0.5],
           side1: [-0.5, 0.5, -0.5],
           side2: [-0.5, -0.5, -0.5],
         },
