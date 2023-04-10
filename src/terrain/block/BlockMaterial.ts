@@ -60,6 +60,7 @@ export default class BlockMaterial {
       side: FrontSide,
       alphaTest: 0.1,
       transparent: true,
+      vertexColors: true,
     });
   }
 

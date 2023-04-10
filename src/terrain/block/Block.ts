@@ -1,4 +1,4 @@
-import { Box3, Vector3 } from "three";
+import { Box3, Vector3, Vector4Tuple } from "three";
 import { ChunkModel } from "../chunk";
 import {
   BlockFace,
@@ -29,6 +29,7 @@ export type BlockMetadata = {
       col: number;
     };
   };
+  color?: Vector4Tuple;
   sounds?: {
     place?: string[];
     broken?: string[];
@@ -104,6 +105,10 @@ export default class Block {
 
   static getBlockMetadata(block: BlockType): BlockMetadata {
     return BlockRegistry[block];
+  }
+
+  static getBlockColor(block: BlockType) {
+    return BlockRegistry[block].color;
   }
 
   static getBlockUVCoordinates(
