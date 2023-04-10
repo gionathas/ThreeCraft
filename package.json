@@ -1,7 +1,7 @@
 {
   "name": "threecraft",
   "private": true,
-  "version": "0.0.2a",
+  "version": "0.0.3a",
   "type": "module",
   "scripts": {
     "dev": "vite",
