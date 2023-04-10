@@ -15,7 +15,7 @@ import { Settings } from "./SettingsManager";
  * //TODO Implement ECS pattern
  */
 export default class GameScene extends Scene {
-  private static readonly SkyColor: string = "#87CEEB";
+  private static readonly SkyColor: string = "#96c5fa";
 
   private initialized: boolean;
   private gui!: DebugControls;
@@ -84,17 +84,23 @@ export default class GameScene extends Scene {
    */
   private initLights() {
     const sunLight = new DirectionalLight(0xffffff, 0.2);
-    sunLight.position.set(100, 100, 0);
+    const sunLight2 = new DirectionalLight(0xffffff, 0.1);
+
+    sunLight.position.set(0, -100, 0);
+    sunLight.lookAt(0, 100, 0);
+
+    sunLight2.position.set(0, 200, 0);
+    sunLight2.lookAt(0, 100, 0);
 
     // const helper = new THREE.DirectionalLightHelper(sunLight, 5);
 
     const ambientLight = new AmbientLight(0xffffff, 0.8);
 
     // add lights
-    this.add(sunLight, ambientLight);
+    this.add(sunLight, sunLight2, ambientLight);
     // this.scene.add(helper);
 
-    return [sunLight, ambientLight];
+    return [sunLight, sunLight2, ambientLight];
   }
 
   private initBackground() {
