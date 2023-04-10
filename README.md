@@ -2,6 +2,12 @@
 
 This is a Minecraft clone built using Three.js and TypeScript. It is a 3D sandbox game where players can explore, build, and destroy their own world made up of blocks.
 
+You can play a demo [here](https://three-craft.vercel.app/).
+
+**Important**: It is suggested to play the game with Chrome, since it was developed and tested only it.
+
+![Main Menu](/docs/MainMenu.png)
+
 ## Features
 
 - Procedurally generated terrain
